@@ -28,13 +28,19 @@ class Afiliado extends Model
         'fecha_convencimiento' => 'datetime',
     ];
 
-    // === Relaciones ===
     public function capturista()
     {
-        return $this->belongsTo(User::class, 'capturista_id');
+        return $this->belongsTo(User::class,'capturista_id');
     }
 
-    // === Scopes para filtros rápidos ===
+    // 🔧 Relación a Seccion por (seccion,cve_mun)
+    public function seccion()
+    {
+        return $this->belongsTo(Seccion::class,'seccion','seccion')
+                    ->whereColumn('afiliados.cve_mun','secciones.cve_mun');
+    }
+
+    // === Scopes ===
     public function scopeSecciones($q, $secciones)
     {
         $vals = is_array($secciones) ? $secciones : explode(',', (string)$secciones);
@@ -49,11 +55,11 @@ class Afiliado extends Model
 
     public function scopeCapturistaId($q, $userId)
     {
-        return $q->where('capturista_id', $userId);
+        return $q->where('capturista_id',$userId);
     }
 
     public function scopeEstatus($q, $estatus)
     {
-        return $q->where('estatus', $estatus);
+        return $q->where('estatus',$estatus);
     }
 }

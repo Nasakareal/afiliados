@@ -2,15 +2,11 @@
   "ExpandedNodes": [
     "",
     "\\app",
-    "\\app\\Models",
-    "\\database",
-    "\\database\\migrations",
-    "\\database\\seeders",
+    "\\app\\Providers",
     "\\resources",
     "\\resources\\views",
-    "\\resources\\views\\layouts",
-    "\\resources\\views\\mapa"
+    "\\resources\\views\\layouts"
   ],
-  "SelectedNode": "\\database\\seeders\\DatabaseSeeder.php",
+  "SelectedNode": "\\resources\\views\\layouts\\app.blade.php",
   "PreviewInSolutionExplorer": false
 }
