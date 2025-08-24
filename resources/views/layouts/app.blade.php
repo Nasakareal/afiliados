@@ -19,27 +19,39 @@
     .dropdown-menu{border-radius:12px}
     .content-wrap{padding-top:84px}
     .app-footer{color:#666}
-    /* hover-out: cerrar menú cuando el mouse sale del dropdown */
     .dropdown.keep-open:hover .dropdown-menu.show{display:block}
+
+    /* --- Leaflet: asegurar popups SIEMPRE arriba de todo --- */
+    .leaflet-pane.leaflet-popup-pane { z-index: 100000 !important; }
+    .leaflet-popup { z-index: 100001 !important; }
+    .leaflet-tooltip { z-index: 100002 !important; }
   </style>
+
+  {{-- Acepta ambos stacks para CSS de vistas --}}
   @stack('styles')
+  @stack('css')
 </head>
 <body>
 @php
-  // Helpers de “activo”
-  function is_active($patterns){ foreach((array)$patterns as $p){ if(request()->routeIs($p)) return 'active'; } return ''; }
+  // Helpers de “activo” (evitar redeclaración que dispara bucles con Xdebug)
+  if (!function_exists('is_active')) {
+    function is_active($patterns){
+      foreach((array)$patterns as $p){
+        if(request()->routeIs($p)) return 'active';
+      }
+      return '';
+    }
+  }
 @endphp
 
 <nav class="navbar navbar-expand-lg fixed-top navbar-light border-bottom navbar-glass">
   <div class="container-fluid px-3">
     <a class="navbar-brand fw-bold" href="{{ route('dashboard') }}">GLADY<span class="text-danger">•</span>ADOREZ</a>
 
-    {{-- Botón Offcanvas (móvil) --}}
     <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#mainNav">
       <span class="navbar-toggler-icon"></span>
     </button>
 
-    {{-- Contenedor de navegación (desktop y móvil via offcanvas) --}}
     <div class="offcanvas offcanvas-end" tabindex="-1" id="mainNav">
       <div class="offcanvas-header">
         <h5 class="offcanvas-title">Menú</h5>
@@ -64,7 +76,6 @@
           </li>
           @endcan
 
-          {{-- Actividades / Calendario (dropdown) --}}
           @can('actividades.ver')
           <li class="nav-item dropdown keep-open">
             <a class="nav-link dropdown-toggle {{ is_active(['calendario.*','actividades.*']) }}" href="#" data-bs-toggle="dropdown" role="button">
@@ -90,7 +101,6 @@
           </li>
           @endcan
 
-          {{-- Reportes (dropdown) --}}
           @can('reportes.ver')
           <li class="nav-item dropdown keep-open">
             <a class="nav-link dropdown-toggle {{ is_active(['reportes.secciones','reportes.capturistas']) }}" href="#" data-bs-toggle="dropdown" role="button">
@@ -103,7 +113,6 @@
           </li>
           @endcan
 
-          {{-- Settings (dropdown) --}}
           @can('settings.ver')
           <li class="nav-item dropdown keep-open">
             <a class="nav-link dropdown-toggle {{ is_active(['settings.*']) }}" href="#" data-bs-toggle="dropdown" role="button">
@@ -125,7 +134,6 @@
           @endcan
         </ul>
 
-        {{-- Usuario / logout --}}
         <div class="d-flex align-items-center gap-2">
           <span class="small text-muted d-none d-lg-inline">Hola, {{ Auth::user()->name ?? 'Usuario' }}</span>
           <form method="POST" action="{{ route('logout') }}">@csrf
@@ -138,14 +146,12 @@
 </nav>
 
 <main class="content-wrap container-fluid">
-  {{-- Mensajes flash --}}
   @if(session('success'))<div class="alert alert-success alert-dismissible fade show" role="alert">{{ session('success') }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>@endif
   @if(session('error'))  <div class="alert alert-danger alert-dismissible fade show" role="alert">{{ session('error') }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>@endif
 
   @yield('content')
 </main>
 
-{{-- Footer opcional: solo si la vista define la sección --}}
 @hasSection('footer')
 <footer class="app-footer border-top mt-5 py-4">
   <div class="container">
@@ -167,7 +173,7 @@
     });
   });
 
-  // Cerrar dropdown al salir con el mouse (con pequeño delay para UX)
+  // Cerrar dropdown al salir con el mouse
   document.querySelectorAll('.dropdown.keep-open').forEach(dd=>{
     let to=null;
     dd.addEventListener('mouseleave',()=>{
@@ -179,7 +185,7 @@
     dd.addEventListener('mouseenter',()=>{ if(to){ clearTimeout(to); to=null; }});
   });
 
-  // Cerrar offcanvas al navegar (para móvil)
+  // Cerrar offcanvas al navegar (móvil)
   document.querySelectorAll('#mainNav .nav-link, #mainNav .dropdown-item').forEach(a=>{
     a.addEventListener('click',()=>{
       const oc = bootstrap.Offcanvas.getInstance(document.getElementById('mainNav'));

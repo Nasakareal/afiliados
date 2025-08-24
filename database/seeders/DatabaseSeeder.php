@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
             AdminUserSeeder::class,
             PermissionsSeeder::class,
             ActividadSeeder::class,
+            AfiliadosSeeder::class,
         ]);
     }
 }
