@@ -11,7 +11,7 @@ use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\Settings\SettingsController;
 use App\Http\Controllers\Settings\UserController;
 use App\Http\Controllers\Settings\RoleController;
-use App\Http\Controllers\Settings\PermissionController;
+use App\Http\Controllers\Settings\RolePermissionController;
 use App\Http\Controllers\Settings\AppSettingController;
 
 /*
@@ -32,6 +32,8 @@ if (file_exists(base_path('routes/auth.php'))) {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth'])->group(function () {
+
+    Route::get('/dashboard', fn() => view('dashboard'))->name('dashboard');
 
     // Afiliados (convencidos) – CRUD + “registro” (atajo al create)
     Route::get('/afiliados',                 [AfiliadoController::class, 'index'])->name('afiliados.index')->middleware('permission:afiliados.ver');
@@ -67,6 +69,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Mapa
     Route::get('/mapa', [MapaController::class, 'index'])->name('mapa.index')->middleware('permission:mapa.ver');
+    Route::get('/mapa/data', [MapaController::class, 'data'])->name('mapa.data')->middleware('permission:mapa.ver');
 
     // Reportes
     Route::get('/reportes/secciones',   [ReporteController::class, 'secciones'])->name('reportes.secciones')->middleware('permission:reportes.ver');
@@ -94,14 +97,12 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/roles/{role}',             [RoleController::class, 'update'])->name('roles.update')->middleware('permission:roles.editar');
         Route::delete('/roles/{role}',          [RoleController::class, 'destroy'])->name('roles.destroy')->middleware('permission:roles.borrar');
 
-        // Permisos
-        Route::get('/permisos',                 [PermissionController::class, 'index'])->name('permisos.index')->middleware('permission:permisos.ver');
-        Route::get('/permisos/create',          [PermissionController::class, 'create'])->name('permisos.create')->middleware('permission:permisos.crear');
-        Route::post('/permisos',                [PermissionController::class, 'store'])->name('permisos.store')->middleware('permission:permisos.crear');
-        Route::get('/permisos/{permission}',    [PermissionController::class, 'show'])->name('permisos.show')->middleware('permission:permisos.ver');
-        Route::get('/permisos/{permission}/edit',[PermissionController::class, 'edit'])->name('permisos.edit')->middleware('permission:permisos.editar');
-        Route::put('/permisos/{permission}',    [PermissionController::class, 'update'])->name('permisos.update')->middleware('permission:permisos.editar');
-        Route::delete('/permisos/{permission}', [PermissionController::class, 'destroy'])->name('permisos.destroy')->middleware('permission:permisos.borrar');
+        // Permisos por Rol
+        Route::prefix('roles')->name('roles.')->group(function () {
+            Route::get('/{role}/permisos',      [RolePermissionController::class, 'show'])->name('permisos.show')->middleware('permission:permisos.ver');
+            Route::get('/{role}/permisos/edit', [RolePermissionController::class, 'edit'])->name('permisos.edit')->middleware('permission:permisos.editar');
+            Route::put('/{role}/permisos',      [RolePermissionController::class, 'update'])->name('permisos.update')->middleware('permission:permisos.editar');
+        });
 
         // App Settings (bloqueo de captura, etc.)
         Route::get('/app',  [AppSettingController::class, 'edit'])->name('app.edit')->middleware('permission:settings.editar');

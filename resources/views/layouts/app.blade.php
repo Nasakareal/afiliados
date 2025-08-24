@@ -1,33 +1,192 @@
+{{-- resources/views/layouts/app.blade.php --}}
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
+<html lang="es" data-theme="gladyz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>@yield('title','Sistema Afiliados')</title>
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+  <style>
+    :root{--granate:#7a0019;--granate-osc:#5c0013;--humo:#f5f5f7}
+    html,body{height:100%;background:var(--humo)}
+    .navbar-glass{backdrop-filter:blur(8px);background:rgba(255,255,255,.75)}
+    .nav-link.active,.dropdown-item.active{font-weight:700;color:var(--granate)!important}
+    .btn-granate{background:var(--granate);color:#fff;border:none}
+    .btn-granate:hover{background:var(--granate-osc);color:#fff}
+    .dropdown-menu{border-radius:12px}
+    .content-wrap{padding-top:84px}
+    .app-footer{color:#666}
+    /* hover-out: cerrar menú cuando el mouse sale del dropdown */
+    .dropdown.keep-open:hover .dropdown-menu.show{display:block}
+  </style>
+  @stack('styles')
+</head>
+<body>
+@php
+  // Helpers de “activo”
+  function is_active($patterns){ foreach((array)$patterns as $p){ if(request()->routeIs($p)) return 'active'; } return ''; }
+@endphp
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+<nav class="navbar navbar-expand-lg fixed-top navbar-light border-bottom navbar-glass">
+  <div class="container-fluid px-3">
+    <a class="navbar-brand fw-bold" href="{{ route('dashboard') }}">GLADY<span class="text-danger">•</span>ADOREZ</a>
 
-        <!-- Fonts -->
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap">
+    {{-- Botón Offcanvas (móvil) --}}
+    <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#mainNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
-        <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    </head>
-    <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100">
-            @include('layouts.navigation')
+    {{-- Contenedor de navegación (desktop y móvil via offcanvas) --}}
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="mainNav">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title">Menú</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+      </div>
+      <div class="offcanvas-body">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0 align-items-lg-center">
 
-            <!-- Page Heading -->
-            <header class="bg-white shadow">
-                <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                    {{ $header }}
-                </div>
-            </header>
+          @can('afiliados.ver')
+          <li class="nav-item">
+            <a class="nav-link {{ is_active(['afiliados.*','registro']) }}" href="{{ route('afiliados.index') }}">
+              <i class="fa-solid fa-user-check me-1"></i> Afiliados
+            </a>
+          </li>
+          @endcan
 
-            <!-- Page Content -->
-            <main>
-                {{ $slot }}
-            </main>
+          @can('secciones.ver')
+          <li class="nav-item">
+            <a class="nav-link {{ is_active(['secciones.*']) }}" href="{{ route('secciones.index') }}">
+              <i class="fa-solid fa-layer-group me-1"></i> Secciones
+            </a>
+          </li>
+          @endcan
+
+          {{-- Actividades / Calendario (dropdown) --}}
+          @can('actividades.ver')
+          <li class="nav-item dropdown keep-open">
+            <a class="nav-link dropdown-toggle {{ is_active(['calendario.*','actividades.*']) }}" href="#" data-bs-toggle="dropdown" role="button">
+              <i class="fa-solid fa-calendar-days me-1"></i> Actividades
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item {{ is_active('calendario.index') }}" href="{{ route('calendario.index') }}"><i class="fa-regular fa-calendar me-1"></i> Calendario</a></li>
+              <li><a class="dropdown-item {{ is_active('actividades.index') }}" href="{{ route('actividades.index') }}"><i class="fa-solid fa-list-check me-1"></i> Listado</a></li>
+              @can('actividades.crear')
+              <li><a class="dropdown-item {{ is_active('actividades.create') }}" href="{{ route('actividades.create') }}"><i class="fa-solid fa-plus me-1"></i> Crear</a></li>
+              @endcan
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="{{ route('actividades.feed') }}"><i class="fa-solid fa-rss me-1"></i> Feed</a></li>
+            </ul>
+          </li>
+          @endcan
+
+          @can('mapa.ver')
+          <li class="nav-item">
+            <a class="nav-link {{ is_active('mapa.index') }}" href="{{ route('mapa.index') }}">
+              <i class="fa-solid fa-map-location-dot me-1"></i> Mapa
+            </a>
+          </li>
+          @endcan
+
+          {{-- Reportes (dropdown) --}}
+          @can('reportes.ver')
+          <li class="nav-item dropdown keep-open">
+            <a class="nav-link dropdown-toggle {{ is_active(['reportes.secciones','reportes.capturistas']) }}" href="#" data-bs-toggle="dropdown" role="button">
+              <i class="fa-solid fa-chart-column me-1"></i> Reportes
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item {{ is_active('reportes.secciones') }}" href="{{ route('reportes.secciones') }}"><i class="fa-solid fa-diagram-project me-1"></i> Por secciones</a></li>
+              <li><a class="dropdown-item {{ is_active('reportes.capturistas') }}" href="{{ route('reportes.capturistas') }}"><i class="fa-solid fa-ranking-star me-1"></i> Capturistas</a></li>
+            </ul>
+          </li>
+          @endcan
+
+          {{-- Settings (dropdown) --}}
+          @can('settings.ver')
+          <li class="nav-item dropdown keep-open">
+            <a class="nav-link dropdown-toggle {{ is_active(['settings.*']) }}" href="#" data-bs-toggle="dropdown" role="button">
+              <i class="fa-solid fa-gear me-1"></i> Settings
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item {{ is_active('settings.index') }}" href="{{ route('settings.index') }}"><i class="fa-solid fa-gauge-high me-1"></i> Panel</a></li>
+              @can('usuarios.ver')
+              <li><a class="dropdown-item {{ is_active('settings.usuarios.*') }}" href="{{ route('settings.usuarios.index') }}"><i class="fa-solid fa-users me-1"></i> Usuarios</a></li>
+              @endcan
+              @can('roles.ver')
+              <li><a class="dropdown-item {{ is_active('settings.roles.*') }}" href="{{ route('settings.roles.index') }}"><i class="fa-solid fa-user-shield me-1"></i> Roles</a></li>
+              @endcan
+              @can('settings.editar')
+              <li><a class="dropdown-item {{ is_active('settings.app.edit') }}" href="{{ route('settings.app.edit') }}"><i class="fa-solid fa-sliders me-1"></i> App</a></li>
+              @endcan
+            </ul>
+          </li>
+          @endcan
+        </ul>
+
+        {{-- Usuario / logout --}}
+        <div class="d-flex align-items-center gap-2">
+          <span class="small text-muted d-none d-lg-inline">Hola, {{ Auth::user()->name ?? 'Usuario' }}</span>
+          <form method="POST" action="{{ route('logout') }}">@csrf
+            <button class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-right-from-bracket me-1"></i> Salir</button>
+          </form>
         </div>
-    </body>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<main class="content-wrap container-fluid">
+  {{-- Mensajes flash --}}
+  @if(session('success'))<div class="alert alert-success alert-dismissible fade show" role="alert">{{ session('success') }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>@endif
+  @if(session('error'))  <div class="alert alert-danger alert-dismissible fade show" role="alert">{{ session('error') }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>@endif
+
+  @yield('content')
+</main>
+
+{{-- Footer opcional: solo si la vista define la sección --}}
+@hasSection('footer')
+<footer class="app-footer border-top mt-5 py-4">
+  <div class="container">
+    @yield('footer')
+  </div>
+</footer>
+@endif
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Cerrar dropdowns al hacer click fuera
+  document.addEventListener('click', (e)=>{
+    const openMenus = document.querySelectorAll('.dropdown-menu.show');
+    openMenus.forEach(menu=>{
+      if(!menu.parentElement.contains(e.target)){
+        const toggle = menu.parentElement.querySelector('[data-bs-toggle="dropdown"]');
+        bootstrap.Dropdown.getInstance(toggle)?.hide();
+      }
+    });
+  });
+
+  // Cerrar dropdown al salir con el mouse (con pequeño delay para UX)
+  document.querySelectorAll('.dropdown.keep-open').forEach(dd=>{
+    let to=null;
+    dd.addEventListener('mouseleave',()=>{
+      to=setTimeout(()=>{
+        const toggle = dd.querySelector('[data-bs-toggle="dropdown"]');
+        bootstrap.Dropdown.getInstance(toggle)?.hide();
+      }, 150);
+    });
+    dd.addEventListener('mouseenter',()=>{ if(to){ clearTimeout(to); to=null; }});
+  });
+
+  // Cerrar offcanvas al navegar (para móvil)
+  document.querySelectorAll('#mainNav .nav-link, #mainNav .dropdown-item').forEach(a=>{
+    a.addEventListener('click',()=>{
+      const oc = bootstrap.Offcanvas.getInstance(document.getElementById('mainNav'));
+      oc?.hide();
+    });
+  });
+</script>
+@stack('scripts')
+</body>
 </html>

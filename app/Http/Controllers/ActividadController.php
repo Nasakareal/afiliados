@@ -4,82 +4,122 @@ namespace App\Http\Controllers;
 
 use App\Models\Actividad;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ActividadController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * Vista del calendario (FullCalendar)
      */
     public function index()
     {
-        //
+        return view('actividades.calendario');
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
+     * Endpoint JSON para FullCalendar
      */
+    public function feed(Request $request)
+    {
+        $desde = $request->query('start');
+        $hasta = $request->query('end');
+
+        $actividades = Actividad::entreFechas($desde, $hasta)->get();
+
+        // Formato que espera FullCalendar
+        $eventos = $actividades->map(fn($a) => [
+            'id'    => $a->id,
+            'title' => $a->titulo,
+            'start' => $a->inicio->toIso8601String(),
+            'end'   => $a->fin?->toIso8601String(),
+            'allDay'=> $a->all_day,
+            'color' => $this->estadoColor($a->estado),
+            'url'   => route('actividades.show',$a->id),
+        ]);
+
+        return response()->json($eventos);
+    }
+
+    /**
+     * Listado simple en tabla
+     */
+    public function list()
+    {
+        $actividades = Actividad::with('creador')->latest()->paginate(15);
+        return view('actividades.index', compact('actividades'));
+    }
+
     public function create()
     {
-        //
+        return view('actividades.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'titulo'      => 'required|string|max:180',
+            'descripcion' => 'nullable|string',
+            'inicio'      => 'required|date',
+            'fin'         => 'nullable|date|after_or_equal:inicio',
+            'all_day'     => 'boolean',
+            'lugar'       => 'nullable|string|max:200',
+            'estado'      => 'in:programada,cancelada,realizada',
+        ]);
+
+        $validated['creado_por'] = Auth::id();
+
+        $actividad = Actividad::create($validated);
+
+        return redirect()->route('actividades.show', $actividad->id)
+            ->with('status','Actividad creada correctamente.');
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Actividad  $actividad
-     * @return \Illuminate\Http\Response
-     */
     public function show(Actividad $actividad)
     {
-        //
+        return view('actividades.show', compact('actividad'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Actividad  $actividad
-     * @return \Illuminate\Http\Response
-     */
     public function edit(Actividad $actividad)
     {
-        //
+        return view('actividades.edit', compact('actividad'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Actividad  $actividad
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, Actividad $actividad)
     {
-        //
+        $validated = $request->validate([
+            'titulo'      => 'required|string|max:180',
+            'descripcion' => 'nullable|string',
+            'inicio'      => 'required|date',
+            'fin'         => 'nullable|date|after_or_equal:inicio',
+            'all_day'     => 'boolean',
+            'lugar'       => 'nullable|string|max:200',
+            'estado'      => 'in:programada,cancelada,realizada',
+        ]);
+
+        $actividad->update($validated);
+
+        return redirect()->route('actividades.show', $actividad->id)
+            ->with('status','Actividad actualizada correctamente.');
+    }
+
+    public function destroy(Actividad $actividad)
+    {
+        $actividad->delete();
+
+        return redirect()->route('actividades.index')
+            ->with('status','Actividad eliminada correctamente.');
     }
 
     /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Actividad  $actividad
-     * @return \Illuminate\Http\Response
+     * Colores según estado
      */
-    public function destroy(Actividad $actividad)
+    private function estadoColor(string $estado): string
     {
-        //
+        return match($estado) {
+            'programada' => '#1976d2', // azul
+            'cancelada'  => '#d32f2f', // rojo
+            'realizada'  => '#388e3c', // verde
+            default      => '#616161', // gris
+        };
     }
 }
