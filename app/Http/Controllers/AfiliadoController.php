@@ -3,35 +3,28 @@
 namespace App\Http\Controllers;
 
 use App\Models\Afiliado;
-use App\Models\Seccion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class AfiliadoController extends Controller
 {
-    /**
-     * Listado con filtros opcionales:
-     * ?q=texto (nombre, curp, teléfono)
-     * ?seccion_id=ID
-     * ?cvegeo=XXXXX (municipio INEGI)
-     */
-    public function index(\Illuminate\Http\Request $request)
+    public function index(Request $request)
     {
         $q         = trim((string)$request->query('q'));
-        $seccion   = $request->query('seccion');     // p.ej. "1234"
-        $cveMun    = $request->query('cve_mun');     // p.ej. "053"
-        $municipio = $request->query('municipio');   // p.ej. "Morelia"
-        $estatus   = $request->query('estatus');     // "pendiente|validado|descartado"
+        $seccion   = $request->query('seccion');
+        $cveMun    = $request->query('cve_mun');
+        $municipio = $request->query('municipio');
+        $estatus   = $request->query('estatus');
         $capId     = $request->query('capturista_id');
 
-        $afiliados = \App\Models\Afiliado::query()
+        $afiliados = Afiliado::query()
             ->leftJoin('secciones', function($j){
-                // une por seccion y cve_mun si existe, si no por nombre de municipio
                 $j->on('secciones.seccion','=','afiliados.seccion');
-                if (\Illuminate\Support\Facades\Schema::hasColumn('afiliados','cve_mun')) {
+                if (Schema::hasColumn('afiliados','cve_mun')) {
                     $j->on('secciones.cve_mun','=','afiliados.cve_mun');
                 } else {
                     $j->on('secciones.municipio','=','afiliados.municipio');
@@ -68,35 +61,29 @@ class AfiliadoController extends Controller
         return view('afiliados.index', compact('afiliados','q','seccion','cveMun','municipio','estatus','capId'));
     }
 
-
-    /**
-     * Form de creación
-     */
     public function create()
     {
-        $secciones = Seccion::orderBy('numero')->get(['id','numero','nombre']);
+        $municipios = $this->cargarMunicipiosDesdeGeo();
 
-        $municipios = DB::table('cat_municipios')
-            ->select('cvegeo','nomgeo')
-            ->where('cve_ent','16')
-            ->orderBy('nomgeo')
-            ->get();
+        $secciones = collect();
+        if ($municipios->count() > 0) {
+            $cve = $municipios->first()->cve_mun;
+            $secciones = DB::table('secciones')
+                ->where('cve_mun', $cve)
+                ->orderBy('seccion')
+                ->pluck('seccion');
+        }
 
-        return view('afiliados.create', compact('secciones','municipios'));
+        return view('afiliados.create', compact('municipios','secciones'));
     }
 
-    /**
-     * Guardar nuevo afiliado
-     */
     public function store(Request $request)
     {
         $data = $this->validateData($request);
-
-        // normalizaciones mínimas (sin cambiar nombres de columnas)
-        $data['nombre']            = Str::of($data['nombre'])->squish();
-        $data['apellido_paterno']  = Str::of($data['apellido_paterno'])->squish();
-        $data['apellido_materno']  = Str::of($data['apellido_materno'] ?? '')->squish();
-        $data['capturista_id']     = Auth::id();
+        $data['nombre']           = $this->squish($data['nombre']);
+        $data['apellido_paterno'] = $this->squish($data['apellido_paterno'] ?? '');
+        $data['apellido_materno'] = $this->squish($data['apellido_materno'] ?? '');
+        $data['capturista_id']    = Auth::id();
 
         $afiliado = Afiliado::create($data);
 
@@ -104,46 +91,46 @@ class AfiliadoController extends Controller
             ->with('status','Afiliado creado correctamente.');
     }
 
-    /**
-     * Detalle
-     */
     public function show(Afiliado $afiliado)
     {
-        $afiliado->load(['seccion','capturista']);
-        // si quieres nombre de municipio:
-        $municipio = DB::table('cat_municipios')
-            ->select('nomgeo')
-            ->where('cvegeo',$afiliado->cvegeo)
+        $afiliado->load('capturista');
+
+        $seccionInfo = DB::table('secciones')
+            ->where('seccion', $afiliado->seccion)
+            ->when($afiliado->cve_mun, fn($q)=>$q->where('cve_mun',$afiliado->cve_mun),
+                                fn($q)=>$q->where('municipio',$afiliado->municipio))
+            ->select('seccion','municipio','cve_mun','distrito_local','distrito_federal','lista_nominal','centroid_lat','centroid_lng')
             ->first();
 
-        return view('afiliados.show', compact('afiliado','municipio'));
+        return view('afiliados.show', compact('afiliado','seccionInfo'));
     }
 
-    /**
-     * Form de edición
-     */
     public function edit(Afiliado $afiliado)
     {
-        $secciones = Seccion::orderBy('numero')->get(['id','numero','nombre']);
-        $municipios = DB::table('cat_municipios')
-            ->select('cvegeo','nomgeo')
-            ->where('cve_ent','16')
-            ->orderBy('nomgeo')
-            ->get();
+        $municipios = $this->cargarMunicipiosDesdeGeo();
 
-        return view('afiliados.edit', compact('afiliado','secciones','municipios'));
+        $selCve = $afiliado->cve_mun;
+        if (!$selCve) {
+            $hit = $municipios->firstWhere('municipio', $afiliado->municipio);
+            $selCve = $hit->cve_mun ?? null;
+        }
+
+        $secciones = DB::table('secciones')
+            ->when($selCve, fn($q)=>$q->where('cve_mun',$selCve),
+                           fn($q)=>$q->where('municipio',$afiliado->municipio))
+            ->orderBy('seccion')
+            ->pluck('seccion');
+
+        return view('afiliados.edit', compact('afiliado','municipios','secciones'));
     }
 
-    /**
-     * Actualizar
-     */
     public function update(Request $request, Afiliado $afiliado)
     {
         $data = $this->validateData($request, $afiliado->id);
 
-        $data['nombre']           = Str::of($data['nombre'])->squish();
-        $data['apellido_paterno'] = Str::of($data['apellido_paterno'])->squish();
-        $data['apellido_materno'] = Str::of($data['apellido_materno'] ?? '')->squish();
+        $data['nombre']           = $this->squish($data['nombre']);
+        $data['apellido_paterno'] = $this->squish($data['apellido_paterno'] ?? '');
+        $data['apellido_materno'] = $this->squish($data['apellido_materno'] ?? '');
 
         $afiliado->update($data);
 
@@ -151,9 +138,6 @@ class AfiliadoController extends Controller
             ->with('status','Afiliado actualizado correctamente.');
     }
 
-    /**
-     * Eliminar
-     */
     public function destroy(Afiliado $afiliado)
     {
         $afiliado->delete();
@@ -162,37 +146,94 @@ class AfiliadoController extends Controller
             ->with('status','Afiliado eliminado correctamente.');
     }
 
-    /**
-     * Reglas de validación centralizadas
-     * Ajusta columnas según tu migración real.
-     */
     private function validateData(Request $request, ?int $id = null): array
     {
         return $request->validate([
             'nombre'            => ['required','string','max:120'],
-            'apellido_paterno'  => ['required','string','max:120'],
+            'apellido_paterno'  => ['nullable','string','max:120'],
             'apellido_materno'  => ['nullable','string','max:120'],
-            'curp'              => [
-                'nullable','string','max:18',
-                Rule::unique('afiliados','curp')->ignore($id)
-            ],
-            'telefono'          => ['nullable','string','max:25'],
-            'domicilio'         => ['nullable','string','max:255'],
 
-            // Relacionales
-            'seccion_id'        => ['required','integer','exists:secciones,id'],
-            'cvegeo'            => [
-                'required','string','max:5',
-                // valida que exista en catálogo (INEGI) si lo tienes
-                Rule::exists('cat_municipios','cvegeo')
-            ],
+            'edad'              => ['nullable','integer','min:0','max:120'],
+            'sexo'              => ['nullable', Rule::in(['M','F','Otro'])],
 
-            // Extras opcionales si existen en tu tabla:
-            'referencia'        => ['nullable','string','max:255'],
+            'telefono'          => ['nullable','string','max:30'],
+            'email'             => ['nullable','email','max:150'],
+
+            'municipio'         => ['required','string','max:120'],
+            'cve_mun'           => ['nullable','string','size:3'],
+            'localidad'         => ['nullable','string','max:150'],
+            'colonia'           => ['nullable','string','max:150'],
+            'calle'             => ['nullable','string','max:150'],
+            'numero_ext'        => ['nullable','string','max:20'],
+            'numero_int'        => ['nullable','string','max:20'],
+            'cp'                => ['nullable','string','max:10'],
+            'lat'               => ['nullable','numeric'],
+            'lng'               => ['nullable','numeric'],
+
+            'seccion'           => ['nullable','string','max:6'],
+            'distrito_federal'  => ['nullable','integer'],
+            'distrito_local'    => ['nullable','integer'],
+
+            'perfil'            => ['nullable','string'],
             'observaciones'     => ['nullable','string'],
-        ],[
-            'cvegeo.exists'     => 'El municipio seleccionado no existe en el catálogo.',
-            'seccion_id.exists' => 'La sección seleccionada no existe.',
+
+            'estatus'           => ['nullable', Rule::in(['pendiente','validado','descartado'])],
+            'fecha_convencimiento' => ['nullable','date'],
         ]);
+    }
+
+    private function cargarMunicipiosDesdeGeo()
+    {
+        $posibles = [
+            public_path('geo/michoacan.json'),
+            public_path('geo/16_michoacan.json'),
+            public_path('geo/16/municipios.json'),
+            public_path('geo/16/michoacan.json'),
+        ];
+
+        foreach ($posibles as $ruta) {
+            if (is_file($ruta)) {
+                $raw = @file_get_contents($ruta);
+                $json = json_decode($raw, true);
+                if (isset($json['features']) && is_array($json['features'])) {
+                    $items = collect($json['features'])->map(function($f){
+                        $p = $f['properties'] ?? [];
+                        $cve = $p['CVE_MUN'] ?? $p['CVE_MUNI'] ?? $p['CVE_MPIO'] ?? null;
+                        if (!$cve && isset($p['CVEGEO'])) {
+                            $cve = substr((string)$p['CVEGEO'], -3);
+                        }
+                        $nom = $p['NOMGEO'] ?? $p['NOM_MUN'] ?? $p['NOM_MPIO'] ?? $p['NOMMUN'] ?? null;
+
+                        if ($cve && $nom) {
+                            return (object)[
+                                'cve_mun'  => str_pad($cve, 3, '0', STR_PAD_LEFT),
+                                'municipio'=> $nom,
+                            ];
+                        }
+                        return null;
+                    })->filter()->unique('cve_mun')->sortBy('municipio')->values();
+
+                    if ($items->count() > 0) return $items;
+                }
+            }
+        }
+
+        return DB::table('secciones')
+            ->select('cve_mun','municipio')
+            ->distinct()
+            ->orderBy('municipio')
+            ->get()
+            ->map(function($r){
+                $r->cve_mun = str_pad((string)$r->cve_mun, 3, '0', STR_PAD_LEFT);
+                return $r;
+            });
+    }
+
+    private function squish($value): string
+    {
+        if (method_exists(Str::class, 'squish')) {
+            return Str::squish($value);
+        }
+        return preg_replace('/\s+/u', ' ', trim((string)$value));
     }
 }

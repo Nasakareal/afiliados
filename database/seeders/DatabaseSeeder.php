@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
             PermissionsSeeder::class,
             ActividadSeeder::class,
             AfiliadosSeeder::class,
+            ComunicadoSeeder::class,
         ]);
     }
 }

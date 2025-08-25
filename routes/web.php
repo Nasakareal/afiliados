@@ -14,6 +14,11 @@ use App\Http\Controllers\Settings\RoleController;
 use App\Http\Controllers\Settings\RolePermissionController;
 use App\Http\Controllers\Settings\AppSettingController;
 
+use App\Http\Controllers\Settings\ComunicadoController;
+
+use App\Http\Controllers\DashboardController;
+
+
 /*
 |--------------------------------------------------------------------------
 | Público
@@ -33,7 +38,8 @@ if (file_exists(base_path('routes/auth.php'))) {
 */
 Route::middleware(['auth'])->group(function () {
 
-    Route::get('/dashboard', fn() => view('dashboard'))->name('dashboard');
+
+    Route::get('/dashboard', [DashboardController::class,'index'])->name('dashboard');
 
     // Afiliados (convencidos) – CRUD + “registro” (atajo al create)
     Route::get('/afiliados',                 [AfiliadoController::class, 'index'])->name('afiliados.index')->middleware('permission:afiliados.ver');
@@ -103,6 +109,16 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/{role}/permisos/edit', [RolePermissionController::class, 'edit'])->name('permisos.edit')->middleware('permission:permisos.editar');
             Route::put('/{role}/permisos',      [RolePermissionController::class, 'update'])->name('permisos.update')->middleware('permission:permisos.editar');
         });
+
+        // Comunicados – CRUD + marcar leído
+        Route::get('/comunicados',                  [ComunicadoController::class, 'index'])->name('comunicados.index')->middleware('permission:comunicados.ver');
+        Route::get('/comunicados/create',           [ComunicadoController::class, 'create'])->name('comunicados.create')->middleware('permission:comunicados.crear');
+        Route::post('/comunicados',                 [ComunicadoController::class, 'store'])->name('comunicados.store')->middleware('permission:comunicados.crear');
+        Route::get('/comunicados/{comunicado}',     [ComunicadoController::class, 'show'])->name('comunicados.show')->middleware('permission:comunicados.ver');
+        Route::get('/comunicados/{comunicado}/edit',[ComunicadoController::class, 'edit'])->name('comunicados.edit')->middleware('permission:comunicados.editar');
+        Route::put('/comunicados/{comunicado}',     [ComunicadoController::class, 'update'])->name('comunicados.update')->middleware('permission:comunicados.editar');
+        Route::delete('/comunicados/{comunicado}',  [ComunicadoController::class, 'destroy'])->name('comunicados.destroy')->middleware('permission:comunicados.borrar');
+        Route::post('/comunicados/{comunicado}/leido',[ComunicadoController::class, 'marcarLeido'])->name('comunicados.leido')->middleware('permission:comunicados.ver');
 
         // App Settings (bloqueo de captura, etc.)
         Route::get('/app',  [AppSettingController::class, 'edit'])->name('app.edit')->middleware('permission:settings.editar');

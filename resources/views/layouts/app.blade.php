@@ -126,6 +126,9 @@
               @can('roles.ver')
               <li><a class="dropdown-item {{ is_active('settings.roles.*') }}" href="{{ route('settings.roles.index') }}"><i class="fa-solid fa-user-shield me-1"></i> Roles</a></li>
               @endcan
+              @can('comunicados.ver')
+              <li><a class="dropdown-item {{ is_active('settings.comunicados.*') }}" href="{{ route('settings.comunicados.index') }}"><i class="fa-solid fa-bell"></i> Comunicados</a></li>
+              @endcan
               @can('settings.editar')
               <li><a class="dropdown-item {{ is_active('settings.app.edit') }}" href="{{ route('settings.app.edit') }}"><i class="fa-solid fa-sliders me-1"></i> App</a></li>
               @endcan
@@ -193,6 +196,7 @@
     });
   });
 </script>
+@yield('js')
 @stack('scripts')
 </body>
 </html>

@@ -3,8 +3,8 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Pagination\Paginator;
-
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -15,6 +15,14 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        \Illuminate\Support\Facades\Schema::defaultStringLength(191);
+        Schema::defaultStringLength(191);
+
+        if (method_exists(Paginator::class,'useBootstrapFive')) {
+            Paginator::useBootstrapFive();
+        } elseif (method_exists(Paginator::class,'useBootstrapFour')) {
+            Paginator::useBootstrapFour();
+        } else {
+            Paginator::useBootstrap();
+        }
     }
 }

@@ -16,6 +16,10 @@ class PermissionsSeeder extends Seeder
 
         // 1) Crea todos los permisos
         $perms = [
+
+            // Comunicados
+            'comunicados.ver', 'comunicados.crear', 'comunicados.editar', 'comunicados.borrar',
+
             // Afiliados (convencidos)
             'afiliados.ver', 'afiliados.crear', 'afiliados.editar', 'afiliados.borrar',
 

@@ -2,11 +2,15 @@
   "ExpandedNodes": [
     "",
     "\\app",
-    "\\app\\Providers",
+    "\\app\\Http",
+    "\\app\\Http\\Controllers",
+    "\\app\\Http\\Controllers\\Settings",
     "\\resources",
     "\\resources\\views",
-    "\\resources\\views\\layouts"
+    "\\resources\\views\\layouts",
+    "\\resources\\views\\settings",
+    "\\resources\\views\\settings\\comunicados"
   ],
-  "SelectedNode": "\\resources\\views\\layouts\\app.blade.php",
+  "SelectedNode": "\\app\\Http\\Controllers\\DashboardController.php",
   "PreviewInSolutionExplorer": false
 }

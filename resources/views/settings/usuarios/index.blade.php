@@ -65,7 +65,7 @@
         </tbody>
       </table>
 
-      <div class="mt-2">
+      <div class="mt-2 d-flex justify-content-center">
         {{ $usuarios->links() }}
       </div>
     </div>
@@ -84,11 +84,28 @@ function confirmarEliminar(id, btn){
     return;
   }
   Swal.fire({
-    title:'Eliminar usuario', text:'¿Deseas eliminarlo?', icon:'warning',
-    showDenyButton:true, confirmButtonText:'Eliminar', denyButtonText:'Cancelar',
+    title:'Eliminar usuario',
+    text:'¿Deseas eliminarlo?',
+    icon:'warning',
+    showDenyButton:true,
+    confirmButtonText:'Eliminar',
+    denyButtonText:'Cancelar',
     confirmButtonColor:'#e3342f'
   }).then(r=>{ if(r.isConfirmed) form.submit(); else btn.disabled=false; });
 }
+
+// --- Evitar doble paginación (quitar DataTables SOLO aquí) ---
+document.addEventListener('DOMContentLoaded',()=>{
+  if (window.jQuery && $.fn.dataTable && $.fn.dataTable.isDataTable('#tblUsuarios')) {
+    $('#tblUsuarios').DataTable().destroy();
+    $('#tblUsuarios thead th').removeClass('sorting sorting_asc sorting_desc');
+  }
+  const wrp = document.getElementById('tblUsuarios')?.closest('.dataTables_wrapper');
+  if (wrp) {
+    wrp.querySelectorAll('.dataTables_paginate,.dataTables_info,.dataTables_length,.dataTables_filter')
+       .forEach(el=>el.remove());
+  }
+});
 </script>
 
 @if (session('status'))
