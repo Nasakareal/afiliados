@@ -6,9 +6,11 @@
     "\\app\\Http\\Controllers",
     "\\app\\Http\\Controllers\\Api",
     "\\app\\Http\\Resources",
-    "\\config",
+    "\\app\\Models",
+    "\\database",
+    "\\database\\migrations",
     "\\routes"
   ],
-  "SelectedNode": "\\app\\Http\\Controllers\\Api\\SeccionApiController.php",
+  "SelectedNode": "\\database\\migrations\\2025_08_26_190403_create_device_tokens_table.php",
   "PreviewInSolutionExplorer": false
 }

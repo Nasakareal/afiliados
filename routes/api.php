@@ -8,10 +8,12 @@ use App\Http\Controllers\Api\SeccionApiController;
 use App\Http\Controllers\Api\ActividadApiController;
 use App\Http\Controllers\Api\MapaApiController;
 use App\Http\Controllers\Api\ReporteApiController;
+use App\Http\Controllers\Api\DeviceApiController;
 
 Route::prefix('v1')->group(function () {
-
     Route::post('/auth/login', [AuthApiController::class, 'login'])->name('api.auth.login');
+
+    Route::post('/devices', [DeviceApiController::class, 'store'])->name('api.devices.store');
 
     Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         Route::get('/auth/me', [AuthApiController::class, 'me'])->name('api.auth.me');
@@ -40,7 +42,5 @@ Route::prefix('v1')->group(function () {
 });
 
 Route::fallback(function () {
-    return response()->json([
-        'message' => 'Ruta no encontrada'
-    ], 404);
+    return response()->json(['message' => 'Ruta no encontrada'], 404);
 });
