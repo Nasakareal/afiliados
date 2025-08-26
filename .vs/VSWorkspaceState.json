@@ -4,13 +4,11 @@
     "\\app",
     "\\app\\Http",
     "\\app\\Http\\Controllers",
-    "\\app\\Http\\Controllers\\Settings",
-    "\\resources",
-    "\\resources\\views",
-    "\\resources\\views\\layouts",
-    "\\resources\\views\\settings",
-    "\\resources\\views\\settings\\comunicados"
+    "\\app\\Http\\Controllers\\Api",
+    "\\app\\Http\\Resources",
+    "\\config",
+    "\\routes"
   ],
-  "SelectedNode": "\\app\\Http\\Controllers\\DashboardController.php",
+  "SelectedNode": "\\app\\Http\\Controllers\\Api\\SeccionApiController.php",
   "PreviewInSolutionExplorer": false
 }
