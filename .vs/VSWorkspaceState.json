@@ -12,6 +12,6 @@
     "\\resources\\views\\layouts",
     "\\routes"
   ],
-  "SelectedNode": "\\app\\Models\\Actividad.php",
+  "SelectedNode": "\\app\\Http\\Controllers\\Api\\DeviceApiController.php",
   "PreviewInSolutionExplorer": false
 }
