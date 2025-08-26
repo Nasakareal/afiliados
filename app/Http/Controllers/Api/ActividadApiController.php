@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Actividad;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use App\Http\Resources\ActividadResource;
+use Carbon\Carbon;
 
 class ActividadApiController extends Controller
 {
@@ -17,21 +19,42 @@ class ActividadApiController extends Controller
 
     public function feed(Request $request)
     {
-        $desde = $request->query('start');
-        $hasta = $request->query('end');
+        try {
+            $v = $request->validate([
+                'start' => 'required|date',
+                'end'   => 'required|date|after_or_equal:start',
+            ]);
 
-        $actividades = Actividad::entreFechas($desde, $hasta)->get();
+            $desde = Carbon::parse($v['start']);
+            $hasta = Carbon::parse($v['end']);
+            $actividades = Actividad::entreFechas($desde, $hasta)
+                ->whereNotNull('inicio')
+                ->get();
 
-        $eventos = $actividades->map(fn($a) => [
-            'id'    => $a->id,
-            'title' => $a->titulo,
-            'start' => $a->inicio->toIso8601String(),
-            'end'   => $a->fin?->toIso8601String(),
-            'allDay'=> $a->all_day,
-            'color' => $this->estadoColor($a->estado),
-        ]);
+            $eventos = $actividades->map(function ($a) {
+                if (!$a->inicio) {
+                    Log::warning('Actividad sin inicio, se omite del feed', ['id' => $a->id]);
+                    return null;
+                }
+                return [
+                    'id'     => $a->id,
+                    'title'  => $a->titulo ?: 'Sin título',
+                    'start'  => $a->inicio?->toIso8601String(),
+                    'end'    => $a->fin?->toIso8601String(),
+                    'allDay' => (bool) $a->all_day,
+                    'color'  => $this->estadoColor($a->estado),
+                ];
+            })->filter()->values();
 
-        return response()->json($eventos);
+            return response()->json($eventos);
+        } catch (\Throwable $e) {
+            Log::error('Error en feed de actividades', [
+                'msg' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'q' => $request->query(),
+            ]);
+            return response()->json(['message' => 'Error al generar el feed'], 500);
+        }
     }
 
     public function store(Request $request)
@@ -66,9 +89,12 @@ class ActividadApiController extends Controller
         return new ActividadResource($actividad);
     }
 
-    public function destroy(Actividad $actividad) { $actividad->delete(); return response()->json(['ok'=>true]); }
+    public function destroy(Actividad $actividad) {
+        $actividad->delete();
+        return response()->json(['ok'=>true]);
+    }
 
-    private function estadoColor(string $estado): string
+    private function estadoColor(?string $estado): string
     {
         return match($estado) {
             'programada' => '#1976d2',

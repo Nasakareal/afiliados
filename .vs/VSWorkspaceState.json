@@ -5,12 +5,13 @@
     "\\app\\Http",
     "\\app\\Http\\Controllers",
     "\\app\\Http\\Controllers\\Api",
-    "\\app\\Http\\Resources",
     "\\app\\Models",
-    "\\database",
-    "\\database\\migrations",
+    "\\app\\Providers",
+    "\\resources",
+    "\\resources\\views",
+    "\\resources\\views\\layouts",
     "\\routes"
   ],
-  "SelectedNode": "\\database\\migrations\\2025_08_26_190403_create_device_tokens_table.php",
+  "SelectedNode": "\\app\\Models\\Actividad.php",
   "PreviewInSolutionExplorer": false
 }

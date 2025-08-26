@@ -46,4 +46,19 @@ class Actividad extends Model
     {
         return $q->where('estado', $estado);
     }
+
+    public function scopeEntreFechas($q, $desde, $hasta)
+    {
+        return $q->whereNotNull('inicio')
+            ->where(function($qq) use ($desde, $hasta) {
+                $qq->whereBetween('inicio', [$desde, $hasta])
+                   ->orWhereBetween('fin', [$desde, $hasta])
+                   ->orWhere(function($q3) use ($desde, $hasta) {
+                        $q3->where('inicio', '<=', $desde)
+                           ->where(function($q4) use ($hasta){
+                               $q4->whereNull('fin')->orWhere('fin', '>=', $hasta);
+                           });
+                   });
+            });
+    }
 }
