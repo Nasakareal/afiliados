@@ -2,16 +2,15 @@
   "ExpandedNodes": [
     "",
     "\\app",
-    "\\app\\Http",
-    "\\app\\Http\\Controllers",
-    "\\app\\Http\\Controllers\\Api",
     "\\app\\Models",
     "\\app\\Providers",
+    "\\database",
+    "\\database\\migrations",
     "\\resources",
     "\\resources\\views",
     "\\resources\\views\\layouts",
     "\\routes"
   ],
-  "SelectedNode": "\\app\\Http\\Controllers\\Api\\DeviceApiController.php",
+  "SelectedNode": "\\database\\migrations\\2025_08_26_190403_create_device_tokens_table.php",
   "PreviewInSolutionExplorer": false
 }

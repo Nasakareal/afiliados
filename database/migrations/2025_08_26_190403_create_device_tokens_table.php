@@ -10,7 +10,7 @@ return new class extends Migration {
             $t->id();
             $t->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
             $t->string('platform', 20)->nullable();
-            $t->string('token')->unique();
+            $t->string('token', 191)->unique();
             $t->timestamp('last_seen_at')->nullable();
             $t->timestamps();
         });

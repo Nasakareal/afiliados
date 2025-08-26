@@ -7,6 +7,10 @@
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:app\\Http\\Controllers\\Api\\DeviceApiController.php||{3B902123-F8A7-4915-9F01-361F908088D0}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\wamp64\\www\\sistemaAfiliados\\database\\migrations\\2025_08_26_190403_create_device_tokens_table.php||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:database\\migrations\\2025_08_26_190403_create_device_tokens_table.php||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\wamp64\\www\\sistemaAfiliados\\app\\Models\\Actividad.php||{3B902123-F8A7-4915-9F01-361F908088D0}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:app\\Models\\Actividad.php||{3B902123-F8A7-4915-9F01-361F908088D0}"
     },
@@ -34,8 +38,21 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 1,
           "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "2025_08_26_190403_create_device_tokens_table.php",
+              "DocumentMoniker": "C:\\wamp64\\www\\sistemaAfiliados\\database\\migrations\\2025_08_26_190403_create_device_tokens_table.php",
+              "RelativeDocumentMoniker": "database\\migrations\\2025_08_26_190403_create_device_tokens_table.php",
+              "ToolTip": "C:\\wamp64\\www\\sistemaAfiliados\\database\\migrations\\2025_08_26_190403_create_device_tokens_table.php",
+              "RelativeToolTip": "database\\migrations\\2025_08_26_190403_create_device_tokens_table.php",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAvAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002338|",
+              "WhenOpened": "2025-08-26T23:21:07.293Z",
+              "EditorCaption": ""
+            },
             {
               "$type": "Document",
               "DocumentIndex": 0,
@@ -44,14 +61,14 @@
               "RelativeDocumentMoniker": "app\\Http\\Controllers\\Api\\DeviceApiController.php",
               "ToolTip": "C:\\wamp64\\www\\sistemaAfiliados\\app\\Http\\Controllers\\Api\\DeviceApiController.php",
               "RelativeToolTip": "app\\Http\\Controllers\\Api\\DeviceApiController.php",
-              "ViewState": "AgIAAAEAAAAAAAAAAAAkwA8AAAA0AAAAAAAAAA==",
+              "ViewState": "AgIAABsAAAAAAAAAAAAAADMAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002338|",
               "WhenOpened": "2025-08-26T23:18:51.206Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "Actividad.php",
               "DocumentMoniker": "C:\\wamp64\\www\\sistemaAfiliados\\app\\Models\\Actividad.php",
               "RelativeDocumentMoniker": "app\\Models\\Actividad.php",
@@ -59,12 +76,11 @@
               "RelativeToolTip": "app\\Models\\Actividad.php",
               "ViewState": "AgIAABUAAAAAAAAAAAAkwD4AAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002338|",
-              "WhenOpened": "2025-08-26T23:11:33.019Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-26T23:11:33.019Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "api.php",
               "DocumentMoniker": "C:\\wamp64\\www\\sistemaAfiliados\\routes\\api.php",
               "RelativeDocumentMoniker": "routes\\api.php",
@@ -76,7 +92,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "app.blade.php",
               "DocumentMoniker": "C:\\wamp64\\www\\sistemaAfiliados\\resources\\views\\layouts\\app.blade.php",
               "RelativeDocumentMoniker": "resources\\views\\layouts\\app.blade.php",
@@ -88,7 +104,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "dashboard.blade.php",
               "DocumentMoniker": "C:\\wamp64\\www\\sistemaAfiliados\\resources\\views\\dashboard.blade.php",
               "RelativeDocumentMoniker": "resources\\views\\dashboard.blade.php",
@@ -100,7 +116,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "home.blade.php",
               "DocumentMoniker": "C:\\wamp64\\www\\sistemaAfiliados\\resources\\views\\home.blade.php",
               "RelativeDocumentMoniker": "resources\\views\\home.blade.php",

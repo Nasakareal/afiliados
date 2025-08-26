@@ -28,15 +28,7 @@ class DeviceApiController extends Controller
                 ]
             );
 
-            return response()->json([
-                'ok'   => true,
-                'id'   => $row->id,
-                'data' => [
-                    'token'    => $row->token,
-                    'platform' => $row->platform,
-                    'user_id'  => $row->user_id,
-                ],
-            ]);
+            return response()->json(['ok' => true, 'id' => $row->id]);
         } catch (\Illuminate\Validation\ValidationException $ve) {
             return response()->json([
                 'ok'      => false,
@@ -50,7 +42,6 @@ class DeviceApiController extends Controller
                 'body'  => $r->all(),
                 'user'  => optional($r->user())->id,
             ]);
-
             return response()->json([
                 'ok'      => false,
                 'message' => 'Error del servidor al registrar el dispositivo',
