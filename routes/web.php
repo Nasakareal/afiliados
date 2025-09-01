@@ -7,17 +7,16 @@ use App\Http\Controllers\SeccionController;
 use App\Http\Controllers\ActividadController;
 use App\Http\Controllers\MapaController;
 use App\Http\Controllers\ReporteController;
-
 use App\Http\Controllers\Settings\SettingsController;
 use App\Http\Controllers\Settings\UserController;
 use App\Http\Controllers\Settings\RoleController;
 use App\Http\Controllers\Settings\RolePermissionController;
 use App\Http\Controllers\Settings\AppSettingController;
-
 use App\Http\Controllers\Settings\ComunicadoController;
-
 use App\Http\Controllers\DashboardController;
 
+// NUEVO: controlador del forzado de contraseña
+use App\Http\Controllers\Auth\ForcePasswordController;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,22 +25,38 @@ use App\Http\Controllers\DashboardController;
 */
 Route::view('/', 'welcome')->name('welcome');
 
-// Carga /login, /register, /logout (Breeze)
+// Breeze/Fortify (login, register, etc.)
 if (file_exists(base_path('routes/auth.php'))) {
     require __DIR__.'/auth.php';
 }
 
 /*
 |--------------------------------------------------------------------------
-| Protegido (auth)
+| Solo autenticado (para mostrar/guardar el cambio de contraseña)
 |--------------------------------------------------------------------------
+|
+| Estas dos rutas NO llevan el middleware force.password.change,
+| para evitar bucles.
+|
 */
-Route::middleware(['auth'])->group(function () {
+Route::middleware('auth')->group(function () {
+    Route::get ('/password/force', [ForcePasswordController::class, 'form'])->name('password.force.form');
+    Route::post('/password/force', [ForcePasswordController::class, 'update'])->name('password.force.update');
+});
 
+/*
+|--------------------------------------------------------------------------
+| Protegido con forzado de cambio
+|--------------------------------------------------------------------------
+|
+| TODO lo demás debe pasar por force.password.change
+|
+*/
+Route::middleware(['auth','force.password.change'])->group(function () {
 
     Route::get('/dashboard', [DashboardController::class,'index'])->name('dashboard');
 
-    // Afiliados (convencidos) – CRUD + “registro” (atajo al create)
+    // Afiliados
     Route::get('/afiliados',                 [AfiliadoController::class, 'index'])->name('afiliados.index')->middleware('permission:afiliados.ver');
     Route::get('/afiliados/create',          [AfiliadoController::class, 'create'])->name('afiliados.create')->middleware('permission:afiliados.crear');
     Route::post('/afiliados',                [AfiliadoController::class, 'store'])->name('afiliados.store')->middleware('permission:afiliados.crear');
@@ -52,7 +67,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/registro', [AfiliadoController::class, 'create'])->name('registro')->middleware('permission:afiliados.crear');
 
-    // Secciones – CRUD
+    // Secciones
     Route::get('/secciones',                 [SeccionController::class, 'index'])->name('secciones.index')->middleware('permission:secciones.ver');
     Route::get('/secciones/create',          [SeccionController::class, 'create'])->name('secciones.create')->middleware('permission:secciones.crear');
     Route::post('/secciones',                [SeccionController::class, 'store'])->name('secciones.store')->middleware('permission:secciones.crear');
@@ -61,7 +76,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/secciones/{seccion}',       [SeccionController::class, 'update'])->name('secciones.update')->middleware('permission:secciones.editar');
     Route::delete('/secciones/{seccion}',    [SeccionController::class, 'destroy'])->name('secciones.destroy')->middleware('permission:secciones.borrar');
 
-    // Actividades (calendario) – CRUD + feed
+    // Actividades / Calendario
     Route::get('/calendario',                  [ActividadController::class, 'index'])->name('calendario.index')->middleware('permission:actividades.ver');
     Route::get('/actividades/feed',            [ActividadController::class, 'feed'])->name('actividades.feed')->middleware('permission:actividades.ver');
 
@@ -81,11 +96,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/reportes/secciones',   [ReporteController::class, 'secciones'])->name('reportes.secciones')->middleware('permission:reportes.ver');
     Route::get('/reportes/capturistas', [ReporteController::class, 'capturistas'])->name('reportes.capturistas')->middleware('permission:reportes.ver');
 
-    // Settings (usuarios, roles, permisos, app)
+    // Settings
     Route::prefix('settings')->name('settings.')->group(function () {
         Route::get('/', [SettingsController::class, 'index'])->name('index')->middleware('permission:settings.ver');
 
-        // Usuarios
         Route::get('/usuarios',                 [UserController::class, 'index'])->name('usuarios.index')->middleware('permission:usuarios.ver');
         Route::get('/usuarios/create',          [UserController::class, 'create'])->name('usuarios.create')->middleware('permission:usuarios.crear');
         Route::post('/usuarios',                [UserController::class, 'store'])->name('usuarios.store')->middleware('permission:usuarios.crear');
@@ -94,7 +108,6 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/usuarios/{user}',          [UserController::class, 'update'])->name('usuarios.update')->middleware('permission:usuarios.editar');
         Route::delete('/usuarios/{user}',       [UserController::class, 'destroy'])->name('usuarios.destroy')->middleware('permission:usuarios.borrar');
 
-        // Roles
         Route::get('/roles',                    [RoleController::class, 'index'])->name('roles.index')->middleware('permission:roles.ver');
         Route::get('/roles/create',             [RoleController::class, 'create'])->name('roles.create')->middleware('permission:roles.crear');
         Route::post('/roles',                   [RoleController::class, 'store'])->name('roles.store')->middleware('permission:roles.crear');
@@ -103,26 +116,22 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/roles/{role}',             [RoleController::class, 'update'])->name('roles.update')->middleware('permission:roles.editar');
         Route::delete('/roles/{role}',          [RoleController::class, 'destroy'])->name('roles.destroy')->middleware('permission:roles.borrar');
 
-        // Permisos por Rol
         Route::prefix('roles')->name('roles.')->group(function () {
             Route::get('/{role}/permisos',      [RolePermissionController::class, 'show'])->name('permisos.show')->middleware('permission:permisos.ver');
             Route::get('/{role}/permisos/edit', [RolePermissionController::class, 'edit'])->name('permisos.edit')->middleware('permission:permisos.editar');
             Route::put('/{role}/permisos',      [RolePermissionController::class, 'update'])->name('permisos.update')->middleware('permission:permisos.editar');
         });
 
-        // Comunicados – CRUD + marcar leído
-        Route::get('/comunicados',                  [ComunicadoController::class, 'index'])->name('comunicados.index')->middleware('permission:comunicados.ver');
-        Route::get('/comunicados/create',           [ComunicadoController::class, 'create'])->name('comunicados.create')->middleware('permission:comunicados.crear');
-        Route::post('/comunicados',                 [ComunicadoController::class, 'store'])->name('comunicados.store')->middleware('permission:comunicados.crear');
-        Route::get('/comunicados/{comunicado}',     [ComunicadoController::class, 'show'])->name('comunicados.show')->middleware('permission:comunicados.ver');
-        Route::get('/comunicados/{comunicado}/edit',[ComunicadoController::class, 'edit'])->name('comunicados.edit')->middleware('permission:comunicados.editar');
-        Route::put('/comunicados/{comunicado}',     [ComunicadoController::class, 'update'])->name('comunicados.update')->middleware('permission:comunicados.editar');
-        Route::delete('/comunicados/{comunicado}',  [ComunicadoController::class, 'destroy'])->name('comunicados.destroy')->middleware('permission:comunicados.borrar');
+        Route::get('/comunicados',                   [ComunicadoController::class, 'index'])->name('comunicados.index')->middleware('permission:comunicados.ver');
+        Route::get('/comunicados/create',            [ComunicadoController::class, 'create'])->name('comunicados.create')->middleware('permission:comunicados.crear');
+        Route::post('/comunicados',                  [ComunicadoController::class, 'store'])->name('comunicados.store')->middleware('permission:comunicados.crear');
+        Route::get('/comunicados/{comunicado}',      [ComunicadoController::class, 'show'])->name('comunicados.show')->middleware('permission:comunicados.ver');
+        Route::get('/comunicados/{comunicado}/edit', [ComunicadoController::class, 'edit'])->name('comunicados.edit')->middleware('permission:comunicados.editar');
+        Route::put('/comunicados/{comunicado}',      [ComunicadoController::class, 'update'])->name('comunicados.update')->middleware('permission:comunicados.editar');
+        Route::delete('/comunicados/{comunicado}',   [ComunicadoController::class, 'destroy'])->name('comunicados.destroy')->middleware('permission:comunicados.borrar');
         Route::post('/comunicados/{comunicado}/leido',[ComunicadoController::class, 'marcarLeido'])->name('comunicados.leido')->middleware('permission:comunicados.ver');
 
-        // App Settings (bloqueo de captura, etc.)
         Route::get('/app',  [AppSettingController::class, 'edit'])->name('app.edit')->middleware('permission:settings.editar');
         Route::put('/app',  [AppSettingController::class, 'update'])->name('app.update')->middleware('permission:settings.editar');
     });
-
 });
