@@ -71,6 +71,17 @@
 </style>
 @endpush
 
+@push('styles')
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet">
+<style>
+  #calendar { min-height: 85vh; padding:1rem; }
+  .fc-toolbar-title { font-weight:700; font-size:1.4rem; }
+  .fc-day-today { background: rgba(25,118,210,0.08)!important; }
+  .fc-event { cursor:pointer; border-radius:6px; font-weight:600; }
+  .fc-event-time { font-weight:700; }
+</style>
+@endpush
+
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -91,27 +102,37 @@ document.addEventListener('DOMContentLoaded', function() {
     buttonText: {
       today: 'Hoy', month: 'Mes', week: 'Semana', day: 'Día', list: 'Lista'
     },
+
     events: '{{ route("actividades.feed") }}',
+
     eventClick: function(info) {
       info.jsEvent.preventDefault();
       const e = info.event;
 
-      document.getElementById('evt-titulo').textContent = e.title;
-      document.getElementById('evt-descripcion').textContent = e.extendedProps.descripcion || '(sin descripción)';
-      document.getElementById('evt-lugar').textContent = e.extendedProps.lugar || '(no especificado)';
-      document.getElementById('evt-inicio').textContent = e.start?.toLocaleString('es-MX') || '';
-      document.getElementById('evt-fin').textContent = e.end?.toLocaleString('es-MX') || '(no definido)';
-      document.getElementById('evt-estado').innerHTML = estadoBadge(e.extendedProps.estado);
+      // Texto principal
+      document.getElementById('evt-titulo').textContent      = e.title || '(sin título)';
+      document.getElementById('evt-descripcion').textContent = e.extendedProps?.descripcion || '(sin descripción)';
+      document.getElementById('evt-lugar').textContent       = e.extendedProps?.lugar || '(no especificado)';
+
+      // Fechas
+      const inicio = e.start ? e.start.toLocaleString('es-MX') : '';
+      const fin    = e.end ? e.end.toLocaleString('es-MX') : '(no definido)';
+      document.getElementById('evt-inicio').textContent = inicio;
+      document.getElementById('evt-fin').textContent    = fin;
+
+      // Estado (con default para evitar "undefined")
+      const estado = e.extendedProps?.estado || 'programada';
+      document.getElementById('evt-estado').innerHTML = estadoBadge(estado);
 
       // Botones
-      document.getElementById('evt-ver').href = e.extendedProps.url || '#';
-      document.getElementById('evt-editar').href = e.extendedProps.editUrl || '#';
+      document.getElementById('evt-ver').href    = e.url || '#';
+      document.getElementById('evt-editar').href = e.extendedProps?.editUrl || '#';
 
       new bootstrap.Modal(document.getElementById('eventoModal')).show();
     },
+
     eventDidMount: function(info) {
-      // Tooltip estilo simple
-      const tooltip = new bootstrap.Tooltip(info.el, {
+      new bootstrap.Tooltip(info.el, {
         title: info.event.title,
         placement: 'top',
         trigger: 'hover',
@@ -119,14 +140,15 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     }
   });
+
   calendar.render();
 
   function estadoBadge(estado){
     switch(estado){
       case 'programada': return '<span class="badge bg-primary">Programada</span>';
-      case 'cancelada': return '<span class="badge bg-danger">Cancelada</span>';
-      case 'realizada': return '<span class="badge bg-success">Realizada</span>';
-      default: return '<span class="badge bg-secondary">'+estado+'</span>';
+      case 'cancelada':  return '<span class="badge bg-danger">Cancelada</span>';
+      case 'realizada':  return '<span class="badge bg-success">Realizada</span>';
+      default:           return '<span class="badge bg-secondary">'+ (estado ?? 'N/D') +'</span>';
     }
   }
 });

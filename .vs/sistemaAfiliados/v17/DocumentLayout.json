@@ -1,12 +1,122 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "C:\\wamp64\\www\\sistemaAfiliados\\",
-  "Documents": [],
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\wamp64\\www\\sistemaAfiliados\\resources\\views\\actividades\\index.blade.php||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:resources\\views\\actividades\\index.blade.php||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\wamp64\\www\\sistemaAfiliados\\routes\\web.php||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:routes\\web.php||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\wamp64\\www\\sistemaAfiliados\\app\\Http\\Controllers\\ActividadController.php||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:app\\Http\\Controllers\\ActividadController.php||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\wamp64\\www\\sistemaAfiliados\\resources\\views\\actividades\\edit.blade.php||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:resources\\views\\actividades\\edit.blade.php||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\wamp64\\www\\sistemaAfiliados\\resources\\views\\actividades\\calendario.blade.php||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:resources\\views\\actividades\\calendario.blade.php||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\wamp64\\www\\sistemaAfiliados\\resources\\views\\actividades\\create.blade.php||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:resources\\views\\actividades\\create.blade.php||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
       "VerticalTabListWidth": 256,
-      "DocumentGroups": []
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "web.php",
+              "DocumentMoniker": "C:\\wamp64\\www\\sistemaAfiliados\\routes\\web.php",
+              "RelativeDocumentMoniker": "routes\\web.php",
+              "ToolTip": "C:\\wamp64\\www\\sistemaAfiliados\\routes\\web.php",
+              "RelativeToolTip": "routes\\web.php",
+              "ViewState": "AgIAACcAAAAAAAAAAAAkwHgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002338|",
+              "WhenOpened": "2025-09-02T18:27:42.919Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "index.blade.php",
+              "DocumentMoniker": "C:\\wamp64\\www\\sistemaAfiliados\\resources\\views\\actividades\\index.blade.php",
+              "RelativeDocumentMoniker": "resources\\views\\actividades\\index.blade.php",
+              "ToolTip": "C:\\wamp64\\www\\sistemaAfiliados\\resources\\views\\actividades\\index.blade.php",
+              "RelativeToolTip": "resources\\views\\actividades\\index.blade.php",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002338|",
+              "WhenOpened": "2025-09-02T18:25:33.484Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "edit.blade.php",
+              "DocumentMoniker": "C:\\wamp64\\www\\sistemaAfiliados\\resources\\views\\actividades\\edit.blade.php",
+              "RelativeDocumentMoniker": "resources\\views\\actividades\\edit.blade.php",
+              "ToolTip": "C:\\wamp64\\www\\sistemaAfiliados\\resources\\views\\actividades\\edit.blade.php",
+              "RelativeToolTip": "resources\\views\\actividades\\edit.blade.php",
+              "ViewState": "AgIAAEMAAAAAAAAAAAAkwHMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002338|",
+              "WhenOpened": "2025-09-02T18:23:39.917Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "create.blade.php",
+              "DocumentMoniker": "C:\\wamp64\\www\\sistemaAfiliados\\resources\\views\\actividades\\create.blade.php",
+              "RelativeDocumentMoniker": "resources\\views\\actividades\\create.blade.php",
+              "ToolTip": "C:\\wamp64\\www\\sistemaAfiliados\\resources\\views\\actividades\\create.blade.php",
+              "RelativeToolTip": "resources\\views\\actividades\\create.blade.php",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAFMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002338|",
+              "WhenOpened": "2025-09-02T18:21:47.823Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "calendario.blade.php",
+              "DocumentMoniker": "C:\\wamp64\\www\\sistemaAfiliados\\resources\\views\\actividades\\calendario.blade.php",
+              "RelativeDocumentMoniker": "resources\\views\\actividades\\calendario.blade.php",
+              "ToolTip": "C:\\wamp64\\www\\sistemaAfiliados\\resources\\views\\actividades\\calendario.blade.php",
+              "RelativeToolTip": "resources\\views\\actividades\\calendario.blade.php",
+              "ViewState": "AgIAAGMAAAAAAAAAAAAkwIUAAAAjAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002338|",
+              "WhenOpened": "2025-09-02T18:17:41.092Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "ActividadController.php",
+              "DocumentMoniker": "C:\\wamp64\\www\\sistemaAfiliados\\app\\Http\\Controllers\\ActividadController.php",
+              "RelativeDocumentMoniker": "app\\Http\\Controllers\\ActividadController.php",
+              "ToolTip": "C:\\wamp64\\www\\sistemaAfiliados\\app\\Http\\Controllers\\ActividadController.php",
+              "RelativeToolTip": "app\\Http\\Controllers\\ActividadController.php",
+              "ViewState": "AgIAAFIAAAAAAAAAAAAkwIIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002338|",
+              "WhenOpened": "2025-09-02T18:16:39.128Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
     }
   ]
 }

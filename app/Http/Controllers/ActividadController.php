@@ -26,16 +26,21 @@ class ActividadController extends Controller
 
         $actividades = Actividad::entreFechas($desde, $hasta)->get();
 
-        // Formato que espera FullCalendar
-        $eventos = $actividades->map(fn($a) => [
-            'id'    => $a->id,
-            'title' => $a->titulo,
-            'start' => $a->inicio->toIso8601String(),
-            'end'   => $a->fin?->toIso8601String(),
-            'allDay'=> $a->all_day,
-            'color' => $this->estadoColor($a->estado),
-            'url'   => route('actividades.show',$a->id),
-        ]);
+        $eventos = $actividades->map(function ($a) {
+            return [
+                'id'        => $a->id,
+                'title'     => $a->titulo,
+                'start'     => $a->inicio?->toIso8601String(),
+                'end'       => $a->fin?->toIso8601String(),
+                'allDay'    => (bool) $a->all_day,
+                'color'     => $this->estadoColor($a->estado ?? 'programada'),
+                'url'       => route('actividades.show',$a->id),
+                'descripcion'=> $a->descripcion,
+                'lugar'      => $a->lugar,
+                'estado'     => $a->estado,
+                'editUrl'    => route('actividades.edit',$a->id),
+            ];
+        });
 
         return response()->json($eventos);
     }
