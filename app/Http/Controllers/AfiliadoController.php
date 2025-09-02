@@ -205,10 +205,10 @@ class AfiliadoController extends Controller
             // NO obligatorios
             'edad'             => ['nullable','integer','min:0','max:120'],
             'sexo'             => ['nullable', Rule::in(['M','F','Otro'])],
+            'email'            => ['nullable','email','max:150'],
 
             // Obligatorios (según tu último store)
             'telefono'         => ['required','string','max:30'],
-            'email'            => ['required','email','max:150'],
             'municipio'        => ['required','string','max:120'],
             'cve_mun'          => ['required','string','size:3'],
             'localidad'        => ['required','string','max:150'],
@@ -233,10 +233,10 @@ class AfiliadoController extends Controller
             // NO obligatorios
             'edad'             => ['nullable','integer','min:0','max:120'],
             'sexo'             => ['nullable', Rule::in(['M','F','Otro'])],
+            'email'            => ['nullable','email','max:150'],
 
             // Obligatorios (igual que store)
             'telefono'         => ['required','string','max:30'],
-            'email'            => ['required','email','max:150'],
             'municipio'        => ['required','string','max:120'],
             'cve_mun'          => ['required','string','size:3'],
             'localidad'        => ['required','string','max:150'],

@@ -160,7 +160,7 @@
 
           {{-- Perfil / observaciones --}}
           <div class="col-md-12">
-            <label class="form-label {{ $req('perfil') ? 'required' : '' }}">Perfil</label>
+            <label class="form-label {{ $req('perfil') ? 'required' : '' }}">Referente</label>
             <textarea name="perfil" rows="2"
                       class="form-control @error('perfil') is-invalid @enderror"
                       {{ $req('perfil') ? 'required' : '' }}>{{ old('perfil') }}</textarea>

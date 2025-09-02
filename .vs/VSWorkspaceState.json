@@ -10,6 +10,6 @@
     "\\resources\\views\\afiliados",
     "\\routes"
   ],
-  "SelectedNode": "\\resources\\views\\afiliados\\edit.blade.php",
+  "SelectedNode": "\\app\\Http\\Controllers\\AfiliadoController.php",
   "PreviewInSolutionExplorer": false
 }
