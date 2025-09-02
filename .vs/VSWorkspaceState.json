@@ -4,13 +4,11 @@
     "\\app",
     "\\app\\Http",
     "\\app\\Http\\Controllers",
-    "\\app\\Http\\Controllers\\Auth",
-    "\\app\\Http\\Controllers\\Settings",
+    "\\public",
     "\\resources",
     "\\resources\\views",
-    "\\resources\\views\\auth",
-    "\\resources\\views\\layouts"
+    "\\resources\\views\\afiliados"
   ],
-  "SelectedNode": "\\app\\Http\\Controllers\\Auth\\ForcePasswordController.php",
+  "SelectedNode": "\\resources\\views\\afiliados\\edit.blade.php",
   "PreviewInSolutionExplorer": false
 }

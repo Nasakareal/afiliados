@@ -21,20 +21,28 @@ class AfiliadoController extends Controller
         $estatus   = $request->query('estatus');
         $capId     = $request->query('capturista_id');
 
+        $full = $this->fullNameField();
+        $hasCveMun = Schema::hasColumn('afiliados', 'cve_mun');
+
         $afiliados = Afiliado::query()
-            ->leftJoin('secciones', function($j){
+            ->leftJoin('secciones', function($j) use ($hasCveMun){
                 $j->on('secciones.seccion','=','afiliados.seccion');
-                if (Schema::hasColumn('afiliados','cve_mun')) {
+                if ($hasCveMun) {
                     $j->on('secciones.cve_mun','=','afiliados.cve_mun');
                 } else {
                     $j->on('secciones.municipio','=','afiliados.municipio');
                 }
             })
             ->leftJoin('users','users.id','=','afiliados.capturista_id')
-            ->when($q !== '', function($qb) use ($q){
-                $qb->where(function($w) use ($q){
-                    $w->whereRaw("CONCAT_WS(' ',afiliados.nombre,afiliados.apellido_paterno,afiliados.apellido_materno) like ?", ["%{$q}%"])
-                      ->orWhere('afiliados.telefono','like',"%{$q}%")
+            ->when($q !== '', function($qb) use ($q, $full){
+                $qb->where(function($w) use ($q, $full){
+                    if ($full === 'nombre_completo') {
+                        $w->where('afiliados.nombre_completo','like',"%{$q}%");
+                    } else {
+                        // Fallback: nombre + apellidos
+                        $w->whereRaw("CONCAT_WS(' ',afiliados.nombre,afiliados.apellido_paterno,afiliados.apellido_materno) like ?", ["%{$q}%"]);
+                    }
+                    $w->orWhere('afiliados.telefono','like',"%{$q}%")
                       ->orWhere('afiliados.email','like',"%{$q}%");
                 });
             })
@@ -74,16 +82,32 @@ class AfiliadoController extends Controller
                 ->pluck('seccion');
         }
 
-        return view('afiliados.create', compact('municipios','secciones'));
+        // Para asteriscos/required en la vista:
+        $rules    = $this->rulesStore();
+        $required = $this->requiredMap($rules);
+        $fullNameField = $this->fullNameField();
+
+        return view('afiliados.create', compact('municipios','secciones','required','fullNameField'));
     }
 
     public function store(Request $request)
     {
-        $data = $this->validateData($request);
-        $data['nombre']           = $this->squish($data['nombre']);
-        $data['apellido_paterno'] = $this->squish($data['apellido_paterno'] ?? '');
-        $data['apellido_materno'] = $this->squish($data['apellido_materno'] ?? '');
-        $data['capturista_id']    = Auth::id();
+        $full = $this->fullNameField();
+
+        // Normaliza nombre (sin acentos, MAYÚSCULAS y sin espacios dobles)
+        $raw  = $this->squish($request->input($full, ''));
+        $name = Str::upper(Str::ascii($raw));
+        $request->merge([$full => $name]);
+
+        $rules = $this->rulesStore();
+        $data  = $request->validate($rules);
+
+        // Default si no mandan fecha
+        if (empty($data['fecha_convencimiento'])) {
+            $data['fecha_convencimiento'] = now();
+        }
+
+        $data['capturista_id'] = Auth::id();
 
         $afiliado = Afiliado::create($data);
 
@@ -121,21 +145,35 @@ class AfiliadoController extends Controller
             ->orderBy('seccion')
             ->pluck('seccion');
 
-        return view('afiliados.edit', compact('afiliado','municipios','secciones'));
+        // Para asteriscos/required en la vista:
+        $rules    = $this->rulesUpdate($afiliado);
+        $required = $this->requiredMap($rules);
+        $fullNameField = $this->fullNameField();
+
+        return view('afiliados.edit', compact('afiliado','municipios','secciones','required','fullNameField'));
     }
 
     public function update(Request $request, Afiliado $afiliado)
     {
-        $data = $this->validateData($request, $afiliado->id);
+        $full = $this->fullNameField();
 
-        $data['nombre']           = $this->squish($data['nombre']);
-        $data['apellido_paterno'] = $this->squish($data['apellido_paterno'] ?? '');
-        $data['apellido_materno'] = $this->squish($data['apellido_materno'] ?? '');
+        // Normaliza nombre (sin acentos, MAYÚSCULAS y sin espacios dobles)
+        $raw  = $this->squish($request->input($full, $afiliado->{$full} ?? ''));
+        $name = Str::upper(Str::ascii($raw));
+        $request->merge([$full => $name]);
+
+        $rules = $this->rulesUpdate($afiliado);
+        $data  = $request->validate($rules);
+
+        if (empty($data['fecha_convencimiento'])) {
+            $data['fecha_convencimiento'] = now();
+        }
 
         $afiliado->update($data);
 
-        return redirect()->route('afiliados.show',$afiliado->id)
-            ->with('status','Afiliado actualizado correctamente.');
+        return redirect()
+            ->route('afiliados.show', $afiliado->id)
+            ->with('status', 'Afiliado actualizado correctamente.');
     }
 
     public function destroy(Afiliado $afiliado)
@@ -146,41 +184,95 @@ class AfiliadoController extends Controller
             ->with('status','Afiliado eliminado correctamente.');
     }
 
-    private function validateData(Request $request, ?int $id = null): array
+    /* =========================
+     *       REGLAS / UTILS
+     * ========================= */
+
+    /** Campo de nombre completo según el esquema real */
+    private function fullNameField(): string
     {
-        return $request->validate([
-            'nombre'            => ['required','string','max:120'],
-            'apellido_paterno'  => ['nullable','string','max:120'],
-            'apellido_materno'  => ['nullable','string','max:120'],
-
-            'edad'              => ['nullable','integer','min:0','max:120'],
-            'sexo'              => ['nullable', Rule::in(['M','F','Otro'])],
-
-            'telefono'          => ['nullable','string','max:30'],
-            'email'             => ['nullable','email','max:150'],
-
-            'municipio'         => ['required','string','max:120'],
-            'cve_mun'           => ['nullable','string','size:3'],
-            'localidad'         => ['nullable','string','max:150'],
-            'colonia'           => ['nullable','string','max:150'],
-            'calle'             => ['nullable','string','max:150'],
-            'numero_ext'        => ['nullable','string','max:20'],
-            'numero_int'        => ['nullable','string','max:20'],
-            'cp'                => ['nullable','string','max:10'],
-            'lat'               => ['nullable','numeric'],
-            'lng'               => ['nullable','numeric'],
-
-            'seccion'           => ['nullable','string','max:6'],
-            'distrito_federal'  => ['nullable','integer'],
-            'distrito_local'    => ['nullable','integer'],
-
-            'perfil'            => ['nullable','string'],
-            'observaciones'     => ['nullable','string'],
-
-            'estatus'           => ['nullable', Rule::in(['pendiente','validado','descartado'])],
-            'fecha_convencimiento' => ['nullable','date'],
-        ]);
+        return Schema::hasColumn('afiliados', 'nombre_completo') ? 'nombre_completo' : 'nombre';
     }
+
+    /** Reglas para STORE (creación) */
+    private function rulesStore(): array
+    {
+        $full = $this->fullNameField();
+
+        return [
+            $full              => ['required','string','max:120', Rule::unique('afiliados', $full)],
+
+            // NO obligatorios
+            'edad'             => ['nullable','integer','min:0','max:120'],
+            'sexo'             => ['nullable', Rule::in(['M','F','Otro'])],
+
+            // Obligatorios (según tu último store)
+            'telefono'         => ['required','string','max:30'],
+            'email'            => ['required','email','max:150'],
+            'municipio'        => ['required','string','max:120'],
+            'cve_mun'          => ['required','string','size:3'],
+            'localidad'        => ['required','string','max:150'],
+            'colonia'          => ['required','string','max:150'],
+            'seccion'          => ['required','string','max:6'],
+            'distrito_federal' => ['required','integer'],
+            'distrito_local'   => ['required','integer'],
+            'estatus'          => ['required', Rule::in(['pendiente','validado','descartado'])],
+
+            'fecha_convencimiento' => ['nullable','date'],
+        ];
+    }
+
+    /** Reglas para UPDATE (edición) */
+    private function rulesUpdate(Afiliado $afiliado): array
+    {
+        $full = $this->fullNameField();
+
+        return [
+            $full              => ['required','string','max:120', Rule::unique('afiliados', $full)->ignore($afiliado->id, 'id')],
+
+            // NO obligatorios
+            'edad'             => ['nullable','integer','min:0','max:120'],
+            'sexo'             => ['nullable', Rule::in(['M','F','Otro'])],
+
+            // Obligatorios (igual que store)
+            'telefono'         => ['required','string','max:30'],
+            'email'            => ['required','email','max:150'],
+            'municipio'        => ['required','string','max:120'],
+            'cve_mun'          => ['required','string','size:3'],
+            'localidad'        => ['required','string','max:150'],
+            'colonia'          => ['required','string','max:150'],
+            'seccion'          => ['required','string','max:6'],
+            'distrito_federal' => ['required','integer'],
+            'distrito_local'   => ['required','integer'],
+            'estatus'          => ['required', Rule::in(['pendiente','validado','descartado'])],
+
+            'fecha_convencimiento' => ['nullable','date'],
+        ];
+    }
+
+    /**
+     * Genera mapa de obligatorios a partir de reglas:
+     * ['campo' => true/false]
+     */
+    private function requiredMap(array $rules): array
+    {
+        $map = [];
+        foreach ($rules as $field => $ruleList) {
+            $arr = is_array($ruleList) ? $ruleList : explode('|', (string)$ruleList);
+            $hasRequired = false;
+            foreach ($arr as $r) {
+                if (is_string($r) && str_starts_with($r, 'required')) {
+                    $hasRequired = true; break;
+                }
+            }
+            $map[$field] = $hasRequired;
+        }
+        return $map;
+    }
+
+    /* =========================
+     *      Helpers existentes
+     * ========================= */
 
     private function cargarMunicipiosDesdeGeo()
     {

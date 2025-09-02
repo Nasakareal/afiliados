@@ -30,28 +30,11 @@ if (file_exists(base_path('routes/auth.php'))) {
     require __DIR__.'/auth.php';
 }
 
-/*
-|--------------------------------------------------------------------------
-| Solo autenticado (para mostrar/guardar el cambio de contraseña)
-|--------------------------------------------------------------------------
-|
-| Estas dos rutas NO llevan el middleware force.password.change,
-| para evitar bucles.
-|
-*/
 Route::middleware('auth')->group(function () {
     Route::get ('/password/force', [ForcePasswordController::class, 'form'])->name('password.force.form');
     Route::post('/password/force', [ForcePasswordController::class, 'update'])->name('password.force.update');
 });
 
-/*
-|--------------------------------------------------------------------------
-| Protegido con forzado de cambio
-|--------------------------------------------------------------------------
-|
-| TODO lo demás debe pasar por force.password.change
-|
-*/
 Route::middleware(['auth','force.password.change'])->group(function () {
 
     Route::get('/dashboard', [DashboardController::class,'index'])->name('dashboard');
