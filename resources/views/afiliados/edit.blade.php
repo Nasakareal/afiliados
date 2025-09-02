@@ -188,7 +188,7 @@
 
           {{-- Estado --}}
           <div class="col-md-3">
-            <label class="form-label {{ $req('estatus') ? 'required' : '' }}">Estatus</label>
+            <label class="form-label {{ $req('estatus') ? 'required' : '' }}">Afiliado</label>
             <select name="estatus" class="form-select @error('estatus') is-invalid @enderror"
                     {{ $req('estatus') ? 'required' : '' }}>
               <option value="pendiente"  {{ $estatusOld==='pendiente'?'selected':'' }}>{{ $labelMap['pendiente'] }}</option>

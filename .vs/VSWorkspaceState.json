@@ -7,9 +7,9 @@
     "\\public",
     "\\resources",
     "\\resources\\views",
-    "\\resources\\views\\actividades",
+    "\\resources\\views\\afiliados",
     "\\routes"
   ],
-  "SelectedNode": "\\routes\\web.php",
+  "SelectedNode": "\\resources\\views\\afiliados\\edit.blade.php",
   "PreviewInSolutionExplorer": false
 }
