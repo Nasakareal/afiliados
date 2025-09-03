@@ -18,7 +18,7 @@
     <div class="col-md-2">
       <div class="card shadow-sm border-0">
         <div class="card-body">
-          <div class="text-muted small">Validados</div>
+          <div class="text-muted small">Sí</div>
           <div class="h3 fw-bold text-success mb-0">{{ number_format($stats['validado']) }}</div>
         </div>
       </div>
@@ -34,7 +34,7 @@
     <div class="col-md-2">
       <div class="card shadow-sm border-0">
         <div class="card-body">
-          <div class="text-muted small">Descartados</div>
+          <div class="text-muted small">No</div>
           <div class="h3 fw-bold text-danger mb-0">{{ number_format($stats['descartado']) }}</div>
         </div>
       </div>

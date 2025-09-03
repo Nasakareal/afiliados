@@ -178,10 +178,16 @@ class AfiliadoController extends Controller
 
     public function destroy(Afiliado $afiliado)
     {
-        $afiliado->delete();
-
-        return redirect()->route('afiliados.index')
-            ->with('status','Afiliado eliminado correctamente.');
+        try {
+            $afiliado->forceDelete();
+            return redirect()->route('afiliados.index')
+                ->with('status','Afiliado eliminado definitivamente.');
+        } catch (\Illuminate\Database\QueryException $e) {
+            if ($e->getCode() === '23000') {
+                return back()->with('error','No se puede borrar: hay registros relacionados (FK).');
+            }
+            throw $e;
+        }
     }
 
     /* =========================

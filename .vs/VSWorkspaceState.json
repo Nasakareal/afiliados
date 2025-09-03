@@ -4,11 +4,13 @@
     "\\app",
     "\\app\\Http",
     "\\app\\Http\\Controllers",
+    "\\app\\Models",
     "\\public",
     "\\resources",
     "\\resources\\views",
     "\\resources\\views\\afiliados",
     "\\routes"
   ],
+  "SelectedNode": "\\app\\Models\\Afiliado.php",
   "PreviewInSolutionExplorer": false
 }

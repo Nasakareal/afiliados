@@ -38,10 +38,10 @@
         </div>
         <div class="col-6 col-md-2">
           <select name="estatus" class="form-control form-control-sm">
-            <option value="">Estatus</option>
+            <option value="">Afiliado</option>
             <option value="pendiente" {{ ($estatus ?? '')==='pendiente'?'selected':'' }}>Pendiente</option>
-            <option value="validado"  {{ ($estatus ?? '')==='validado'?'selected':'' }}>Validado</option>
-            <option value="descartado"{{ ($estatus ?? '')==='descartado'?'selected':'' }}>Descartado</option>
+            <option value="validado"  {{ ($estatus ?? '')==='validado'?'selected':'' }}>Sí</option>
+            <option value="descartado"{{ ($estatus ?? '')==='descartado'?'selected':'' }}>No</option>
           </select>
         </div>
         <div class="col-6 col-md-2">
