@@ -206,16 +206,16 @@ class AfiliadoController extends Controller
             'edad'             => ['nullable','integer','min:0','max:120'],
             'sexo'             => ['nullable', Rule::in(['M','F','Otro'])],
             'email'            => ['nullable','email','max:150'],
+            'distrito_federal' => ['nullable','integer'],
+            'distrito_local'   => ['nullable','integer'],
+            'localidad'        => ['nullable','string','max:150'],
+            'colonia'          => ['nullable','string','max:150'],
+            'telefono'         => ['nullable','string','max:30'],
 
             // Obligatorios (según tu último store)
-            'telefono'         => ['required','string','max:30'],
             'municipio'        => ['required','string','max:120'],
             'cve_mun'          => ['required','string','size:3'],
-            'localidad'        => ['required','string','max:150'],
-            'colonia'          => ['required','string','max:150'],
             'seccion'          => ['required','string','max:6'],
-            'distrito_federal' => ['required','integer'],
-            'distrito_local'   => ['required','integer'],
             'estatus'          => ['required', Rule::in(['pendiente','validado','descartado'])],
 
             'fecha_convencimiento' => ['nullable','date'],
@@ -234,16 +234,17 @@ class AfiliadoController extends Controller
             'edad'             => ['nullable','integer','min:0','max:120'],
             'sexo'             => ['nullable', Rule::in(['M','F','Otro'])],
             'email'            => ['nullable','email','max:150'],
+            'telefono'         => ['nullable','string','max:30'],
+            'distrito_federal' => ['nullable','integer'],
+            'distrito_local'   => ['nullable','integer'],
+            
+            'localidad'        => ['nullable','string','max:150'],
+            'colonia'          => ['nullable','string','max:150'],
 
             // Obligatorios (igual que store)
-            'telefono'         => ['required','string','max:30'],
             'municipio'        => ['required','string','max:120'],
             'cve_mun'          => ['required','string','size:3'],
-            'localidad'        => ['required','string','max:150'],
-            'colonia'          => ['required','string','max:150'],
             'seccion'          => ['required','string','max:6'],
-            'distrito_federal' => ['required','integer'],
-            'distrito_local'   => ['required','integer'],
             'estatus'          => ['required', Rule::in(['pendiente','validado','descartado'])],
 
             'fecha_convencimiento' => ['nullable','date'],
