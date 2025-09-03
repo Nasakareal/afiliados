@@ -16,34 +16,47 @@ class MapaController extends Controller
         return strtoupper(trim($s));
     }
 
-    public function index()
+    public function index(Request $request)
     {
+        $estatus = $request->query('estatus', 'validado');
+        $allowed = ['validado','pendiente','descartado','todos'];
+        if (!in_array($estatus, $allowed, true)) $estatus = 'validado';
+
         $rows = DB::table('afiliados')
             ->selectRaw("LPAD(cve_mun,3,'0') as cve_mun, municipio, COUNT(*) as total")
+            ->whereNull('deleted_at')
+            ->when($estatus !== 'todos', fn($q)=>$q->where('estatus', $estatus))
             ->groupBy('cve_mun','municipio')
             ->get();
 
-        $conteoPorCVE = [];
+        $conteo = [];
         $conteoPorNombre = [];
 
         foreach ($rows as $r) {
             $cvegeo = '16' . $r->cve_mun;
-            $conteoPorCVE[$cvegeo] = (int)$r->total;
+            $conteo[$cvegeo] = (int)$r->total;
 
             $norm = $this->normalize($r->municipio);
             $conteoPorNombre[$norm] = (int)$r->total;
         }
 
         return view('mapa.index', [
-            'conteo'          => $conteoPorCVE,
+            'conteo'          => $conteo,
             'conteoPorNombre' => $conteoPorNombre,
+            'estatus'         => $estatus,
         ]);
     }
 
-    public function data()
+    public function data(Request $request)
     {
+        $estatus = $request->query('estatus', 'validado');
+        $allowed = ['validado','pendiente','descartado','todos'];
+        if (!in_array($estatus, $allowed, true)) $estatus = 'validado';
+
         $rows = DB::table('afiliados')
             ->select('id','nombre','apellido_paterno','apellido_materno','municipio','lat','lng')
+            ->whereNull('deleted_at')
+            ->when($estatus !== 'todos', fn($q)=>$q->where('estatus', $estatus))
             ->whereNotNull('lat')->whereNotNull('lng')
             ->limit(2000)
             ->get();

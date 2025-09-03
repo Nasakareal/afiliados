@@ -11,6 +11,6 @@
     "\\resources\\views\\afiliados",
     "\\routes"
   ],
-  "SelectedNode": "\\app\\Models\\Afiliado.php",
+  "SelectedNode": "\\app\\Http\\Controllers\\MapaController.php",
   "PreviewInSolutionExplorer": false
 }
