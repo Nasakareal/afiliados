@@ -9,13 +9,38 @@
   <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+
   <style>
-    :root{--granate:#7a0019;--granate-osc:#5c0013;--humo:#f5f5f7}
+    :root{
+      /* Paleta existente */
+      --granate:#7a0019;
+      --granate-osc:#5c0013;
+
+      /* === Rosas del muestrario === */
+      --rosa-1:#ff1c9d;  /* PANTONE P 75-8 U */
+      --rosa-2:#d91785;  /* PANTONE P 75-16 U */
+      --rosa-3:#ff99d3;  /* PANTONE P 75-5 U */
+
+      /* === Grises del muestrario (para fondo de página) === */
+      --gris-1:#464e59;  /* oscuro */
+      --gris-2:#3c434d;  /* medio-oscuro */
+      --gris-3:#cfd8e6;  /* claro */
+
+      /* Fondo general DETRÁS del content */
+      --humo: var(--gris-3);  /* <-- cámbialo a var(--gris-1) o var(--gris-2) si lo quieres más oscuro */
+    }
+
     html,body{height:100%;background:var(--humo)}
+
+    /* Navbar de vidrio (por si lo quieres en otras vistas) */
     .navbar-glass{backdrop-filter:blur(8px);background:rgba(255,255,255,.75)}
+
+    /* Activo general (fuera del navbar rosa) */
     .nav-link.active,.dropdown-item.active{font-weight:700;color:var(--granate)!important}
+
     .btn-granate{background:var(--granate);color:#fff;border:none}
     .btn-granate:hover{background:var(--granate-osc);color:#fff}
+
     .dropdown-menu{border-radius:12px}
     .content-wrap{padding-top:84px}
     .app-footer{color:#666}
@@ -25,6 +50,23 @@
     .leaflet-pane.leaflet-popup-pane { z-index: 100000 !important; }
     .leaflet-popup { z-index: 100001 !important; }
     .leaflet-tooltip { z-index: 100002 !important; }
+
+    /* ====== Utilidades de fondo rosa ====== */
+    .bg-rosa-1{background-color:var(--rosa-1)!important}
+    .bg-rosa-2{background-color:var(--rosa-2)!important}
+    .bg-rosa-3{background-color:var(--rosa-3)!important}
+    .bg-rosa-grad{background:linear-gradient(90deg,var(--rosa-2),var(--rosa-1))!important}
+
+    /* ====== Ajustes de contraste para navbar en rosa ====== */
+    .navbar-rosa .navbar-brand,
+    .navbar-rosa .nav-link,
+    .navbar-rosa .navbar-toggler { color:#fff !important; }
+
+    .navbar-rosa .nav-link:hover{ opacity:.9; }
+
+    /* Evitar que el activo se pinte granate dentro del navbar rosa */
+    nav.navbar-rosa .nav-link.active,
+    nav.navbar-rosa .dropdown-item.active { color:#fff !important; }
   </style>
 
   {{-- Acepta ambos stacks para CSS de vistas --}}
@@ -33,7 +75,7 @@
 </head>
 <body>
 @php
-  // Helpers de “activo” (evitar redeclaración que dispara bucles con Xdebug)
+  // Helper "activo" (protegido para no redeclarar)
   if (!function_exists('is_active')) {
     function is_active($patterns){
       foreach((array)$patterns as $p){
@@ -44,19 +86,30 @@
   }
 @endphp
 
-<nav class="navbar navbar-expand-lg fixed-top navbar-light border-bottom navbar-glass">
+{{-- =========================================================
+     NAVBAR
+     Cambia la clase de color:
+       bg-rosa-1  -> #ff1c9d (fuerte)
+       bg-rosa-2  -> #d91785 (por defecto)
+       bg-rosa-3  -> #ff99d3 (claro)
+       bg-rosa-grad -> degradado
+   ========================================================= --}}
+<nav class="navbar navbar-expand-lg fixed-top navbar-dark navbar-rosa bg-rosa-2 border-bottom">
   <div class="container-fluid px-3">
-    <a class="navbar-brand fw-bold" href="{{ route('dashboard') }}">GLADY<span class="text-danger">•</span>ADOREZ</a>
+    <a class="navbar-brand fw-bold" href="{{ route('dashboard') }}">
+      GLADY<span class="text-white">•</span>ADOREZ
+    </a>
 
-    <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#mainNav">
+    <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#mainNav" aria-label="Menú">
       <span class="navbar-toggler-icon"></span>
     </button>
 
-    <div class="offcanvas offcanvas-end" tabindex="-1" id="mainNav">
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="mainNav" aria-labelledby="mainNavLabel">
       <div class="offcanvas-header">
-        <h5 class="offcanvas-title">Menú</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+        <h5 class="offcanvas-title" id="mainNavLabel">Menú</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
       </div>
+
       <div class="offcanvas-body">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0 align-items-lg-center">
 
@@ -78,7 +131,7 @@
 
           @can('actividades.ver')
           <li class="nav-item dropdown keep-open">
-            <a class="nav-link dropdown-toggle {{ is_active(['calendario.*','actividades.*']) }}" href="#" data-bs-toggle="dropdown" role="button">
+            <a class="nav-link dropdown-toggle {{ is_active(['calendario.index','actividades.*']) }}" href="#" data-bs-toggle="dropdown" role="button">
               <i class="fa-solid fa-calendar-days me-1"></i> Actividades
             </a>
             <ul class="dropdown-menu">
@@ -138,9 +191,11 @@
         </ul>
 
         <div class="d-flex align-items-center gap-2">
-          <span class="small text-muted d-none d-lg-inline">Hola, {{ Auth::user()->name ?? 'Usuario' }}</span>
+          <span class="small text-white-50 d-none d-lg-inline">Hola, {{ Auth::user()->name ?? 'Usuario' }}</span>
           <form method="POST" action="{{ route('logout') }}">@csrf
-            <button class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-right-from-bracket me-1"></i> Salir</button>
+            <button class="btn btn-outline-light btn-sm">
+              <i class="fa-solid fa-right-from-bracket me-1"></i> Salir
+            </button>
           </form>
         </div>
       </div>
@@ -149,8 +204,19 @@
 </nav>
 
 <main class="content-wrap container-fluid">
-  @if(session('success'))<div class="alert alert-success alert-dismissible fade show" role="alert">{{ session('success') }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>@endif
-  @if(session('error'))  <div class="alert alert-danger alert-dismissible fade show" role="alert">{{ session('error') }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>@endif
+  @if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      {{ session('success') }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  @endif
+
+  @if(session('error'))
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      {{ session('error') }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  @endif
 
   @yield('content')
 </main>
@@ -176,7 +242,7 @@
     });
   });
 
-  // Cerrar dropdown al salir con el mouse
+  // Cerrar dropdown al salir con el mouse (hover persistente)
   document.querySelectorAll('.dropdown.keep-open').forEach(dd=>{
     let to=null;
     dd.addEventListener('mouseleave',()=>{
@@ -196,6 +262,7 @@
     });
   });
 </script>
+
 @yield('js')
 @stack('scripts')
 </body>
