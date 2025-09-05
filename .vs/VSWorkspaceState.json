@@ -1,10 +1,16 @@
 {
   "ExpandedNodes": [
     "",
+    "\\app",
+    "\\app\\Http",
+    "\\app\\Http\\Controllers",
+    "\\database",
     "\\resources",
     "\\resources\\views",
-    "\\resources\\views\\layouts"
+    "\\resources\\views\\afiliados",
+    "\\resources\\views\\layouts",
+    "\\resources\\views\\reportes"
   ],
-  "SelectedNode": "\\resources\\views\\layouts\\guest.blade.php",
+  "SelectedNode": "\\resources\\views\\reportes\\capturistas.blade.php",
   "PreviewInSolutionExplorer": false
 }

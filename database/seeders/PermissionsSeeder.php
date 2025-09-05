@@ -11,10 +11,13 @@ class PermissionsSeeder extends Seeder
 {
     public function run(): void
     {
-        // Limpia caché de permisos/roles
-        app()[PermissionRegistrar::class]->forgetCachedPermissions();
+        // Guard a usar (debe coincidir con tu auth/guards)
+        $guard = 'web';
 
-        // 1) Crea todos los permisos
+        // Limpia la caché de permisos/roles
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+
+        // 1) Definir todos los permisos del sistema
         $perms = [
 
             // Comunicados
@@ -30,7 +33,7 @@ class PermissionsSeeder extends Seeder
             'actividades.ver', 'actividades.crear', 'actividades.editar', 'actividades.borrar',
 
             // Mapa y reportes
-            'mapa.ver', 'reportes.ver',
+            'mapa.ver', 'reportes.ver'
 
             // Settings / administración
             'settings.ver', 'settings.editar',
@@ -41,41 +44,49 @@ class PermissionsSeeder extends Seeder
             'permisos.ver', 'permisos.crear', 'permisos.editar', 'permisos.borrar',
         ];
 
+        // 2) Crear (si no existen) todos los permisos con el guard correcto
         foreach ($perms as $p) {
-            Permission::firstOrCreate(['name' => $p, 'guard_name' => 'web']);
+            Permission::firstOrCreate([
+                'name'       => $p,
+                'guard_name' => $guard,
+            ]);
         }
 
-        // 2) Crea (o toma) los roles
-        $roleSuper = Role::firstOrCreate(['name' => 'SuperAdmin', 'guard_name' => 'web']);
-        $roleAdmin = Role::firstOrCreate(['name' => 'Admin',      'guard_name' => 'web']);
-        $roleCoord = Role::firstOrCreate(['name' => 'Coordinador','guard_name' => 'web']);
-        $roleCapt  = Role::firstOrCreate(['name' => 'Capturista', 'guard_name' => 'web']);
-        $roleView  = Role::firstOrCreate(['name' => 'Consulta',   'guard_name' => 'web']);
+        // 3) Crear (o tomar) los roles con el mismo guard
+        $roleSuper = Role::firstOrCreate(['name' => 'SuperAdmin',  'guard_name' => $guard]);
+        $roleAdmin = Role::firstOrCreate(['name' => 'Admin',       'guard_name' => $guard]);
+        $roleCoord = Role::firstOrCreate(['name' => 'Coordinador', 'guard_name' => $guard]);
+        $roleCapt  = Role::firstOrCreate(['name' => 'Capturista',  'guard_name' => $guard]);
+        $roleView  = Role::firstOrCreate(['name' => 'Consulta',    'guard_name' => $guard]);
 
-        // 3) Asignación de permisos por rol
-        $roleSuper->syncPermissions(Permission::all());
+        // 4) Asignación de permisos por rol
 
-        // Admin: todo
-        $roleAdmin->syncPermissions($perms);
+        // SuperAdmin: siempre todos los permisos existentes en la BD (según guard)
+        $roleSuper->syncPermissions(
+            Permission::where('guard_name', $guard)->get()
+        );
 
-        // Coordinador: operar afiliados/actividades + ver secciones/mapa/reportes
-        $roleCoord->syncPermissions([
+        // Admin: agregar (no quitar) los permisos listados en $perms
+        $roleAdmin->givePermissionTo($perms);
+
+        // Coordinador: operar afiliados/actividades + ver secciones/mapa/reportes (aditivo)
+        $roleCoord->givePermissionTo([
             'afiliados.ver','afiliados.crear','afiliados.editar','afiliados.borrar',
             'actividades.ver','actividades.crear','actividades.editar','actividades.borrar',
             'secciones.ver','mapa.ver','reportes.ver',
         ]);
 
-        // Capturista: crear/ver afiliados + ver mapa
-        $roleCapt->syncPermissions([
+        // Capturista: crear/ver afiliados + ver mapa (aditivo)
+        $roleCapt->givePermissionTo([
             'afiliados.ver','afiliados.crear','mapa.ver',
         ]);
 
-        // Consulta: solo lectura general
-        $roleView->syncPermissions([
+        // Consulta: solo lectura general (aditivo)
+        $roleView->givePermissionTo([
             'afiliados.ver','secciones.ver','actividades.ver','mapa.ver','reportes.ver',
         ]);
 
-        // Recalcula caché
-        app()[PermissionRegistrar::class]->forgetCachedPermissions();
+        // Recalcula/limpia de nuevo la caché
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
     }
 }

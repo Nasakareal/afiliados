@@ -160,6 +160,7 @@
               <i class="fa-solid fa-chart-column me-1"></i> Reportes
             </a>
             <ul class="dropdown-menu">
+              <li><a class="dropdown-item {{ is_active('reportes.index') }}" href="{{ route('reportes.index') }}"><i class="fa-solid fa-gauge-high me-1"></i>Panel</a></li>
               <li><a class="dropdown-item {{ is_active('reportes.secciones') }}" href="{{ route('reportes.secciones') }}"><i class="fa-solid fa-diagram-project me-1"></i> Por secciones</a></li>
               <li><a class="dropdown-item {{ is_active('reportes.capturistas') }}" href="{{ route('reportes.capturistas') }}"><i class="fa-solid fa-ranking-star me-1"></i> Capturistas</a></li>
             </ul>

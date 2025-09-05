@@ -21,7 +21,6 @@
     </div>
 
     <div class="card-body">
-
       {{-- Filtros --}}
       <form method="GET" action="{{ route('afiliados.index') }}" class="row g-2 mb-3">
         <div class="col-12 col-md-4">
@@ -73,7 +72,7 @@
             <th>Municipio</th>
             <th>Sección</th>
             <th>Capturista</th>
-            <th>Estatus</th>
+            <th>Afiliado</th>
             <th>Creación</th>
             <th class="text-center" style="width:140px">Acciones</th>
           </tr>

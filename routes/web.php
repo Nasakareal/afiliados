@@ -71,6 +71,36 @@ Route::middleware(['auth','force.password.change'])->group(function () {
     Route::put('/actividades/{actividad}',     [ActividadController::class, 'update'])->name('actividades.update')->middleware('permission:actividades.editar');
     Route::delete('/actividades/{actividad}',  [ActividadController::class, 'destroy'])->name('actividades.destroy')->middleware('permission:actividades.borrar');
 
+
+    // Reportes
+    Route::prefix('reportes')->name('reportes.')->middleware('permission:reportes.ver')->group(function () {
+        Route::get('/', [ReporteController::class, 'index'])->name('index');
+
+        // Afiliados
+        Route::prefix('afiliados')->name('afiliados.')->group(function () {
+            Route::get('/',            [ReporteController::class, 'afiliados'])->name('index');
+            Route::get('/data',        [ReporteController::class, 'afiliadosData'])->name('data');
+            Route::get('/export.xlsx', [ReporteController::class, 'afiliadosExportXlsx'])->name('export.xlsx');
+            Route::get('/facets',      [ReporteController::class, 'facets'])->name('facets'); // <- ESTA
+        });
+
+        // Secciones
+        Route::prefix('secciones')->name('secciones.')->group(function () {
+            Route::get('/',            [ReporteController::class, 'secciones'])->name('index');
+            Route::get('/data',        [ReporteController::class, 'seccionesData'])->name('data');
+            Route::get('/export.xlsx', [ReporteController::class, 'seccionesExportXlsx'])->name('export.xlsx');
+        });
+
+        // Capturistas
+        Route::prefix('capturistas')->name('capturistas.')->group(function () {
+            Route::get('/',            [ReporteController::class, 'capturistas'])->name('index');
+            Route::get('/data',        [ReporteController::class, 'capturistasData'])->name('data');
+            Route::get('/export.xlsx', [ReporteController::class, 'capturistasExportXlsx'])->name('export.xlsx');
+        });
+    });
+
+
+
     // Mapa
     Route::get('/mapa', [MapaController::class, 'index'])->name('mapa.index')->middleware('permission:mapa.ver');
     Route::get('/mapa/data', [MapaController::class, 'data'])->name('mapa.data')->middleware('permission:mapa.ver');
