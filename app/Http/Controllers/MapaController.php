@@ -31,19 +31,37 @@ class MapaController extends Controller
 
         $conteo = [];
         $conteoPorNombre = [];
-
         foreach ($rows as $r) {
             $cvegeo = '16' . $r->cve_mun;
             $conteo[$cvegeo] = (int)$r->total;
-
             $norm = $this->normalize($r->municipio);
             $conteoPorNombre[$norm] = (int)$r->total;
+        }
+
+        // === NUEVO: buscar todas las capas .geojson en public/maps/out
+        $layers = [];
+        $dir = public_path('maps/out');
+        if (is_dir($dir)) {
+            $files = glob($dir.'/*.geojson');
+            sort($files);
+            foreach ($files as $path) {
+                $file  = basename($path);
+                $base  = pathinfo($file, PATHINFO_FILENAME); // p.ej. AUTOPISTA
+                // Etiqueta amigable: AUTOPISTA -> Autopista, CABECERA_MUNICIPAL -> Cabecera Municipal
+                $pretty = str_replace('_',' ', ucwords(strtolower($base), '_'));
+                $layers[] = [
+                    'id'   => $base,
+                    'name' => $pretty,
+                    'url'  => asset('maps/out/'.$file),
+                ];
+            }
         }
 
         return view('mapa.index', [
             'conteo'          => $conteo,
             'conteoPorNombre' => $conteoPorNombre,
             'estatus'         => $estatus,
+            'layers'          => $layers,   // <<< pásalo a la vista
         ]);
     }
 

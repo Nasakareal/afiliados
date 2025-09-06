@@ -1,0 +1,17 @@
+{"type":"FeatureCollection", "features": [
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-102.35047,19.06843]},"properties":{"ID":1,"NOMBRE":"INFANTE","TIPO":3,"CONTROL":1,"Geometry1_":"1=Xi2B)uSDuf","GMRotation":-0.000023}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-102.71444,19.16423]},"properties":{"ID":2,"NOMBRE":"LA RUANA","TIPO":3,"CONTROL":3,"Geometry1_":"1=Xi2)nG13=p","GMRotation":-1.242619}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-101.75195,19.85297]},"properties":{"ID":3,"NOMBRE":"ZACAPU","TIPO":3,"CONTROL":8,"Geometry1_":"1=X<YXH46Q_-","GMRotation":-0.000019}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-102.80061,18.74167]},"properties":{"ID":4,"NOMBRE":"AGUILILLA","TIPO":3,"CONTROL":9,"Geometry1_":"1=Xi1y_g.)A>","GMRotation":-0.000025}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-102.71536,18.97848]},"properties":{"ID":5,"NOMBRE":"EL AGUAJE","TIPO":3,"CONTROL":10,"Geometry1_":"1=Xi2^{\\di\\-","GMRotation":-0.000024}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-100.24509,19.98842]},"properties":{"ID":6,"NOMBRE":"TAMBOR","TIPO":3,"CONTROL":11,"Geometry1_":"1=X=LhLhu6X-","GMRotation":-0.00001}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-102.93684,18.83071]},"properties":{"ID":7,"NOMBRE":"SIN NOMBRE","TIPO":3,"CONTROL":12,"Geometry1_":"1=Xi1S{1,oo>","GMRotation":-0.000024}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-101.57616,19.54703]},"properties":{"ID":8,"NOMBRE":"PATZCUARO","TIPO":3,"CONTROL":13,"Geometry1_":"1=X<ZEKKvDyp","GMRotation":-0.000019}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-100.43068,19.47708]},"properties":{"ID":9,"NOMBRE":"OCURIO","TIPO":3,"CONTROL":14,"Geometry1_":"1=X=mtS@e@zf","GMRotation":-0.000012}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-102.39867,19.09094]},"properties":{"ID":10,"NOMBRE":"PABLO L SIDAR","TIPO":2,"CONTROL":15,"Geometry1_":"1=Xi23OdcnZ-","GMRotation":-0.000024}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-102.7149,19.16584]},"properties":{"ID":11,"NOMBRE":"LA RUANA","TIPO":3,"CONTROL":16,"Geometry1_":"1=Xi2)n]h@l>","GMRotation":-0.000024}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-102.22345,17.99552]},"properties":{"ID":12,"NOMBRE":"LAZARO CARDENAS","TIPO":2,"CONTROL":17,"Geometry1_":"1=XiB6e;77w>","GMRotation":-0.000026}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-101.02642,19.84374]},"properties":{"ID":13,"NOMBRE":"FRANCISCO J MUJICA","TIPO":1,"CONTROL":18,"Geometry1_":"1=X<yZY)mEn>","GMRotation":-0.000016}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-102.03641,19.40028]},"properties":{"ID":14,"NOMBRE":"INTERNACIONAL DE URUAPAN","TIPO":2,"CONTROL":19,"Geometry1_":"1=X<Zhj+Om7f","GMRotation":-0.000022}},
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-103.17473,18.77149]},"properties":{"ID":15,"NOMBRE":"SIN NOMBRE","TIPO":3,"CONTROL":20,"Geometry1_":"1=Xi1n*]jKM>","GMRotation":0.000001}}
+]}

@@ -25,7 +25,6 @@ class Seccion extends Model
 
     public function afiliados()
     {
-        // Coincide por seccion y municipio
         return $this->hasMany(Afiliado::class, 'seccion', 'seccion')
                     ->where('municipio', $this->municipio);
     }

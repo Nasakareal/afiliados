@@ -51,13 +51,15 @@
     return { color:'#111', weight:1, fillColor:getColor(total), fillOpacity:0.75, interactive:true };
   }
 
-  // 1) Mapa + pane dedicado por si algo tapa eventos
   var map = L.map('map', { zoomControl:true, doubleClickZoom:false, scrollWheelZoom:true, dragging:true, preferCanvas:false });
   map.createPane('municipiosPane');
   map.getPane('municipiosPane').style.zIndex = 650;
   map.getPane('municipiosPane').style.pointerEvents = 'auto';
+  map.createPane('overlaysPane');
+  map.getPane('overlaysPane').style.zIndex = 700;
 
-  // 2) CSS de refuerzo (pointer-events)
+  const layersControl = L.control.layers(null, {}, { collapsed:false }).addTo(map);
+
   (function(){
     var s = document.createElement('style');
     s.innerHTML = `
@@ -68,7 +70,6 @@
     document.head.appendChild(s);
   })();
 
-  // 3) Leyenda simple
   var legend = L.control({position:'bottomright'});
   legend.onAdd = function(){
     var div = L.DomUtil.create('div','info-legend');
@@ -83,15 +84,14 @@
   };
   legend.addTo(map);
 
-  // 4) Logs de depuración: ¿llegan clicks al mapa?
-  map.on('click', function(e){ console.log('[MAP CLICK]', e.latlng); });
+  map.on('click', e => console.log('[MAP CLICK]', e.latlng));
 
-  // 5) Cargar GeoJSON y asegurar interactividad
+  let capaMunicipios = null;
   fetch("{{ asset('geo/michoacan.json') }}")
-    .then(function(r){ return r.json(); })
+    .then(r => r.json())
     .then(function(geo){
       var featuresCount = 0;
-      var capa = L.geoJSON(geo, {
+      capaMunicipios = L.geoJSON(geo, {
         pane: 'municipiosPane',
         style: function(f){
           var p = f.properties || {};
@@ -115,9 +115,7 @@
           layer.options.className = 'municipio';
           layer.options.bubblingMouseEvents = true;
 
-
           layer.on('click', function(e){
-            console.log('[POLY CLICK]', nombre, cve, e.latlng);
             var html = ''
               + '<div style="min-width:220px">'
               +   '<h5 style="margin:0 0 6px 0">' + nombre + '</h5>'
@@ -127,21 +125,45 @@
             this.bindPopup(html, { closeButton:true }).openPopup();
             this.setStyle({ weight:3, fillOpacity:1.0 }); this.bringToFront();
           });
-          layer.on('mouseover', function(){
-            this.setStyle({ weight:2, fillOpacity:0.9 }); this.bringToFront();
-          });
-          layer.on('mouseout', function(){
-            this.setStyle(styleFeature(tot));
-          });
+          layer.on('mouseover', function(){ this.setStyle({ weight:2, fillOpacity:0.9 }); this.bringToFront(); });
+          layer.on('mouseout',  function(){ this.setStyle(styleFeature(tot)); });
         }
       }).addTo(map);
 
-      console.log('[GEOJSON CARGADO] features=', featuresCount);
-      var bounds = capa.getBounds();
+      layersControl.addOverlay(capaMunicipios, 'Municipios (afiliados)');
+
+      var bounds = capaMunicipios.getBounds();
       map.fitBounds(bounds);
       map.setMaxBounds(bounds.pad(0.05));
     })
-    .catch(function(err){ console.error('Error cargando GeoJSON:', err); });
-</script>
+    .catch(err => console.error('Error cargando GeoJSON:', err));
 
+  function crearOverlay(geo) {
+    let tipo = null;
+    if (geo && geo.features && geo.features.length) {
+      const f0 = geo.features.find(f => f && f.geometry);
+      tipo = f0 && f0.geometry && f0.geometry.type || null;
+    }
+    const opts = { pane: 'overlaysPane' };
+
+    if (tipo && /Point/i.test(tipo)) {
+      opts.pointToLayer = (f, latlng) => L.circleMarker(latlng, { radius: 3, weight: 1 });
+    } else if (tipo && /LineString/i.test(tipo)) {
+      opts.style = { weight: 2 };
+    } else if (tipo && /Polygon/i.test(tipo)) {
+      opts.style = { weight: 1, color:'#333', fill:false };
+    }
+    return L.geoJSON(geo, opts);
+  }
+
+  @foreach ($layers as $l)
+    fetch("{{ $l['url'] }}")
+      .then(r => r.json())
+      .then(geo => {
+        const layer = crearOverlay(geo);
+        layersControl.addOverlay(layer, "{{ $l['name'] }}");
+      })
+      .catch(err => console.error('Error capa {{ $l['name'] }}:', err));
+  @endforeach
+</script>
 @endpush

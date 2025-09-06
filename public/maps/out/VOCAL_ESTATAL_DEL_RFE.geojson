@@ -1,0 +1,3 @@
+{"type":"FeatureCollection", "features": [
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-101.16433,19.68879]},"properties":{"ID":1,"ENTIDAD":16,"DISTRITO":10,"MUNICIPIO":54,"SECCION":1115,"LOCALIDAD_":1,"LOCALIDAD__1":"MORELIA","VOCAL_NOMB":"LIC. ADALBERTO CORTES MAGAÑA","CALLE_Y_No":"RAFAEL GARCIA DE LEON No. 1545","COLONIA":"CHAPULTEPEC ORIENTE","COD_POSTAL":"58260","TELEFONO":"01-443-3154565","FAX":"01-443-3154568","CONTROL":1,"MANZANA":82,"Geometry2_":"1=X<z3yiwWyf","GMRotation":-0.000022}}
+]}

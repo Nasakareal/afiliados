@@ -4,12 +4,12 @@
     "\\app",
     "\\app\\Http",
     "\\app\\Http\\Controllers",
-    "\\database",
+    "\\app\\Models",
     "\\resources",
     "\\resources\\views",
     "\\resources\\views\\afiliados",
-    "\\resources\\views\\layouts",
-    "\\resources\\views\\reportes"
+    "\\routes"
   ],
+  "SelectedNode": "\\resources\\views\\afiliados\\index.blade.php",
   "PreviewInSolutionExplorer": false
 }

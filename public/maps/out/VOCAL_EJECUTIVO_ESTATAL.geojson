@@ -1,0 +1,3 @@
+{"type":"FeatureCollection", "features": [
+{"type":"Feature","geometry":{"type":"Point","coordinates":[-101.16433,19.68879]},"properties":{"ID":1,"entidad":16,"distrito":10,"municipio":54,"seccion":1115,"localidad_":1,"manzana":82,"localidad__1":"MORELIA","vocal_nomb":"LIC. DAVID ALEJANDRO DELGADO ARROYO","calle_y_no":"RAFAEL GARCIA DE LEON NO. 1545","colonia":"CHAPULTEPEC ORIENTE","telefono":"01 443 3242116","fax":"01 443 3242116","cod_postal":"58260","control":1,"Geometry_s":"1=X<z3yiwWyf","GMRotation":0}}
+]}

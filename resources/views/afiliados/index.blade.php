@@ -55,11 +55,26 @@
       </form>
 
       @php
-        $cls = fn($st)=> match($st){
-          'validado'   => 'badge bg-success',
-          'pendiente'  => 'badge bg-warning text-dark',
-          'descartado' => 'badge bg-danger',
-          default      => 'badge bg-secondary'
+        // Clases por estatus (colores)
+        $cls = function($st){
+          $st = strtolower((string)$st);
+          return match($st){
+            'validado'   => 'badge bg-success',
+            'pendiente'  => 'badge bg-warning text-dark',
+            'descartado' => 'badge bg-danger',
+            default      => 'badge bg-secondary'
+          };
+        };
+
+        // Texto mostrado: Sí / No / Pendiente
+        $txt = function($st){
+          $st = strtolower((string)$st);
+          return match($st){
+            'validado'   => 'Sí',
+            'descartado' => 'No',
+            'pendiente'  => 'Pendiente',
+            default      => '—'
+          };
         };
       @endphp
 
@@ -106,7 +121,7 @@
               </div>
             </td>
             <td>{{ $a->capturista_nombre ?? optional($a->capturista)->name }}</td>
-            <td><span class="{{ $cls($a->estatus) }}">{{ ucfirst($a->estatus) }}</span></td>
+            <td><span class="{{ $cls($a->estatus) }}">{{ $txt($a->estatus) }}</span></td>
             <td>{{ optional($a->created_at)->format('Y-m-d H:i') }}</td>
             <td class="text-center">
               <div class="btn-group">

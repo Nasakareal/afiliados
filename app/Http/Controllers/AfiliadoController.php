@@ -82,7 +82,6 @@ class AfiliadoController extends Controller
                 ->pluck('seccion');
         }
 
-        // Para asteriscos/required en la vista:
         $rules    = $this->rulesStore();
         $required = $this->requiredMap($rules);
         $fullNameField = $this->fullNameField();
@@ -222,6 +221,7 @@ class AfiliadoController extends Controller
             'municipio'        => ['required','string','max:120'],
             'cve_mun'          => ['required','string','size:3'],
             'seccion'          => ['required','string','max:6'],
+            'perfil'          => ['required','string','max:120'],
             'estatus'          => ['required', Rule::in(['pendiente','validado','descartado'])],
 
             'fecha_convencimiento' => ['nullable','date'],
@@ -243,7 +243,6 @@ class AfiliadoController extends Controller
             'telefono'         => ['nullable','string','max:30'],
             'distrito_federal' => ['nullable','integer'],
             'distrito_local'   => ['nullable','integer'],
-            
             'localidad'        => ['nullable','string','max:150'],
             'colonia'          => ['nullable','string','max:150'],
 
@@ -251,6 +250,7 @@ class AfiliadoController extends Controller
             'municipio'        => ['required','string','max:120'],
             'cve_mun'          => ['required','string','size:3'],
             'seccion'          => ['required','string','max:6'],
+            'perfil'           => ['required','string','max:120'],
             'estatus'          => ['required', Rule::in(['pendiente','validado','descartado'])],
 
             'fecha_convencimiento' => ['nullable','date'],
