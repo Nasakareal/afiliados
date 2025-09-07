@@ -26,10 +26,15 @@
 @push('scripts')
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
+  // Choropleth (todos)
   var _conteoBlade = @json($conteo);
   var _conteoNombreBlade = @json($conteoPorNombre);
   var conteoPorCVE = _conteoBlade || {};
   var conteoPorNombre = _conteoNombreBlade || {};
+
+  // Stats por municipio
+  var statsCVE    = @json($statsCVE);
+  var statsNombre = @json($statsNombre);
 
   function normalize(s){
     return (s || '').toString()
@@ -37,6 +42,7 @@
       .replace(/[^A-Z0-9 ]/gi,'').trim().toUpperCase();
   }
 
+  // Cortes de color sobre el TOTAL (todos)
   var breaks = [0,5,20,50,100,250,500,1000];
   function getColor(v){
     return v >= breaks[7] ? '#5B0013' :
@@ -73,64 +79,66 @@
   var legend = L.control({position:'bottomright'});
   legend.onAdd = function(){
     var div = L.DomUtil.create('div','info-legend');
-    div.innerHTML = '<strong>Afiliados</strong><br>';
+    div.innerHTML = '<strong>Total de registros</strong><br>';
     for (var i=0;i<breaks.length;i++){
       var from = breaks[i], to = breaks[i+1];
       var label = to ? (from + '-' + (to-1)) : (from + '+');
       var sampleVal = to ? (to-1) : (from+1);
       div.innerHTML += '<div><i style="background:' + getColor(sampleVal) + '"></i>' + label + '</div>';
     }
+    div.innerHTML += '<div style="margin-top:6px"><small>* El color usa el total (todos los estatus)</small></div>';
     return div;
   };
   legend.addTo(map);
 
-  map.on('click', e => console.log('[MAP CLICK]', e.latlng));
+  function pickStats(p){
+    var cve = (p.CVEGEO || (String(p.CVE_ENT||'') + String(p.CVE_MUN||''))).toString();
+    if (statsCVE && statsCVE[cve]) return statsCVE[cve];
 
-  let capaMunicipios = null;
+    var nomN = normalize(p.NOMGEO || '');
+    if (statsNombre && statsNombre[nomN]) return statsNombre[nomN];
+
+    // fallback: si no hay stats, usa 0s
+    return { total:0, afiliados:0, no_afiliados:0, pendientes:0, convencidos:0 };
+  }
+
   fetch("{{ asset('geo/michoacan.json') }}")
     .then(r => r.json())
     .then(function(geo){
-      var featuresCount = 0;
-      capaMunicipios = L.geoJSON(geo, {
+      let capaMunicipios = L.geoJSON(geo, {
         pane: 'municipiosPane',
         style: function(f){
-          var p = f.properties || {};
-          var cve = (p.CVEGEO || (String(p.CVE_ENT||'') + String(p.CVE_MUN||''))).toString();
-          var nomN = normalize(p.NOMGEO || '');
-          var totCVE = (conteoPorCVE.hasOwnProperty(cve) ? conteoPorCVE[cve] : null);
-          var tot = (totCVE !== null && totCVE !== undefined) ? totCVE :
-                    (conteoPorNombre.hasOwnProperty(nomN) ? conteoPorNombre[nomN] : 0);
-          return styleFeature(tot);
+          var st = pickStats(f.properties || {});
+          return styleFeature(st.total);
         },
         onEachFeature: function(feature, layer){
-          featuresCount++;
-          var p = feature.properties || {};
+          var p  = feature.properties || {};
+          var st = pickStats(p);
           var cve = (p.CVEGEO || (String(p.CVE_ENT||'') + String(p.CVE_MUN||''))).toString();
           var nombre = p.NOMGEO || 'Desconocido';
-          var nomN = normalize(nombre);
-          var totCVE = (conteoPorCVE.hasOwnProperty(cve) ? conteoPorCVE[cve] : null);
-          var tot = (totCVE !== null && totCVE !== undefined) ? totCVE :
-                    (conteoPorNombre.hasOwnProperty(nomN) ? conteoPorNombre[nomN] : 0);
 
           layer.options.className = 'municipio';
           layer.options.bubblingMouseEvents = true;
 
-          layer.on('click', function(e){
+          layer.on('click', function(){
             var html = ''
-              + '<div style="min-width:220px">'
+              + '<div style="min-width:240px">'
               +   '<h5 style="margin:0 0 6px 0">' + nombre + '</h5>'
-              +   '<div><strong>Afiliados:</strong> ' + tot + '</div>'
+              +   '<div><strong>Afiliados:</strong> ' + st.afiliados + '</div>'
+              +   '<div><strong>No afiliados:</strong> ' + st.no_afiliados + '</div>'
+              +   '<div><strong>Convencidos (sí + no):</strong> ' + st.convencidos + '</div>'
+              +   '<div style="margin-top:6px"><small>Total (todos): ' + st.total + (st.pendientes ? (' — Pendientes: ' + st.pendientes) : '') + '</small></div>'
               +   '<div><small>CVEGEO: ' + cve + '</small></div>'
               + '</div>';
             this.bindPopup(html, { closeButton:true }).openPopup();
             this.setStyle({ weight:3, fillOpacity:1.0 }); this.bringToFront();
           });
           layer.on('mouseover', function(){ this.setStyle({ weight:2, fillOpacity:0.9 }); this.bringToFront(); });
-          layer.on('mouseout',  function(){ this.setStyle(styleFeature(tot)); });
+          layer.on('mouseout',  function(){ this.setStyle(styleFeature(st.total)); });
         }
       }).addTo(map);
 
-      layersControl.addOverlay(capaMunicipios, 'Municipios (afiliados)');
+      layersControl.addOverlay(capaMunicipios, 'Municipios (total)');
 
       var bounds = capaMunicipios.getBounds();
       map.fitBounds(bounds);

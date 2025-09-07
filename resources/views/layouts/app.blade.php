@@ -27,7 +27,7 @@
       --gris-3:#cfd8e6;  /* claro */
 
       /* Fondo general DETRÁS del content */
-      --humo: var(--gris-3);  /* <-- cámbialo a var(--gris-1) o var(--gris-2) si lo quieres más oscuro */
+      --humo: var(--gris-3);
     }
 
     html,body{height:100%;background:var(--humo)}
@@ -116,7 +116,7 @@
           @can('afiliados.ver')
           <li class="nav-item">
             <a class="nav-link {{ is_active(['afiliados.*','registro']) }}" href="{{ route('afiliados.index') }}">
-              <i class="fa-solid fa-user-check me-1"></i> Afiliados
+              <i class="fa-solid fa-user-check me-1"></i> Convencidos
             </a>
           </li>
           @endcan

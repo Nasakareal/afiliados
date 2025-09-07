@@ -8,8 +8,9 @@
     "\\resources",
     "\\resources\\views",
     "\\resources\\views\\afiliados",
+    "\\resources\\views\\mapa",
     "\\routes"
   ],
-  "SelectedNode": "\\resources\\views\\afiliados\\index.blade.php",
+  "SelectedNode": "\\resources\\views\\mapa\\index.blade.php",
   "PreviewInSolutionExplorer": false
 }

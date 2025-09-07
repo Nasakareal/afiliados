@@ -1,16 +1,16 @@
 @extends('layouts.app')
 
-@section('title','Afiliados')
+@section('title','Referente/Referencia')
 
 @section('content_header')
-  <h1 class="text-center w-100">Afiliados</h1>
+  <h1 class="text-center w-100">Referente/Referencia</h1>
 @endsection
 
 @section('content')
 <div class="container-xl">
   <div class="card card-outline card-primary">
     <div class="card-header d-flex justify-content-between align-items-center">
-      <h3 class="card-title">Afiliados registrados</h3>
+      <h3 class="card-title">Referentes / Referencias registradas</h3>
       @can('afiliados.crear')
       <div class="btn-group">
         <a href="{{ route('registro') }}" class="btn btn-primary btn-sm">
@@ -86,6 +86,7 @@
             <th>Contacto</th>
             <th>Municipio</th>
             <th>Sección</th>
+            <th>Referente/Referencia</th> {{-- NUEVA COLUMNA (mapea a perfil) --}}
             <th>Capturista</th>
             <th>Afiliado</th>
             <th>Creación</th>
@@ -120,6 +121,10 @@
                 @if(isset($a->s_distrito_federal)) · D. Fed: {{ $a->s_distrito_federal }} @endif
               </div>
             </td>
+
+            {{-- NUEVA CELDA: muestra el campo perfil como "Referente/Referencia" --}}
+            <td>{{ $a->perfil ?? '—' }}</td>
+
             <td>{{ $a->capturista_nombre ?? optional($a->capturista)->name }}</td>
             <td><span class="{{ $cls($a->estatus) }}">{{ $txt($a->estatus) }}</span></td>
             <td>{{ optional($a->created_at)->format('Y-m-d H:i') }}</td>

@@ -10,7 +10,7 @@
     <div class="col-md-3">
       <div class="card shadow-sm border-0">
         <div class="card-body">
-          <div class="text-muted small">Afiliados totales</div>
+          <div class="text-muted small">Convencidos totales</div>
           <div class="display-6 fw-bold">{{ number_format($stats['total']) }}</div>
         </div>
       </div>
@@ -18,7 +18,7 @@
     <div class="col-md-2">
       <div class="card shadow-sm border-0">
         <div class="card-body">
-          <div class="text-muted small">Sí</div>
+          <div class="text-muted small">Afiliados</div>
           <div class="h3 fw-bold text-success mb-0">{{ number_format($stats['validado']) }}</div>
         </div>
       </div>
@@ -34,7 +34,7 @@
     <div class="col-md-2">
       <div class="card shadow-sm border-0">
         <div class="card-body">
-          <div class="text-muted small">No</div>
+          <div class="text-muted small">No afiliados</div>
           <div class="h3 fw-bold text-danger mb-0">{{ number_format($stats['descartado']) }}</div>
         </div>
       </div>
