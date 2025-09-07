@@ -56,7 +56,8 @@ Route::middleware(['auth','force.password.change'])->group(function () {
     Route::get('/secciones/{seccion}/edit', [SeccionController::class,'edit'])->name('secciones.edit')->middleware('permission:secciones.editar');
     Route::put('/secciones/{seccion}', [SeccionController::class,'update'])->name('secciones.update')->middleware('permission:secciones.editar');
     Route::delete('/secciones/{seccion}', [SeccionController::class,'destroy'])->name('secciones.destroy')->middleware('permission:secciones.borrar');
-
+    Route::post('/secciones/import', [SeccionController::class, 'importExcel'])->name('secciones.import');
+    
     // Actividades / Calendario
     Route::get('/calendario', [ActividadController::class,'index'])->name('calendario.index')->middleware('permission:actividades.ver');
     Route::get('/actividades/feed', [ActividadController::class,'feed'])->name('actividades.feed')->middleware('permission:actividades.ver');

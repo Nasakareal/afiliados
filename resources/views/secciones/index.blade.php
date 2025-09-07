@@ -13,6 +13,16 @@
       <h3 class="card-title">Secciones registradas</h3>
       @can('secciones.crear')
       <div class="btn-group">
+        <form method="POST" action="{{ route('secciones.import') }}" enctype="multipart/form-data" class="d-flex gap-2">
+          @csrf
+          <input type="file" name="archivo" accept=".xlsx,.xls,.csv,.ods" required class="form-control form-control-sm" />
+          <button class="btn btn-success btn-sm">
+            <i class="fa fa-file-excel"></i> Importar secciones
+          </button>
+        </form>
+
+      </div>
+      <div class="btn-group">
         <a href="{{ route('secciones.create') }}" class="btn btn-primary btn-sm">
           <i class="fa fa-plus"></i> Nueva
         </a>
