@@ -7,10 +7,11 @@
     "\\app\\Models",
     "\\resources",
     "\\resources\\views",
+    "\\resources\\views\\afiliados",
+    "\\resources\\views\\layouts",
     "\\resources\\views\\mapa",
-    "\\resources\\views\\secciones",
     "\\routes"
   ],
-  "SelectedNode": "\\resources\\views\\secciones\\index.blade.php",
+  "SelectedNode": "\\resources\\views\\afiliados\\edit.blade.php",
   "PreviewInSolutionExplorer": false
 }

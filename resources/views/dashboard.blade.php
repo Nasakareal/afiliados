@@ -105,7 +105,7 @@
         </div>
         <div class="table-responsive">
           <table class="table table-sm mb-0">
-            <thead><tr><th>Municipio</th><th class="text-end">Afiliados</th></tr></thead>
+            <thead><tr><th>Municipio</th><th class="text-end">Convencidos</th></tr></thead>
             <tbody>
             @forelse($porMunicipio as $row)
               <tr>
@@ -128,7 +128,7 @@
         </div>
         <div class="table-responsive">
           <table class="table table-sm mb-0">
-            <thead><tr><th>Sección</th><th class="text-end">Afiliados</th></tr></thead>
+            <thead><tr><th>Sección</th><th class="text-end">Convencidos</th></tr></thead>
             <tbody>
             @forelse($porSeccion as $row)
               <tr>

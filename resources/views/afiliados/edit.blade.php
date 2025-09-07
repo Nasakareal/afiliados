@@ -14,9 +14,10 @@
       {{-- Asterisco para obligatorios --}}
       <style>
         label.required::after { content:" *"; color:#dc3545; margin-left:.25rem; }
+        .form-control[readonly] { background-color:#f8f9fa; }
       </style>
       @php
-        // Helpers que vienen del controller: $required y $fullNameField
+        // Helpers desde el controller
         $req = fn($f) => !empty($required[$f] ?? false);
         $fullNameField = $fullNameField ?? 'nombre';
 
@@ -33,7 +34,7 @@
         // Municipios
         $munSel = old('municipio', $afiliado->municipio ?? '');
 
-        // Fecha convencimiento preformateada
+        // Fecha convencimiento
         $fechaConv = old('fecha_convencimiento');
         if (!$fechaConv && !empty($afiliado->fecha_convencimiento)) {
             try {
@@ -140,7 +141,7 @@
             <input type="number" name="distrito_local" value="{{ old('distrito_local',$afiliado->distrito_local) }}"
                    min="1" max="100" step="1" inputmode="numeric" pattern="[0-9]*"
                    class="form-control @error('distrito_local') is-invalid @enderror"
-                   {{ $req('distrito_local') ? 'required' : '' }}>
+                   {{ $req('distrito_local') ? 'required' : '' }} readonly>
             @error('distrito_local')<div class="invalid-feedback">{{ $message }}</div>@enderror
           </div>
 
@@ -149,7 +150,7 @@
             <input type="number" name="distrito_federal" value="{{ old('distrito_federal',$afiliado->distrito_federal) }}"
                    min="1" max="100" step="1" inputmode="numeric" pattern="[0-9]*"
                    class="form-control @error('distrito_federal') is-invalid @enderror"
-                   {{ $req('distrito_federal') ? 'required' : '' }}>
+                   {{ $req('distrito_federal') ? 'required' : '' }} readonly>
             @error('distrito_federal')<div class="invalid-feedback">{{ $message }}</div>@enderror
           </div>
 
@@ -169,9 +170,9 @@
             @error('colonia')<div class="invalid-feedback">{{ $message }}</div>@enderror
           </div>
 
-          {{-- Perfil / observaciones (no obligatorios si no están en reglas) --}}
+          {{-- Perfil / observaciones --}}
           <div class="col-md-12">
-            <label class="form-label {{ $req('perfil') ? 'required' : '' }}">Perfil</label>
+            <label class="form-label {{ $req('perfil') ? 'required' : '' }}">Referente</label>
             <textarea name="perfil" rows="2"
                       class="form-control @error('perfil') is-invalid @enderror"
                       {{ $req('perfil') ? 'required' : '' }}>{{ old('perfil',$afiliado->perfil) }}</textarea>
@@ -222,24 +223,97 @@
 </div>
 @endsection
 
-@section('js')
+@push('scripts')
 <script>
-function pad3(v){ v = (v||'').toString().trim(); return v ? v.padStart(3,'0') : ''; }
+document.addEventListener('DOMContentLoaded', function(){
+  const $sec = document.querySelector('input[name="seccion"], select[name="seccion"]');
+  if (!$sec) return;
 
-document.addEventListener('DOMContentLoaded', ()=>{
-  const sel = document.getElementById('slMunicipio');
-  const cve = document.getElementById('txtCveMun');
+  const $cve = document.querySelector('#txtCveMun');
+  const $mun = document.querySelector('#slMunicipio');
+  const $dl  = document.querySelector('input[name="distrito_local"]');
+  const $df  = document.querySelector('input[name="distrito_federal"]');
 
-  function syncCve(){
-    const opt = sel?.selectedOptions && sel.selectedOptions[0];
-    const fromData = opt ? opt.getAttribute('data-cve') : '';
-    if (cve) cve.value = pad3(fromData);
+  [$cve,$dl,$df].forEach(el=>{
+    if(!el) return;
+    el.readOnly = true;
+    ['keydown','paste','drop'].forEach(evt=>{
+      el.addEventListener(evt, e=>{ if(el.readOnly) e.preventDefault(); });
+    });
+  });
+
+  function syncCveFromMunicipio(){
+    if(!$mun || !$cve) return;
+    const opt = $mun.options[$mun.selectedIndex];
+    const cve = (opt && opt.dataset && opt.dataset.cve) ? String(opt.dataset.cve).padStart(3,'0') : '';
+    $cve.value = cve;
+  }
+  if ($mun) {
+    $mun.addEventListener('change', () => { syncCveFromMunicipio(); if ($sec.value) debouncedLookup(); });
+    syncCveFromMunicipio();
   }
 
-  if (sel) {
-    syncCve();
-    sel.addEventListener('change', syncCve);
+  const endpoint = "{{ route('secciones.lookup') }}";
+  const pad3   = v => (v==null ? '' : String(v).trim().padStart(3,'0'));
+  const squish = v => String(v||'').trim().replace(/\s+/g,' ');
+  let t=null;
+
+  async function fetchLookup(params){
+    const url = endpoint + '?' + (new URLSearchParams(params)).toString();
+    const r = await fetch(url, { headers: { 'X-Requested-With':'XMLHttpRequest', 'Accept':'application/json' } });
+    if (!r.ok) throw r;
+    return r.json();
   }
+
+  function fillFields(j, forceCanon){
+    if ($dl) $dl.value = j.distrito_local ?? '';
+    if ($df) $df.value = j.distrito_federal ?? '';
+    if ($cve && (forceCanon || !squish($cve.value)) && j.cve_mun) $cve.value = j.cve_mun;
+
+    if ($mun && (forceCanon || !squish($mun.value)) && j.municipio) {
+      const val = j.municipio;
+      const opt = Array.from($mun.options).find(o=>o.value===val);
+      if (opt) { $mun.value = val; syncCveFromMunicipio(); }
+    }
+
+    [$dl,$df,$cve,$mun].forEach(el=>{
+      if(!el) return;
+      el.classList.remove('is-invalid');
+      el.classList.add('is-valid');
+      setTimeout(()=>el.classList.remove('is-valid'), 600);
+    });
+  }
+
+  async function lookup(){
+    const seccion = squish($sec.value);
+    if (!seccion) return;
+
+    const strict = { seccion };
+    if ($cve && squish($cve.value)) strict.cve_mun = pad3($cve.value);
+    else if ($mun && squish($mun.value)) strict.municipio = squish($mun.value);
+
+    try { const j = await fetchLookup(strict); fillFields(j,false); return; }
+    catch(e){  }
+
+    try { const j = await fetchLookup({ seccion }); fillFields(j,true); }
+    catch(e){
+      if ($dl) $dl.value = '';
+      if ($df) $df.value = '';
+      [$dl,$df,$cve,$mun].forEach(el=>{
+        if(!el) return;
+        el.classList.remove('is-valid');
+        el.classList.add('is-invalid');
+        setTimeout(()=>el.classList.remove('is-invalid'), 800);
+      });
+    }
+  }
+
+  function debouncedLookup(){ if (t) clearTimeout(t); t = setTimeout(lookup, 200); }
+
+  $sec.addEventListener('input', debouncedLookup);
+  ['change','blur'].forEach(ev => $sec.addEventListener(ev, lookup));
+
+  if (squish($sec.value)) lookup();
 });
 </script>
-@endsection
+@endpush

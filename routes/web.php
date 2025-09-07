@@ -49,14 +49,16 @@ Route::middleware(['auth','force.password.change'])->group(function () {
     Route::get('/registro', [AfiliadoController::class,'create'])->name('registro')->middleware('permission:afiliados.crear');
 
     // Secciones
-    Route::get('/secciones', [SeccionController::class,'index'])->name('secciones.index')->middleware('permission:secciones.ver');
-    Route::get('/secciones/create', [SeccionController::class,'create'])->name('secciones.create')->middleware('permission:secciones.crear');
-    Route::post('/secciones', [SeccionController::class,'store'])->name('secciones.store')->middleware('permission:secciones.crear');
-    Route::get('/secciones/{seccion}', [SeccionController::class,'show'])->name('secciones.show')->middleware('permission:secciones.ver');
-    Route::get('/secciones/{seccion}/edit', [SeccionController::class,'edit'])->name('secciones.edit')->middleware('permission:secciones.editar');
-    Route::put('/secciones/{seccion}', [SeccionController::class,'update'])->name('secciones.update')->middleware('permission:secciones.editar');
-    Route::delete('/secciones/{seccion}', [SeccionController::class,'destroy'])->name('secciones.destroy')->middleware('permission:secciones.borrar');
-    Route::post('/secciones/import', [SeccionController::class, 'importExcel'])->name('secciones.import');
+    Route::get('/secciones',               [SeccionController::class,'index'])->name('secciones.index')->middleware('permission:secciones.ver');
+    Route::get('/secciones/create',        [SeccionController::class,'create'])->name('secciones.create')->middleware('permission:secciones.crear');
+    Route::post('/secciones',              [SeccionController::class,'store'])->name('secciones.store')->middleware('permission:secciones.crear');
+    Route::post('/secciones/import',       [SeccionController::class,'importExcel'])->name('secciones.import')->middleware('permission:secciones.crear');
+    Route::get('/secciones/lookup',        [SeccionController::class,'lookup'])->name('secciones.lookup')->middleware('permission:secciones.ver');
+    Route::get   ('/secciones/{seccion}',        [SeccionController::class,'show'])->whereNumber('seccion')->name('secciones.show')->middleware('permission:secciones.ver');
+    Route::get   ('/secciones/{seccion}/edit',   [SeccionController::class,'edit'])->whereNumber('seccion')->name('secciones.edit')->middleware('permission:secciones.editar');
+    Route::put   ('/secciones/{seccion}',        [SeccionController::class,'update'])->whereNumber('seccion')->name('secciones.update')->middleware('permission:secciones.editar');
+    Route::delete('/secciones/{seccion}',        [SeccionController::class,'destroy'])->whereNumber('seccion')->name('secciones.destroy')->middleware('permission:secciones.borrar');
+
     
     // Actividades / Calendario
     Route::get('/calendario', [ActividadController::class,'index'])->name('calendario.index')->middleware('permission:actividades.ver');

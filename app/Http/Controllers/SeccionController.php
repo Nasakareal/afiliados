@@ -426,5 +426,27 @@ public function importExcel(Request $request)
             });
     }
 
+    public function lookup(Request $request)
+    {
+        $seccion = $this->squish((string)$request->input('seccion', ''));
+        if ($seccion === '') {
+            return response()->json(['message' => 'Sección requerida'], 422);
+        }
 
+        $q = DB::table('secciones')->where('seccion', $seccion);
+
+        if ($request->filled('cve_mun')) {
+            $cve = str_pad((string)$request->input('cve_mun'), 3, '0', STR_PAD_LEFT);
+            $q->where('cve_mun', $cve);
+        } elseif ($request->filled('municipio')) {
+            $q->where('municipio', $this->squish((string)$request->input('municipio')));
+        }
+
+        $row = $q->select('seccion','municipio','cve_mun','distrito_local','distrito_federal')->first();
+
+        if (!$row) {
+            return response()->json(['message' => 'No encontrada'], 404);
+        }
+        return response()->json($row);
+    }
 }
