@@ -21,43 +21,46 @@
   .info-legend { background:#fff; padding:8px 10px; border-radius:6px; box-shadow:0 1px 5px rgba(0,0,0,.3); font:14px/1.2 system-ui, sans-serif; }
   .info-legend i { width:14px; height:14px; display:inline-block; margin-right:6px; vertical-align:middle; }
 
-  /* Etiquetas dentro de los municipios (base a 14px y luego escalamos por JS) */
   .leaflet-div-icon.mun-label { background: transparent; border: none; }
   .mun-label-text{
     font: 14px/1.1 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-    font-weight: 700;
-    color: #111;
-    text-shadow:
-      0 0 3px #fff,
-      0 0 6px #fff,
-      0 1px 0 #fff;
-    white-space: nowrap;
-    pointer-events: none;                     /* no bloquea clics */
-    transform: translate(-50%, -50%) scale(1);/* centrado + escala dinámica */
+    font-weight: 700; color: #111;
+    text-shadow: 0 0 3px #fff, 0 0 6px #fff, 0 1px 0 #fff;
+    white-space: nowrap; pointer-events: none;
+    transform: translate(-50%, -50%) scale(1);
     transform-origin: 50% 50%;
   }
+
+  .map-label { pointer-events: none; }
+  .map-label-text{
+    display:inline-block;
+    font: 600 12px/1 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.7);
+    background: rgba(0,0,0,.25);
+    padding:2px 6px; border-radius:4px; white-space:nowrap;
+    transform: translate(-50%, -50%) scale(1);
+    transform-origin: 50% 50%;
+  }
+  .label-dl { background: rgba(0, 86, 179, .35); }
+  .label-df { background: rgba(179, 86, 0, .35); }
+  .label-sec{ background: rgba(0, 128, 64, .35); }
 </style>
 @endpush
-
 
 @push('scripts')
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
 
 <script>
-  // Datos
   const conteoPorCVE    = @json($conteo) || {};
   const conteoPorNombre = @json($conteoPorNombre) || {};
   const statsCVE        = @json($statsCVE) || {};
   const statsNombre     = @json($statsNombre) || {};
 
   function normalize(s){
-    return (s || '').toString()
-      .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-      .replace(/[^A-Z0-9 ]/gi,'').trim().toUpperCase();
+    return (s || '').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Z0-9 ]/gi,'').trim().toUpperCase();
   }
 
-  // Colores basados en TOTAL (todos)
   const breaks = [0,5,20,50,100,250,500,1000];
   function getColor(v){
     return v >= breaks[7] ? '#5B0013' :
@@ -75,21 +78,16 @@
   const map = L.map('map', { zoomControl:true, doubleClickZoom:false, scrollWheelZoom:true, dragging:true });
   map.createPane('municipiosPane');  map.getPane('municipiosPane').style.zIndex = 650;
   map.createPane('overlaysPane');    map.getPane('overlaysPane').style.zIndex   = 700;
+  map.createPane('labelsPane');      map.getPane('labelsPane').style.zIndex     = 800;
+  map.getPane('labelsPane').style.pointerEvents = 'none';
 
   const layersControl = L.control.layers(null, {}, { collapsed:false }).addTo(map);
-
-  // Capa para poder ocultar/mostrar etiquetas
   const labelsGroup = L.layerGroup().addTo(map);
   layersControl.addOverlay(labelsGroup, 'Nombres de municipios');
 
-  // Para que sigan existiendo eventos encima de overlays
   (function(){
     const s = document.createElement('style');
-    s.innerHTML = `
-      #map { position: relative; }
-      .leaflet-overlay-pane svg path, .leaflet-interactive { pointer-events: auto !important; }
-      .municipio { cursor:pointer; }
-    `;
+    s.innerHTML = '#map{position:relative}.leaflet-overlay-pane svg path,.leaflet-interactive{pointer-events:auto !important}.municipio{cursor:pointer}';
     document.head.appendChild(s);
   })();
 
@@ -116,72 +114,41 @@
     return { total:0, afiliados:0, no_afiliados:0, pendientes:0, convencidos:0 };
   }
 
-  // ======= Ajuste dinámico de tamaño/visibilidad de etiquetas =======
-  const MIN_ZOOM_FOR_LABELS = 8;   // no mostrar arriba (más alejado) de este zoom
-  const MIN_SCALE_VISIBLE   = 0.55; // si queda más chico que esto, se oculta
+  const MIN_LABEL_SCALE = 0.2;
+  const munLabels = [];
 
-  const munLabels = []; // { layer, label, textEl }
-
-  function fitOne(item){
+  function fitMunicipio(item){
     const el = item.label.getElement();
     if (!el) return;
     const textEl = item.textEl || el.querySelector('.mun-label-text');
     if (!textEl) return;
-
-    // Mostrar/ocultar por nivel de zoom
-    if (map.getZoom() < MIN_ZOOM_FOR_LABELS){
-      textEl.style.display = 'none';
-      return;
-    } else {
-      textEl.style.display = 'block';
-    }
-
-    // Dimensiones del polígono en pixeles
     const b  = item.layer.getBounds();
     const nw = map.latLngToLayerPoint(b.getNorthWest());
     const se = map.latLngToLayerPoint(b.getSouthEast());
-    const polyW = Math.abs(se.x - nw.x);
-    const polyH = Math.abs(se.y - nw.y);
-
-    const maxW = polyW * 0.80; // deja margen
-    const maxH = polyH * 0.50;
-
-    // Mide tamaño "natural" del texto (base 14px)
+    const polyW = Math.abs(se.x - nw.x), polyH = Math.abs(se.y - nw.y);
+    const maxW = polyW * 0.80, maxH = polyH * 0.50;
     textEl.style.transform = 'translate(-50%, -50%) scale(1)';
-    textEl.style.fontSize  = ''; // usa CSS base (14px)
     const rect = textEl.getBoundingClientRect();
     const w0 = rect.width || 1, h0 = rect.height || 1;
-
-    // Escala para que quepa en ancho y alto del polígono
     let scale = Math.min(maxW / w0, maxH / h0, 1);
     if (!isFinite(scale)) scale = 1;
-
-    // Si la escala necesaria es muy chica, ocultamos
-    if (scale < MIN_SCALE_VISIBLE){
-      textEl.style.display = 'none';
-      return;
-    }
-
-    textEl.style.display   = 'block';
+    scale = Math.max(scale, MIN_LABEL_SCALE);
     textEl.style.transform = 'translate(-50%, -50%) scale(' + scale.toFixed(3) + ')';
   }
+  function fitMunicipios(){ munLabels.forEach(fitMunicipio); }
+  map.on('zoomend viewreset', fitMunicipios);
 
-  function fitAll(){ munLabels.forEach(fitOne); }
-  map.on('zoomend viewreset', fitAll);
-
-  // ======= Cargar municipios y crear etiquetas =======
   fetch("{{ asset('geo/michoacan.json') }}")
     .then(r => r.json())
     .then(function(geo){
       const capaMunicipios = L.geoJSON(geo, {
         pane: 'municipiosPane',
-        style: function(f){ return styleFeature(pickStats(f.properties||{}).total); },
+        style: f => styleFeature(pickStats(f.properties||{}).total),
         onEachFeature: function(feature, layer){
           const p  = feature.properties || {};
           const st = pickStats(p);
           const cve    = (p.CVEGEO || (String(p.CVE_ENT||'') + String(p.CVE_MUN||''))).toString();
           const nombre = p.NOMGEO || 'Desconocido';
-
           layer.options.className = 'municipio';
           layer.on('click', function(){
             const html = `
@@ -199,7 +166,6 @@
           layer.on('mouseover', function(){ this.setStyle({ weight:2, fillOpacity:0.9 }); this.bringToFront(); });
           layer.on('mouseout',  function(){ this.setStyle(styleFeature(st.total)); });
 
-          // Punto interno para la etiqueta (center of mass o centro del bounds)
           let latlng;
           try {
             const com = turf.centerOfMass(feature);
@@ -210,21 +176,15 @@
           }
 
           const label = L.marker(latlng, {
-            pane: 'overlaysPane',
-            interactive: false,
-            keyboard: false,
-            bubblingMouseEvents: false,
-            icon: L.divIcon({
-              className: 'mun-label',
-              html: `<span class="mun-label-text">${nombre}</span>`
-            })
+            pane: 'labelsPane',
+            interactive: false, keyboard: false, bubblingMouseEvents: false,
+            icon: L.divIcon({ className: 'mun-label', html: `<span class="mun-label-text">${nombre}</span>` })
           }).addTo(labelsGroup);
 
-          // Guardamos referencia para reajuste dinámico
           const item = { layer, label };
           item.label.on('add', () => {
             item.textEl = item.label.getElement().querySelector('.mun-label-text');
-            fitOne(item);
+            fitMunicipio(item);
           });
           munLabels.push(item);
         }
@@ -233,35 +193,124 @@
       layersControl.addOverlay(capaMunicipios, 'Municipios (total)');
 
       const bounds = capaMunicipios.getBounds();
-      map.fitBounds(bounds);
-      map.setMaxBounds(bounds.pad(0.05));
-
-      // Ajuste inicial (por si el add aún no corrió)
-      setTimeout(fitAll, 0);
+      map.fitBounds(bounds); map.setMaxBounds(bounds.pad(0.05));
+      setTimeout(fitMunicipios, 0);
     })
     .catch(err => console.error('Error cargando GeoJSON:', err));
 
-  // Capas externas opcionales (se mantienen igual)
+  function pickProp(props, keys){
+    for (const k of keys) if (props && props[k] !== undefined && props[k] !== null && props[k] !== '') return props[k];
+    return null;
+  }
+  function getLabelInfo(props){
+    const sec = pickProp(props, ['SECCION','Seccion','seccion','SEC']);
+    if (sec) return { text: `Sección ${sec}`, className: 'label-sec' };
+    const df  = pickProp(props, ['DISTRITO_F','Distrito_F','DISTRITO_FEDERAL','DF']);
+    if (df)  return { text: `DF ${df}`,  className: 'label-df'  };
+    const dl  = pickProp(props, ['DISTRITO_L','Distrito_L','DISTRITO_LOCAL','DL']);
+    if (dl)  return { text: `DL ${dl}`,  className: 'label-dl'  };
+    return { text: 'Capa', className: '' };
+  }
+  function centerLatLng(feature, layer){
+    try {
+      const c = turf.centerOfMass(feature)?.geometry?.coordinates;
+      if (c && c.length >= 2) return L.latLng(c[1], c[0]);
+    } catch(e){}
+    try { return layer.getBounds().getCenter(); } catch(e){}
+    return null;
+  }
+
+  const overlayLabelItems = [];
+  const MIN_LABEL_SCALE_OVER = 0.2;
+  function fitOverlayOne(item){
+    const root = item.marker.getElement();
+    if (!root) return;
+    const span = root.querySelector('.map-label-text');
+    if (!span) return;
+    const b  = item.layer.getBounds();
+    const nw = map.latLngToLayerPoint(b.getNorthWest());
+    const se = map.latLngToLayerPoint(b.getSouthEast());
+    const polyW = Math.abs(se.x - nw.x), polyH = Math.abs(se.y - nw.y);
+    const maxW = polyW * 0.80, maxH = polyH * 0.50;
+    span.style.transform = 'translate(-50%, -50%) scale(1)';
+    const rect = span.getBoundingClientRect();
+    const w0 = rect.width || 1, h0 = rect.height || 1;
+    let scale = Math.min(maxW / w0, maxH / h0, 1);
+    if (!isFinite(scale)) scale = 1;
+    scale = Math.max(scale, MIN_LABEL_SCALE_OVER);
+    span.style.transform = 'translate(-50%, -50%) scale(' + scale.toFixed(3) + ')';
+  }
+  function fitOverlayAll(){ overlayLabelItems.forEach(fitOverlayOne); }
+  map.on('zoomend viewreset', fitOverlayAll);
+
+  function baseOverlayStyle(feature){
+    const t = feature && feature.geometry && feature.geometry.type || '';
+    if (/LineString/i.test(t)) return { weight: 2, color:'#333' };
+    if (/Polygon/i.test(t))    return { weight: 1, color:'#333', fill:false };
+    return {};
+  }
+  function overlayPopupHTML(props){
+    const sec = pickProp(props, ['SECCION','Seccion','seccion','SEC']);
+    const dl  = pickProp(props, ['DISTRITO_L','Distrito_L','DISTRITO_LOCAL','DL']);
+    const df  = pickProp(props, ['DISTRITO_F','Distrito_F','DISTRITO_FEDERAL','DF']);
+    const ent = pickProp(props, ['ENTIDAD','Entidad','CVE_ENT']);
+    const title = sec ? `Sección ${sec}` : (dl ? `Distrito Local ${dl}` : (df ? `Distrito Federal ${df}` : 'Detalle'));
+    const rows = [];
+    if (sec) rows.push(`<div><strong>Sección:</strong> ${sec}</div>`);
+    if (dl)  rows.push(`<div><strong>Distrito Local:</strong> ${dl}</div>`);
+    if (df)  rows.push(`<div><strong>Distrito Federal:</strong> ${df}</div>`);
+    if (ent) rows.push(`<div><small>Entidad: ${ent}</small></div>`);
+    return `<div style="min-width:220px">
+      <h5 style="margin:0 0 6px 0">${title}</h5>
+      ${rows.join('')}
+    </div>`;
+  }
+
   @foreach ($layers as $l)
     fetch("{{ $l['url'] }}")
       .then(r => r.json())
       .then(geo => {
-        const layer = (function(geo) {
-          let tipo = null;
-          if (geo?.features?.length) {
-            const f0 = geo.features.find(f => f && f.geometry);
-            tipo = f0?.geometry?.type || null;
+        const group = L.layerGroup();
+
+        const geoLayer = L.geoJSON(geo, {
+          pane: 'overlaysPane',
+          style: baseOverlayStyle,
+          onEachFeature: function(feature, layer){
+            layer.on('click', function(e){
+              const html = overlayPopupHTML(feature.properties || {});
+              L.popup({ closeButton:true }).setLatLng(e.latlng).setContent(html).openOn(map);
+              this.setStyle({ weight:3, color:'#000' }); this.bringToFront();
+            });
+            layer.on('mouseover', function(){ this.setStyle({ weight:2 }); this.bringToFront(); });
+            layer.on('mouseout',  function(){ this.setStyle(baseOverlayStyle(feature)); });
           }
-          const opts = { pane: 'overlaysPane' };
-          if (/Point/i.test(tipo))      opts.pointToLayer = (f, latlng) => L.circleMarker(latlng, { radius: 3, weight: 1 });
-          else if (/LineString/i.test(tipo)) opts.style = { weight: 2 };
-          else if (/Polygon/i.test(tipo))    opts.style = { weight: 1, color:'#333', fill:false };
-          return L.geoJSON(geo, opts);
-        })(geo);
-        layersControl.addOverlay(layer, "{{ $l['name'] }}");
+        }).addTo(group);
+
+        L.geoJSON(geo, {
+          onEachFeature: function(feature, lyr){
+            const info = getLabelInfo(feature.properties || {});
+            const latlng = centerLatLng(feature, lyr);
+            if (!latlng) return;
+            const marker = L.marker(latlng, {
+              pane: 'labelsPane',
+              icon: L.divIcon({
+                className: 'map-label',
+                html: `<span class="map-label-text ${info.className}">${info.text}</span>`,
+                iconSize: null
+              }),
+              interactive: false
+            }).addTo(group);
+
+            const item = { layer: lyr, marker };
+            marker.on('add', () => fitOverlayOne(item));
+            overlayLabelItems.push(item);
+          }
+        });
+
+        layersControl.addOverlay(group, "{{ $l['name'] }}");
+        map.on('overlayadd', e => { if (e.layer === group) setTimeout(fitOverlayAll, 0); });
       })
       .catch(err => console.error('Error capa {{ $l['name'] }}:', err));
   @endforeach
 </script>
 @endpush
-

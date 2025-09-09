@@ -30,4 +30,13 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'webpush' => [
+      'vapid' => [
+        'public_key'  => 'BPgi-ATFN6l-1FiUd1Fhc6Nzz2eDDihcUObm__PFwJYsrkqNHmKiFaMgEeGingb1GCWtcfk94WsAyclNHqSYuz4',
+        'private_key' => 'y5186L8W-gaZM2UoadvfPV9C6R6NBXtYtDxUv_rnN_0',
+        'subject'     => 'mailto:soporte@gladyadorez.com',
+      ],
+    ],
+
+
 ];
