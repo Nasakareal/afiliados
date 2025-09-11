@@ -4,10 +4,14 @@
     "\\app",
     "\\app\\Http",
     "\\app\\Http\\Controllers",
+    "\\app\\Http\\Controllers\\Api",
+    "\\database",
+    "\\database\\migrations",
     "\\resources",
     "\\resources\\views",
-    "\\resources\\views\\mapa"
+    "\\resources\\views\\mapa",
+    "\\routes"
   ],
-  "SelectedNode": "\\resources\\views\\mapa\\index.blade.php",
+  "SelectedNode": "\\database\\migrations\\2025_09_11_210041_add_visibility_indexes_to_comunicados_table.php",
   "PreviewInSolutionExplorer": false
 }

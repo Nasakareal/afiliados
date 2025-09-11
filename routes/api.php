@@ -38,6 +38,11 @@ Route::prefix('v1')->group(function () {
 
         Route::get('/reportes/secciones', [ReporteApiController::class, 'secciones'])->name('api.reportes.secciones')->middleware('permission:reportes.ver');
         Route::get('/reportes/capturistas', [ReporteApiController::class, 'capturistas'])->name('api.reportes.capturistas')->middleware('permission:reportes.ver');
+
+        Route::get('/comunicados', [\App\Http\Controllers\Api\ComunicadoApiController::class, 'index'])->name('api.comunicados.index')->middleware('permission:comunicados.ver');
+
+        Route::get('/comunicados/{id}', [\App\Http\Controllers\Api\ComunicadoApiController::class, 'show'])->name('api.comunicados.show')->middleware('permission:comunicados.ver');
+
     });
 });
 
