@@ -5,7 +5,7 @@
   <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
   <title>Iniciar sesión — GLADYADOREZ</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Fonts + Bootstrap + Icons -->
+  <!-- Fonts + Bootstrap + Icons background: url('{{ asset('img/portada2.jpeg') }}') center/cover no-repeat; -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
@@ -18,7 +18,7 @@
     .auth-wrap{ position:relative; min-height:100vh; overflow:hidden; }
     .bg-blur, .bg-overlay{ position:absolute; inset:0 }
     .bg-blur{
-      background: url('{{ asset('img/portada2.jpeg') }}') center/cover no-repeat;
+      background: url('{{ asset('img/fondo.png') }}') center/cover no-repeat;
       filter: blur(6px) saturate(1.0);
       transform: scale(1.03);
     }

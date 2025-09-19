@@ -97,7 +97,7 @@
 <nav class="navbar navbar-expand-lg fixed-top navbar-dark navbar-rosa bg-rosa-2 border-bottom">
   <div class="container-fluid px-3">
     <a class="navbar-brand fw-bold" href="{{ route('dashboard') }}">
-      GLADY<span class="text-white">•</span>ADOREZ
+      G<span class="text-white">•</span>Z
     </a>
 
     <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#mainNav" aria-label="Menú">

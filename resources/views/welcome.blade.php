@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>GLADYADOREZ — Portal</title>
+  <title>GZ — Portal</title>
   <meta name="description" content="Portal informativo. Acceso al sistema.">
   <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -64,7 +64,7 @@
   <!-- Barra superior minimal -->
   <div class="topbar">
     <div class="container d-flex justify-content-between align-items-center">
-      <div class="brand">GLADYADOREZ</div>
+      <div class="brand">GZ</div>
       <div class="right">
         <a class="btn btn-dark btn-sm" href="{{ route('login') }}">Iniciar sesión</a>
       </div>
