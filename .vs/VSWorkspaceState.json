@@ -1,11 +1,8 @@
 {
   "ExpandedNodes": [
     "",
-    "\\config",
-    "\\resources",
-    "\\resources\\views",
-    "\\resources\\views\\layouts"
+    "\\routes"
   ],
-  "SelectedNode": "\\resources\\views\\layouts\\app.blade.php",
+  "SelectedNode": "\\routes\\web.php",
   "PreviewInSolutionExplorer": false
 }

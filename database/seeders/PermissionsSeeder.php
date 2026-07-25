@@ -32,8 +32,11 @@ class PermissionsSeeder extends Seeder
             // Actividades (calendario)
             'actividades.ver', 'actividades.crear', 'actividades.editar', 'actividades.borrar',
 
+            // Captura y mapa de lonas
+            'lonas.ver', 'lonas.crear', 'lonas.editar', 'lonas.borrar',
+
             // Mapa y reportes
-            'mapa.ver', 'reportes.ver'
+            'mapa.ver', 'reportes.ver',
 
             // Settings / administración
             'settings.ver', 'settings.editar',
@@ -58,6 +61,7 @@ class PermissionsSeeder extends Seeder
         $roleCoord = Role::firstOrCreate(['name' => 'Coordinador', 'guard_name' => $guard]);
         $roleCapt  = Role::firstOrCreate(['name' => 'Capturista',  'guard_name' => $guard]);
         $roleView  = Role::firstOrCreate(['name' => 'Consulta',    'guard_name' => $guard]);
+        $roleLonas = Role::firstOrCreate(['name' => 'Lonas',       'guard_name' => $guard]);
 
         // 4) Asignación de permisos por rol
 
@@ -74,16 +78,24 @@ class PermissionsSeeder extends Seeder
             'afiliados.ver','afiliados.crear','afiliados.editar','afiliados.borrar',
             'actividades.ver','actividades.crear','actividades.editar','actividades.borrar',
             'secciones.ver','mapa.ver','reportes.ver',
+            'lonas.ver','lonas.crear','lonas.editar','lonas.borrar',
         ]);
 
         // Capturista: crear/ver afiliados + ver mapa (aditivo)
         $roleCapt->givePermissionTo([
             'afiliados.ver','afiliados.crear','mapa.ver',
+            'lonas.ver','lonas.crear',
         ]);
 
         // Consulta: solo lectura general (aditivo)
         $roleView->givePermissionTo([
             'afiliados.ver','secciones.ver','actividades.ver','mapa.ver','reportes.ver',
+            'lonas.ver',
+        ]);
+
+        // Usuarios genéricos de lonas: únicamente este módulo (captura, listado y mapa).
+        $roleLonas->syncPermissions([
+            'lonas.ver','lonas.crear',
         ]);
 
         // Recalcula/limpia de nuevo la caché

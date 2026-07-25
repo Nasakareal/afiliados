@@ -13,6 +13,10 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
+        if ($request->user()->hasRole('Lonas')) {
+            return redirect()->route('lonas.index');
+        }
+
         // ---- KPIs principales ----
         $total      = Afiliado::count();
         $validado   = Afiliado::where('estatus','validado')->count();

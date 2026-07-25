@@ -146,6 +146,21 @@
           </li>
           @endcan
 
+          @can('lonas.ver')
+          <li class="nav-item dropdown keep-open">
+            <a class="nav-link dropdown-toggle {{ is_active(['lonas.*']) }}" href="#" data-bs-toggle="dropdown" role="button">
+              <i class="fa-solid fa-panorama me-1"></i> Lonas
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item {{ is_active('lonas.index') }}" href="{{ route('lonas.index') }}"><i class="fa-solid fa-list me-1"></i> Listado</a></li>
+              <li><a class="dropdown-item {{ is_active('lonas.map') }}" href="{{ route('lonas.map') }}"><i class="fa-solid fa-map-location-dot me-1"></i> Mapa</a></li>
+              @can('lonas.crear')
+              <li><a class="dropdown-item {{ is_active('lonas.create') }}" href="{{ route('lonas.create') }}"><i class="fa-solid fa-camera me-1"></i> Capturar</a></li>
+              @endcan
+            </ul>
+          </li>
+          @endcan
+
           @can('mapa.ver')
           <li class="nav-item">
             <a class="nav-link {{ is_active('mapa.index') }}" href="{{ route('mapa.index') }}">

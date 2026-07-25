@@ -30,4 +30,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Actividad::class, 'creado_por');
     }
+
+    public function lonasCapturadas()
+    {
+        return $this->hasMany(Lona::class, 'capturado_por');
+    }
 }

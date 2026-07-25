@@ -15,6 +15,7 @@ use App\Http\Controllers\Settings\AppSettingController;
 use App\Http\Controllers\Settings\ComunicadoController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Auth\ForcePasswordController;
+use App\Http\Controllers\LonaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -101,6 +102,18 @@ Route::middleware(['auth','force.password.change'])->group(function () {
     // Mapa
     Route::get('/mapa', [MapaController::class,'index'])->name('mapa.index')->middleware('permission:mapa.ver');
     Route::get('/mapa/data', [MapaController::class,'data'])->name('mapa.data')->middleware('permission:mapa.ver');
+
+    // Lonas
+    Route::get('/lonas', [LonaController::class, 'index'])->name('lonas.index')->middleware('permission:lonas.ver');
+    Route::get('/lonas/mapa', [LonaController::class, 'map'])->name('lonas.map')->middleware('permission:lonas.ver');
+    Route::get('/lonas/mapa/data', [LonaController::class, 'mapData'])->name('lonas.map.data')->middleware('permission:lonas.ver');
+    Route::get('/lonas/create', [LonaController::class, 'create'])->name('lonas.create')->middleware('permission:lonas.crear');
+    Route::post('/lonas', [LonaController::class, 'store'])->name('lonas.store')->middleware('permission:lonas.crear');
+    Route::get('/lonas/{lona}', [LonaController::class, 'show'])->name('lonas.show')->middleware('permission:lonas.ver');
+    Route::get('/lonas/{lona}/foto', [LonaController::class, 'photo'])->name('lonas.foto')->middleware('permission:lonas.ver');
+    Route::get('/lonas/{lona}/edit', [LonaController::class, 'edit'])->name('lonas.edit')->middleware('permission:lonas.editar');
+    Route::put('/lonas/{lona}', [LonaController::class, 'update'])->name('lonas.update')->middleware('permission:lonas.editar');
+    Route::delete('/lonas/{lona}', [LonaController::class, 'destroy'])->name('lonas.destroy')->middleware('permission:lonas.borrar');
 
     // Settings
     Route::prefix('settings')->name('settings.')->group(function () {
