@@ -23,6 +23,9 @@ use App\Http\Controllers\LonaController;
 |--------------------------------------------------------------------------
 */
 Route::view('/', 'welcome')->name('welcome');
+Route::view('/politica-de-privacidad', 'legal.privacy')->name('privacy');
+Route::redirect('/politica-privacidad', '/politica-de-privacidad', 301);
+Route::redirect('/privacy-policy', '/politica-de-privacidad', 301);
 
 // Breeze/Fortify (login, register, etc.)
 if (file_exists(base_path('routes/auth.php'))) {

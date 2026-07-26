@@ -81,7 +81,10 @@
   </main>
 
   <footer class="text-center py-4" style="position:relative; z-index:1;">
-    <small class="text-muted">© {{ date('Y') }}. Uso interno.</small>
+    <small class="text-muted">
+      © {{ date('Y') }}. Uso interno.
+      <a class="text-muted ms-2" href="{{ route('privacy') }}">Política de privacidad</a>
+    </small>
   </footer>
 
 </body>
