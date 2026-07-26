@@ -30,8 +30,8 @@ class ActividadController extends Controller
             return [
                 'id'        => $a->id,
                 'title'     => $a->titulo,
-                'start'     => $a->inicio?->toIso8601String(),
-                'end'       => $a->fin?->toIso8601String(),
+                'start'     => $a->inicio ? $a->inicio->toIso8601String() : null,
+                'end'       => $a->fin ? $a->fin->toIso8601String() : null,
                 'allDay'    => (bool) $a->all_day,
                 'color'     => $this->estadoColor($a->estado ?? 'programada'),
                 'url'       => route('actividades.show',$a->id),
@@ -120,11 +120,12 @@ class ActividadController extends Controller
      */
     private function estadoColor(string $estado): string
     {
-        return match($estado) {
+        $colors = [
             'programada' => '#1976d2', // azul
             'cancelada'  => '#d32f2f', // rojo
             'realizada'  => '#388e3c', // verde
-            default      => '#616161', // gris
-        };
+        ];
+
+        return $colors[$estado] ?? '#616161'; // gris
     }
 }

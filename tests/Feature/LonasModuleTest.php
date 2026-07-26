@@ -51,7 +51,7 @@ class LonasModuleTest extends TestCase
             'foto' => UploadedFile::fake()->image('lona-pesada.png', 2400, 1600),
         ]);
 
-        $lona = Lona::firstOrFail();
+        $lona = Lona::latest('id')->firstOrFail();
         $response->assertRedirect(route('lonas.show', $lona));
         $this->assertSame($user->id, $lona->capturado_por);
         $this->assertStringEndsWith('.jpg', $lona->foto_path);

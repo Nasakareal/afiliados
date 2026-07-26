@@ -39,6 +39,21 @@ Route::prefix('v1')->group(function () {
         Route::get('/reportes/secciones', [ReporteApiController::class, 'secciones'])->name('api.reportes.secciones')->middleware('permission:reportes.ver');
         Route::get('/reportes/capturistas', [ReporteApiController::class, 'capturistas'])->name('api.reportes.capturistas')->middleware('permission:reportes.ver');
 
+        Route::get('/lonas/mapa', [\App\Http\Controllers\Api\LonaApiController::class, 'mapData'])
+            ->name('api.lonas.map')->middleware('permission:lonas.ver');
+        Route::get('/lonas/{lona}/foto', [\App\Http\Controllers\Api\LonaApiController::class, 'photo'])
+            ->name('api.lonas.photo')->middleware('permission:lonas.ver');
+        Route::get('/lonas', [\App\Http\Controllers\Api\LonaApiController::class, 'index'])
+            ->name('api.lonas.index')->middleware('permission:lonas.ver');
+        Route::post('/lonas', [\App\Http\Controllers\Api\LonaApiController::class, 'store'])
+            ->name('api.lonas.store')->middleware('permission:lonas.crear');
+        Route::get('/lonas/{lona}', [\App\Http\Controllers\Api\LonaApiController::class, 'show'])
+            ->name('api.lonas.show')->middleware('permission:lonas.ver');
+        Route::match(['put', 'patch'], '/lonas/{lona}', [\App\Http\Controllers\Api\LonaApiController::class, 'update'])
+            ->name('api.lonas.update')->middleware('permission:lonas.editar');
+        Route::delete('/lonas/{lona}', [\App\Http\Controllers\Api\LonaApiController::class, 'destroy'])
+            ->name('api.lonas.destroy')->middleware('permission:lonas.borrar');
+
         Route::get('/comunicados', [\App\Http\Controllers\Api\ComunicadoApiController::class, 'index'])->name('api.comunicados.index')->middleware('permission:comunicados.ver');
 
         Route::get('/comunicados/{id}', [\App\Http\Controllers\Api\ComunicadoApiController::class, 'show'])->name('api.comunicados.show')->middleware('permission:comunicados.ver');

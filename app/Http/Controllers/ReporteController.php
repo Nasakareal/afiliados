@@ -389,7 +389,7 @@ class ReporteController extends Controller
         }
 
         $items = $q->get()->map(function($r) use ($request, $column, $isCapturista){
-            [$incKey, $excKey] = match ($column) {
+            $filterKeys = [
                 'afiliados.seccion'          => ['secciones','excluir_secciones'],
                 'afiliados.municipio'        => ['municipios','excluir_municipios'],
                 'afiliados.cve_mun'          => ['cve_mun','excluir_cve_mun'],
@@ -398,8 +398,8 @@ class ReporteController extends Controller
                 'afiliados.estatus'          => ['estatus','excluir_estatus'],
                 'afiliados.capturista_id'    => ['capturistas','excluir_capturistas'],
                 'afiliados.sexo'             => ['sexo','excluir_sexo'],
-                default                      => [null,null],
-            };
+            ];
+            [$incKey, $excKey] = $filterKeys[$column] ?? [null,null];
 
             $inc = $this->normalizeList($incKey ? $request->input($incKey) : null);
             $exc = $this->normalizeList($excKey ? $request->input($excKey) : null);

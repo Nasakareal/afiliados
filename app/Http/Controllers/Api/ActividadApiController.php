@@ -39,8 +39,8 @@ class ActividadApiController extends Controller
                 return [
                     'id'     => $a->id,
                     'title'  => $a->titulo ?: 'Sin título',
-                    'start'  => $a->inicio?->toIso8601String(),
-                    'end'    => $a->fin?->toIso8601String(),
+                    'start'  => $a->inicio ? $a->inicio->toIso8601String() : null,
+                    'end'    => $a->fin ? $a->fin->toIso8601String() : null,
                     'allDay' => (bool) $a->all_day,
                     'color'  => $this->estadoColor($a->estado),
                 ];
@@ -96,11 +96,12 @@ class ActividadApiController extends Controller
 
     private function estadoColor(?string $estado): string
     {
-        return match($estado) {
+        $colors = [
             'programada' => '#1976d2',
             'cancelada'  => '#d32f2f',
             'realizada'  => '#388e3c',
-            default      => '#616161',
-        };
+        ];
+
+        return $colors[$estado] ?? '#616161';
     }
 }

@@ -30,6 +30,8 @@ class AuthApiController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email'=> $user->email,
+                'roles' => $user->getRoleNames()->values(),
+                'permissions' => $user->getAllPermissions()->pluck('name')->values(),
             ],
         ]);
     }
@@ -41,7 +43,10 @@ class AuthApiController extends Controller
 
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()?->delete();
+        $token = $request->user()->currentAccessToken();
+        if ($token) {
+            $token->delete();
+        }
         return response()->json(['ok' => true]);
     }
 }
