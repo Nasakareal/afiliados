@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Lona;
 use App\Models\User;
+use Database\Seeders\DistrictCoordinatorUsersSeeder;
 use Database\Seeders\LonasUsersSeeder;
 use Database\Seeders\PermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -80,5 +81,28 @@ class LonasModuleTest extends TestCase
             $this->assertTrue($user->can('lonas.crear'));
             $this->assertFalse($user->can('afiliados.ver'));
         }
+    }
+
+    public function test_production_seeder_reuses_legacy_lonas_accounts(): void
+    {
+        $legacyUser = User::factory()->create([
+            'name' => 'Captura Lonas 01',
+            'email' => 'lonas01@gladyadorez.com',
+            'must_change_password' => true,
+        ]);
+
+        $this->seed(DistrictCoordinatorUsersSeeder::class);
+
+        $districtUser = User::where('email', 'distrito01@gladyadorez.com')->firstOrFail();
+
+        $this->assertSame($legacyUser->id, $districtUser->id);
+        $this->assertSame('Distrito Local 01', $districtUser->name);
+        $this->assertFalse($districtUser->must_change_password);
+        $this->assertTrue($districtUser->hasExactRoles('Lonas'));
+        $this->assertDatabaseMissing('users', ['email' => 'lonas01@gladyadorez.com']);
+        $this->assertSame(
+            30,
+            User::where('email', 'like', '%@gladyadorez.com')->count()
+        );
     }
 }
