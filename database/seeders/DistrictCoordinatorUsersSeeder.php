@@ -9,8 +9,6 @@ class DistrictCoordinatorUsersSeeder extends Seeder
 {
     /**
      * Provisiona las 30 cuentas entregadas en el archivo de credenciales.
-     *
-     * Este seeder reemplaza las cuentas legacy lonas01-lonas30 cuando existen.
      * Ejecutarlo nuevamente restablece las 30 contraseñas a las entregadas.
      */
     public function run(): void
@@ -51,30 +49,20 @@ class DistrictCoordinatorUsersSeeder extends Seeder
         ];
 
         foreach ($passwordHashes as $index => $passwordHash) {
-            $legacyNumber = $index + 1;
-            $legacyEmail = sprintf('lonas%02d@gladyadorez.com', $legacyNumber);
+            $accountNumber = $index + 1;
 
-            if ($legacyNumber <= 24) {
-                $suffix = str_pad((string) $legacyNumber, 2, '0', STR_PAD_LEFT);
+            if ($accountNumber <= 24) {
+                $suffix = str_pad((string) $accountNumber, 2, '0', STR_PAD_LEFT);
                 $name = "Distrito Local {$suffix}";
                 $email = "distrito{$suffix}@gladyadorez.com";
             } else {
-                $coordinatorNumber = $legacyNumber - 24;
+                $coordinatorNumber = $accountNumber - 24;
                 $suffix = str_pad((string) $coordinatorNumber, 2, '0', STR_PAD_LEFT);
                 $name = "Coordinador {$suffix}";
                 $email = "coordinador{$suffix}@gladyadorez.com";
             }
 
-            $targetUser = User::where('email', $email)->first();
-            $legacyUser = User::where('email', $legacyEmail)->first();
-
-            if ($targetUser && $legacyUser && !$targetUser->is($legacyUser)) {
-                throw new \RuntimeException(
-                    "Existen simultáneamente las cuentas {$legacyEmail} y {$email}; resuelve el duplicado antes de continuar."
-                );
-            }
-
-            $user = $targetUser ?? $legacyUser ?? new User();
+            $user = User::where('email', $email)->first() ?? new User();
             $user->forceFill([
                 'name' => $name,
                 'email' => $email,

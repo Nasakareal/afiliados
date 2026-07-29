@@ -12,6 +12,7 @@ class DatabaseSeeder extends Seeder
             RolesSeeder::class,
             PermissionsSeeder::class,
             LonasUsersSeeder::class,
+            DistrictCoordinatorUsersSeeder::class,
         ]);
     }
 }

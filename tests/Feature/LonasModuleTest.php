@@ -9,6 +9,7 @@ use Database\Seeders\LonasUsersSeeder;
 use Database\Seeders\PermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -68,14 +69,14 @@ class LonasModuleTest extends TestCase
     {
         $this->seed(LonasUsersSeeder::class);
 
-        $users = User::where('email', 'like', '%@gladyadorez.com')->get();
+        $users = User::where('email', 'like', 'lonas%@gladyadorez.com')->get();
         $this->assertCount(30, $users);
-        $this->assertCount(24, $users->filter(fn (User $user) => strpos($user->email, 'distrito') === 0));
-        $this->assertCount(6, $users->filter(fn (User $user) => strpos($user->email, 'coordinador') === 0));
-        $this->assertTrue($users->contains('email', 'distrito01@gladyadorez.com'));
-        $this->assertTrue($users->contains('email', 'coordinador01@gladyadorez.com'));
+        $this->assertTrue($users->contains('email', 'lonas01@gladyadorez.com'));
+        $this->assertTrue($users->contains('email', 'lonas30@gladyadorez.com'));
 
         foreach ($users as $user) {
+            $this->assertTrue(Hash::check('Lonas2026!', $user->password));
+            $this->assertFalse($user->must_change_password);
             $this->assertTrue($user->hasExactRoles('Lonas'));
             $this->assertTrue($user->can('lonas.ver'));
             $this->assertTrue($user->can('lonas.crear'));
@@ -83,25 +84,39 @@ class LonasModuleTest extends TestCase
         }
     }
 
-    public function test_production_seeder_reuses_legacy_lonas_accounts(): void
+    public function test_district_seeder_does_not_replace_lonas_accounts(): void
     {
-        $legacyUser = User::factory()->create([
+        $lonasUser = User::factory()->create([
             'name' => 'Captura Lonas 01',
             'email' => 'lonas01@gladyadorez.com',
-            'must_change_password' => true,
+            'must_change_password' => false,
         ]);
 
         $this->seed(DistrictCoordinatorUsersSeeder::class);
 
         $districtUser = User::where('email', 'distrito01@gladyadorez.com')->firstOrFail();
+        $preservedLonasUser = User::where('email', 'lonas01@gladyadorez.com')->firstOrFail();
 
-        $this->assertSame($legacyUser->id, $districtUser->id);
+        $this->assertNotSame($lonasUser->id, $districtUser->id);
+        $this->assertSame($lonasUser->id, $preservedLonasUser->id);
         $this->assertSame('Distrito Local 01', $districtUser->name);
         $this->assertFalse($districtUser->must_change_password);
         $this->assertTrue($districtUser->hasExactRoles('Lonas'));
-        $this->assertDatabaseMissing('users', ['email' => 'lonas01@gladyadorez.com']);
         $this->assertSame(
             30,
+            User::where('email', 'like', 'distrito%@gladyadorez.com')
+                ->orWhere('email', 'like', 'coordinador%@gladyadorez.com')
+                ->count()
+        );
+    }
+
+    public function test_lonas_and_district_accounts_can_coexist(): void
+    {
+        $this->seed(LonasUsersSeeder::class);
+        $this->seed(DistrictCoordinatorUsersSeeder::class);
+
+        $this->assertSame(
+            60,
             User::where('email', 'like', '%@gladyadorez.com')->count()
         );
     }
