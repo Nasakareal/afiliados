@@ -24,13 +24,13 @@
             @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
           </div>
           <div class="col-md-6">
-            <label class="form-label">Password (opcional)</label>
-            <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" placeholder="Deja vacío para no cambiar">
+            <label class="form-label">Restablecer contraseña (opcional)</label>
+            <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" placeholder="Solo administradores; deja vacío para conservarla">
             @error('password')<div class="invalid-feedback">{{ $message }}</div>@enderror
           </div>
           <div class="col-md-6">
-            <label class="form-label">Confirmar password</label>
-            <input type="password" name="password_confirmation" class="form-control" placeholder="Solo si cambias password">
+            <label class="form-label">Confirmar nueva contraseña</label>
+            <input type="password" name="password_confirmation" class="form-control" placeholder="Repite la nueva contraseña">
           </div>
             <div class="col-md-12">
                 <label class="form-label">Rol</label>

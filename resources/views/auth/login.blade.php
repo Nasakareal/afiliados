@@ -123,9 +123,7 @@
                   <label class="form-check-label" for="remember_me">Recordarme</label>
                 </div>
 
-                @if (Route::has('password.request'))
-                  <a class="small text-decoration-none" href="{{ route('password.request') }}">¿Olvidaste tu contraseña?</a>
-                @endif
+                <span class="small text-muted">Solicita el restablecimiento a un administrador.</span>
               </div>
 
               <button type="submit" class="btn btn-granate w-100 py-2">

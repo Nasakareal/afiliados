@@ -11,5 +11,6 @@ Homestead.json
 Homestead.yaml
 npm-debug.log
 yarn-error.log
+credenciales_distritos_coordinadores.txt
 /.idea
 /.vscode

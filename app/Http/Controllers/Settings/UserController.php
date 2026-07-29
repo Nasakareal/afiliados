@@ -47,6 +47,10 @@ class UserController extends Controller
             'email'    => $validated['email'],
             'password' => bcrypt($validated['password']),
         ]);
+        $usuario->forceFill([
+            'must_change_password' => false,
+            'password_changed_at' => now(),
+        ])->save();
 
         if (!empty($role)) {
             $usuario->syncRoles([$role]);
@@ -103,6 +107,8 @@ class UserController extends Controller
         $user->email = $validated['email'];
         if (!empty($validated['password'])) {
             $user->password = bcrypt($validated['password']);
+            $user->must_change_password = false;
+            $user->password_changed_at = now();
         }
         $user->save();
 

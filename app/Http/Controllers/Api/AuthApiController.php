@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
-use App\Models\User;
 
 class AuthApiController extends Controller
 {
@@ -26,13 +26,7 @@ class AuthApiController extends Controller
 
         return response()->json([
             'token' => $token,
-            'user'  => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email'=> $user->email,
-                'roles' => $user->getRoleNames()->values(),
-                'permissions' => $user->getAllPermissions()->pluck('name')->values(),
-            ],
+            'user' => $this->userPayload($user),
         ]);
     }
 
@@ -48,5 +42,16 @@ class AuthApiController extends Controller
             $token->delete();
         }
         return response()->json(['ok' => true]);
+    }
+
+    private function userPayload(User $user): array
+    {
+        return [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'roles' => $user->getRoleNames()->values(),
+            'permissions' => $user->getAllPermissions()->pluck('name')->values(),
+        ];
     }
 }

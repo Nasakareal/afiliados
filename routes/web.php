@@ -14,7 +14,6 @@ use App\Http\Controllers\Settings\RolePermissionController;
 use App\Http\Controllers\Settings\AppSettingController;
 use App\Http\Controllers\Settings\ComunicadoController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\Auth\ForcePasswordController;
 use App\Http\Controllers\LonaController;
 
 /*
@@ -33,11 +32,6 @@ if (file_exists(base_path('routes/auth.php'))) {
 }
 
 Route::middleware('auth')->group(function () {
-    Route::get('/password/force', [ForcePasswordController::class,'form'])->name('password.force.form');
-    Route::post('/password/force', [ForcePasswordController::class,'update'])->name('password.force.update');
-});
-
-Route::middleware(['auth','force.password.change'])->group(function () {
 
     Route::get('/dashboard', [DashboardController::class,'index'])->name('dashboard');
 

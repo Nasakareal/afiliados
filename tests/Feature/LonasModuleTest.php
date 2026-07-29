@@ -69,7 +69,10 @@ class LonasModuleTest extends TestCase
 
         $users = User::where('email', 'like', '%@gladyadorez.com')->get();
         $this->assertCount(30, $users);
-        $this->assertSame('lonas01@gladyadorez.com', $users->sortBy('email')->first()->email);
+        $this->assertCount(24, $users->filter(fn (User $user) => strpos($user->email, 'distrito') === 0));
+        $this->assertCount(6, $users->filter(fn (User $user) => strpos($user->email, 'coordinador') === 0));
+        $this->assertTrue($users->contains('email', 'distrito01@gladyadorez.com'));
+        $this->assertTrue($users->contains('email', 'coordinador01@gladyadorez.com'));
 
         foreach ($users as $user) {
             $this->assertTrue($user->hasExactRoles('Lonas'));

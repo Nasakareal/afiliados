@@ -18,6 +18,8 @@ class User extends Authenticatable
 
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'must_change_password' => 'boolean',
+        'password_changed_at' => 'datetime',
     ];
 
     // === Relaciones de conveniencia ===
