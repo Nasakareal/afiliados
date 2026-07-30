@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Lona;
+use App\Services\GoogleMapsUrlParser;
 use App\Services\LonaPhotoProcessor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -11,6 +12,14 @@ use Illuminate\Support\Facades\Storage;
 
 class LonaApiController extends Controller
 {
+    /** @var GoogleMapsUrlParser */
+    private $googleMapsUrlParser;
+
+    public function __construct(GoogleMapsUrlParser $googleMapsUrlParser)
+    {
+        $this->googleMapsUrlParser = $googleMapsUrlParser;
+    }
+
     public function index(Request $request)
     {
         $q = trim((string) $request->query('q'));
@@ -150,6 +159,12 @@ class LonaApiController extends Controller
 
     private function validateLona(Request $request, bool $photoRequired): array
     {
+        $request->merge([
+            'ubicacion_google' => $this->googleMapsUrlParser->normalize(
+                $request->input('ubicacion_google')
+            ),
+        ]);
+
         $validated = $request->validate([
             'seccion' => ['required', 'string', 'max:10'],
             'direccion' => ['required', 'string', 'max:500'],
@@ -170,6 +185,14 @@ class LonaApiController extends Controller
         ]);
 
         unset($validated['foto']);
+
+        $googleCoordinates = $this->googleMapsUrlParser->coordinates(
+            $validated['ubicacion_google'] ?? null
+        );
+        if ($googleCoordinates) {
+            [$validated['lat'], $validated['lng']] = $googleCoordinates;
+        }
+
         if (empty($validated['ubicacion_google'])) {
             $validated['ubicacion_google'] = sprintf(
                 'https://www.google.com/maps?q=%s,%s',

@@ -65,6 +65,31 @@ class LonasModuleTest extends TestCase
         $this->assertLessThanOrEqual(1920, max($image[0], $image[1]));
     }
 
+    public function test_google_place_link_without_scheme_uses_place_coordinates_instead_of_viewport(): void
+    {
+        Storage::fake('local');
+        $user = User::factory()->create(['must_change_password' => false]);
+        $user->assignRole('Lonas');
+        $googleUrl = 'google.com/maps/place/Monumento+A+Lázaro+Cárdenas/@19.6751315,-101.2289137,13.17z/data=!4m5!3m4!1s0x842d0f18b7980341:0x645a16a9ec7eb00c!8m2!3d19.701789!4d-101.2071705?hl=es&entry=ttu';
+
+        $response = $this->actingAs($user)->post(route('lonas.store'), [
+            'seccion' => '1234',
+            'direccion' => 'Monumento a Lázaro Cárdenas',
+            'ubicacion_google' => $googleUrl,
+            // Simulates the incorrect viewport coordinates previously selected by the browser.
+            'lat' => '19.6751315',
+            'lng' => '-101.2289137',
+            'responsable' => 'Responsable de prueba',
+            'foto' => UploadedFile::fake()->image('lona.jpg', 800, 600),
+        ]);
+
+        $lona = Lona::latest('id')->firstOrFail();
+        $response->assertRedirect(route('lonas.show', $lona));
+        $this->assertSame('https://'.$googleUrl, $lona->ubicacion_google);
+        $this->assertEqualsWithDelta(19.701789, $lona->lat, 0.0000001);
+        $this->assertEqualsWithDelta(-101.2071705, $lona->lng, 0.0000001);
+    }
+
     public function test_generic_lonas_seeder_creates_thirty_restricted_users(): void
     {
         $this->seed(LonasUsersSeeder::class);

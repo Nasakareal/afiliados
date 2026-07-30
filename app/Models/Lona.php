@@ -27,6 +27,7 @@ class Lona extends Model
     protected $casts = [
         'lat' => 'float',
         'lng' => 'float',
+        'capturado_por' => 'integer',
         'foto_bytes_original' => 'integer',
         'foto_bytes_final' => 'integer',
     ];

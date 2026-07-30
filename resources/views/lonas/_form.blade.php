@@ -60,11 +60,11 @@
 
   <div class="col-lg-8">
     <label for="ubicacion_google" class="form-label">Enlace de Google Maps</label>
-    <input type="url" name="ubicacion_google" id="ubicacion_google"
+    <input type="text" inputmode="url" name="ubicacion_google" id="ubicacion_google"
            value="{{ old('ubicacion_google', $lona->ubicacion_google ?? '') }}"
            class="form-control @error('ubicacion_google') is-invalid @enderror"
            maxlength="2000" placeholder="Se genera automáticamente al seleccionar el punto">
-    <div class="form-text">También puedes pegar un enlace con coordenadas; el punto se ubicará automáticamente.</div>
+    <div class="form-text">Puedes pegar el enlace completo, incluso si comienza directamente con google.com; el punto se ubicará automáticamente.</div>
     @error('ubicacion_google')<div class="invalid-feedback">{{ $message }}</div>@enderror
   </div>
 
@@ -136,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }).addTo(map);
 
   let marker = null;
-  function setPoint(lat, lng, zoom) {
+  function setPoint(lat, lng, zoom, updateGoogleLink = true) {
     const latitude = Number(lat);
     const longitude = Number(lng);
     if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return;
@@ -157,11 +157,13 @@ document.addEventListener('DOMContentLoaded', function () {
     lngInput.value = lngValue;
     latDisplay.value = latValue;
     lngDisplay.value = lngValue;
-    googleInput.value = 'https://www.google.com/maps?q=' + latValue + ',' + lngValue;
+    if (updateGoogleLink) {
+      googleInput.value = 'https://www.google.com/maps?q=' + latValue + ',' + lngValue;
+    }
     if (zoom) map.setView([latitude, longitude], 18);
   }
 
-  if (hasInitialPoint) setPoint(initialLat, initialLng, false);
+  if (hasInitialPoint) setPoint(initialLat, initialLng, false, !googleInput.value);
   map.on('click', event => setPoint(event.latlng.lat, event.latlng.lng, false));
 
   locationButton.addEventListener('click', function () {
@@ -188,11 +190,17 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   function coordinatesFromGoogleUrl(value) {
-    const decoded = decodeURIComponent(String(value || ''));
+    let decoded = String(value || '');
+    try {
+      decoded = decodeURIComponent(decoded);
+    } catch (error) {
+      // Keep the original text when a copied URL contains a stray % character.
+    }
     const patterns = [
-      /@(-?\d{1,2}(?:\.\d+)?),(-?\d{1,3}(?:\.\d+)?)/,
+      /!3d(-?\d{1,2}(?:\.\d+)?)!4d(-?\d{1,3}(?:\.\d+)?)/,
       /[?&](?:q|query|ll)=(-?\d{1,2}(?:\.\d+)?),\s*(-?\d{1,3}(?:\.\d+)?)/,
-      /\/place\/(-?\d{1,2}(?:\.\d+)?),\s*(-?\d{1,3}(?:\.\d+)?)/
+      /\/place\/(-?\d{1,2}(?:\.\d+)?),\s*(-?\d{1,3}(?:\.\d+)?)(?:\/|$)/,
+      /@(-?\d{1,2}(?:\.\d+)?),\s*(-?\d{1,3}(?:\.\d+)?)(?:,|\/|$)/
     ];
     for (const pattern of patterns) {
       const match = decoded.match(pattern);
@@ -201,10 +209,22 @@ document.addEventListener('DOMContentLoaded', function () {
     return null;
   }
 
-  googleInput.addEventListener('change', function () {
+  function normalizeGoogleUrl(value) {
+    const url = String(value || '').trim();
+    if (/^(?:www\.)?(?:google\.[a-z.]+|maps\.google\.[a-z.]+|maps\.app\.goo\.gl|goo\.gl)(?:\/|$)/i.test(url)) {
+      return 'https://' + url;
+    }
+    if (url.startsWith('//')) return 'https:' + url;
+    return url;
+  }
+
+  function applyGoogleUrl() {
+    googleInput.value = normalizeGoogleUrl(googleInput.value);
     const point = coordinatesFromGoogleUrl(googleInput.value);
-    if (point) setPoint(point[0], point[1], true);
-  });
+    if (point) setPoint(point[0], point[1], true, false);
+  }
+
+  googleInput.addEventListener('change', applyGoogleUrl);
 
   let previewUrl = null;
   photoInput.addEventListener('change', function () {
@@ -258,6 +278,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   form.addEventListener('submit', async function (event) {
     if (form.dataset.photoReady === '1') return;
+    applyGoogleUrl();
     if (!latInput.value || !lngInput.value) {
       event.preventDefault();
       alert('Selecciona la ubicación exacta de la lona en el mapa.');
