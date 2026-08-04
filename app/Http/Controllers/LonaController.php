@@ -39,7 +39,7 @@ class LonaController extends Controller
         $seccion = trim((string) $request->query('seccion'));
 
         $path = $exporter->create(
-            $this->filteredQuery($q, $seccion)->latest()->get()
+            $this->filteredQuery($q, $seccion)
         );
 
         return response()->download(

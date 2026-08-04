@@ -97,10 +97,10 @@ class LonasModuleTest extends TestCase
         $user = User::factory()->create(['must_change_password' => false]);
         $user->assignRole('Lonas');
 
-        $photo = UploadedFile::fake()->image('lona.jpg', 120, 90);
+        $photo = UploadedFile::fake()->image('lona.jpg', 1600, 1200);
         Storage::disk('local')->put('lonas/prueba.jpg', file_get_contents($photo->getRealPath()));
 
-        foreach (range(1, 21) as $number) {
+        foreach (range(1, 121) as $number) {
             Lona::create([
                 'seccion' => '0012',
                 'direccion' => 'Avenida Centro '.$number,
@@ -136,6 +136,7 @@ class LonasModuleTest extends TestCase
         $response->assertHeader('content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 
         $path = $response->baseResponse->getFile()->getPathname();
+        $this->assertLessThan(5 * 1024 * 1024, filesize($path));
         $workbook = IOFactory::load($path);
         $sheet = $workbook->getActiveSheet();
 
@@ -145,8 +146,10 @@ class LonasModuleTest extends TestCase
         $this->assertStringStartsWith('Avenida Centro ', $sheet->getCell('D5')->getValue());
         $this->assertSame('Capturista', $sheet->getCell('G4')->getValue());
         $this->assertSame($user->name, $sheet->getCell('G5')->getValue());
-        $this->assertSame(25, $sheet->getHighestDataRow());
-        $this->assertCount(21, $sheet->getDrawingCollection());
+        $this->assertSame(125, $sheet->getHighestDataRow());
+        $this->assertCount(121, $sheet->getDrawingCollection());
+        $this->assertLessThanOrEqual(145, $sheet->getDrawingCollection()[0]->getWidth());
+        $this->assertLessThanOrEqual(100, $sheet->getDrawingCollection()[0]->getHeight());
         $this->assertSame(
             'https://www.google.com/maps?q=19.7026,-101.1922',
             $sheet->getCell('J5')->getHyperlink()->getUrl()

@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
@@ -13,16 +13,21 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use RuntimeException;
-use Throwable;
 
 class LonasExcelExporter
 {
     private const HEADER_ROW = 4;
     private const FIRST_DATA_ROW = 5;
     private const LAST_COLUMN = 'P';
+    private const QUERY_CHUNK_SIZE = 100;
+    private const PHOTO_WIDTH = 145;
+    private const PHOTO_HEIGHT = 100;
+    private const PHOTO_QUALITY = 65;
 
-    public function create(Collection $lonas): string
+    public function create(Builder $query): string
     {
+        $this->ensureExecutionCapacity();
+
         $exportDirectory = storage_path('app/exports');
         if (!is_dir($exportDirectory) && !mkdir($exportDirectory, 0775, true) && !is_dir($exportDirectory)) {
             throw new RuntimeException('No fue posible preparar la carpeta de exportaciones.');
@@ -33,9 +38,18 @@ class LonasExcelExporter
             throw new RuntimeException('No fue posible crear el archivo temporal de exportación.');
         }
 
-        $spreadsheet = new Spreadsheet();
+        $assetDirectory = $exportDirectory.DIRECTORY_SEPARATOR.uniqid('lonas_assets_', true);
+        if (!mkdir($assetDirectory, 0775, true) && !is_dir($assetDirectory)) {
+            @unlink($path);
+            throw new RuntimeException('No fue posible preparar las fotografías para la exportación.');
+        }
+
+        $spreadsheet = null;
+        $completed = false;
 
         try {
+            $total = (clone $query)->count();
+            $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
             $sheet->setTitle('Lonas');
             $sheet->setShowGridlines(false);
@@ -45,7 +59,7 @@ class LonasExcelExporter
             $sheet->mergeCells('A2:'.self::LAST_COLUMN.'2');
             $sheet->setCellValue(
                 'A2',
-                'Generado el '.now()->format('d/m/Y H:i').' · '.$lonas->count().' registro(s)'
+                'Generado el '.now()->format('d/m/Y H:i').' · '.$total.' registro(s)'
             );
 
             $headers = [
@@ -72,36 +86,14 @@ class LonasExcelExporter
             }
 
             $row = self::FIRST_DATA_ROW;
-            foreach ($lonas as $lona) {
-                $sheet->setCellValue("A{$row}", (int) $lona->id);
-                $sheet->setCellValueExplicit("C{$row}", (string) $lona->seccion, DataType::TYPE_STRING);
-                $sheet->setCellValue("D{$row}", $lona->direccion);
-                $sheet->setCellValue("E{$row}", $lona->responsable);
-                $sheet->setCellValue("F{$row}", $lona->capturado_por === null ? null : (int) $lona->capturado_por);
-                $sheet->setCellValue("G{$row}", optional($lona->capturista)->name ?: '—');
-                $sheet->setCellValue("H{$row}", (float) $lona->lat);
-                $sheet->setCellValue("I{$row}", (float) $lona->lng);
-                $sheet->setCellValue("J{$row}", $lona->ubicacion_google);
-                $sheet->setCellValue("K{$row}", $lona->foto_nombre_original);
-                $sheet->setCellValue("L{$row}", $lona->foto_path);
-                $sheet->setCellValue("M{$row}", $lona->foto_bytes_original === null ? null : (int) $lona->foto_bytes_original);
-                $sheet->setCellValue("N{$row}", $lona->foto_bytes_final === null ? null : (int) $lona->foto_bytes_final);
-
-                if ($lona->created_at) {
-                    $sheet->setCellValue("O{$row}", Date::PHPToExcel($lona->created_at));
-                }
-                if ($lona->updated_at) {
-                    $sheet->setCellValue("P{$row}", Date::PHPToExcel($lona->updated_at));
-                }
-
-                if ($lona->ubicacion_google) {
-                    $sheet->getCell("J{$row}")->getHyperlink()->setUrl($lona->ubicacion_google);
-                }
-
-                $this->addPhoto($sheet, $lona->foto_path, $row);
-                $sheet->getRowDimension($row)->setRowHeight(82);
-                $row++;
-            }
+            (clone $query)
+                ->reorder('id')
+                ->chunkById(self::QUERY_CHUNK_SIZE, function ($lonas) use ($sheet, $assetDirectory, &$row) {
+                    foreach ($lonas as $lona) {
+                        $this->writeRow($sheet, $lona, $row, $assetDirectory);
+                        $row++;
+                    }
+                });
 
             $lastRow = max(self::HEADER_ROW, $row - 1);
             $sheet->setAutoFilter('A'.self::HEADER_ROW.':'.self::LAST_COLUMN.$lastRow);
@@ -110,27 +102,58 @@ class LonasExcelExporter
             $this->applyStyles($spreadsheet, $lastRow);
 
             $writer = new Xlsx($spreadsheet);
+            $writer->setPreCalculateFormulas(false);
             $writer->save($path);
 
-            $spreadsheet->disconnectWorksheets();
+            $completed = true;
 
             return $path;
-        } catch (Throwable $exception) {
-            $spreadsheet->disconnectWorksheets();
-            @unlink($path);
-            throw $exception;
+        } finally {
+            if ($spreadsheet) {
+                $spreadsheet->disconnectWorksheets();
+            }
+            $this->removeAssetDirectory($assetDirectory);
+            if (!$completed) {
+                @unlink($path);
+            }
         }
     }
 
-    private function addPhoto($sheet, ?string $storagePath, int $row): void
+    private function writeRow($sheet, $lona, int $row, string $assetDirectory): void
     {
-        if (!$storagePath || !Storage::disk('local')->exists($storagePath)) {
-            $sheet->setCellValue("B{$row}", 'No disponible');
-            return;
+        $sheet->setCellValue("A{$row}", (int) $lona->id);
+        $sheet->setCellValueExplicit("C{$row}", (string) $lona->seccion, DataType::TYPE_STRING);
+        $sheet->setCellValue("D{$row}", $lona->direccion);
+        $sheet->setCellValue("E{$row}", $lona->responsable);
+        $sheet->setCellValue("F{$row}", $lona->capturado_por === null ? null : (int) $lona->capturado_por);
+        $sheet->setCellValue("G{$row}", optional($lona->capturista)->name ?: '—');
+        $sheet->setCellValue("H{$row}", (float) $lona->lat);
+        $sheet->setCellValue("I{$row}", (float) $lona->lng);
+        $sheet->setCellValue("J{$row}", $lona->ubicacion_google);
+        $sheet->setCellValue("K{$row}", $lona->foto_nombre_original);
+        $sheet->setCellValue("L{$row}", $lona->foto_path);
+        $sheet->setCellValue("M{$row}", $lona->foto_bytes_original === null ? null : (int) $lona->foto_bytes_original);
+        $sheet->setCellValue("N{$row}", $lona->foto_bytes_final === null ? null : (int) $lona->foto_bytes_final);
+
+        if ($lona->created_at) {
+            $sheet->setCellValue("O{$row}", Date::PHPToExcel($lona->created_at));
+        }
+        if ($lona->updated_at) {
+            $sheet->setCellValue("P{$row}", Date::PHPToExcel($lona->updated_at));
         }
 
-        $absolutePath = Storage::disk('local')->path($storagePath);
-        if (@getimagesize($absolutePath) === false) {
+        if ($lona->ubicacion_google) {
+            $sheet->getCell("J{$row}")->getHyperlink()->setUrl($lona->ubicacion_google);
+        }
+
+        $this->addPhoto($sheet, $lona->foto_path, $row, $assetDirectory);
+        $sheet->getRowDimension($row)->setRowHeight(82);
+    }
+
+    private function addPhoto($sheet, ?string $storagePath, int $row, string $assetDirectory): void
+    {
+        $thumbnailPath = $this->createThumbnail($storagePath, $row, $assetDirectory);
+        if (!$thumbnailPath) {
             $sheet->setCellValue("B{$row}", 'No disponible');
             return;
         }
@@ -138,13 +161,104 @@ class LonasExcelExporter
         $drawing = new Drawing();
         $drawing->setName('Lona '.$row);
         $drawing->setDescription('Fotografía de la lona');
-        $drawing->setPath($absolutePath);
+        $drawing->setPath($thumbnailPath);
         $drawing->setResizeProportional(true);
-        $drawing->setWidthAndHeight(145, 100);
+        $drawing->setWidthAndHeight(self::PHOTO_WIDTH, self::PHOTO_HEIGHT);
         $drawing->setCoordinates("B{$row}");
         $drawing->setOffsetX(5);
         $drawing->setOffsetY(5);
         $drawing->setWorksheet($sheet);
+    }
+
+    private function createThumbnail(?string $storagePath, int $row, string $assetDirectory): ?string
+    {
+        if (!$storagePath || !function_exists('imagecreatefromstring') || !Storage::disk('local')->exists($storagePath)) {
+            return null;
+        }
+
+        $absolutePath = Storage::disk('local')->path($storagePath);
+        $binary = @file_get_contents($absolutePath);
+        if ($binary === false) {
+            return null;
+        }
+
+        $source = @imagecreatefromstring($binary);
+        unset($binary);
+        if (!$source) {
+            return null;
+        }
+
+        $sourceWidth = imagesx($source);
+        $sourceHeight = imagesy($source);
+        $scale = min(self::PHOTO_WIDTH / $sourceWidth, self::PHOTO_HEIGHT / $sourceHeight, 1);
+        $targetWidth = max(1, (int) round($sourceWidth * $scale));
+        $targetHeight = max(1, (int) round($sourceHeight * $scale));
+        $thumbnail = imagecreatetruecolor($targetWidth, $targetHeight);
+
+        if (!$thumbnail) {
+            imagedestroy($source);
+            return null;
+        }
+
+        $white = imagecolorallocate($thumbnail, 255, 255, 255);
+        imagefill($thumbnail, 0, 0, $white);
+        imagecopyresampled(
+            $thumbnail,
+            $source,
+            0,
+            0,
+            0,
+            0,
+            $targetWidth,
+            $targetHeight,
+            $sourceWidth,
+            $sourceHeight
+        );
+
+        $thumbnailPath = $assetDirectory.DIRECTORY_SEPARATOR.$row.'.jpg';
+        $written = @imagejpeg($thumbnail, $thumbnailPath, self::PHOTO_QUALITY);
+        imagedestroy($thumbnail);
+        imagedestroy($source);
+
+        return $written ? $thumbnailPath : null;
+    }
+
+    private function removeAssetDirectory(string $assetDirectory): void
+    {
+        foreach (glob($assetDirectory.DIRECTORY_SEPARATOR.'*') ?: [] as $asset) {
+            if (is_file($asset)) {
+                @unlink($asset);
+            }
+        }
+        @rmdir($assetDirectory);
+    }
+
+    private function ensureExecutionCapacity(): void
+    {
+        @set_time_limit(600);
+
+        $memoryLimit = trim((string) ini_get('memory_limit'));
+        if ($memoryLimit !== '-1' && $this->memoryLimitInBytes($memoryLimit) < 512 * 1024 * 1024) {
+            @ini_set('memory_limit', '512M');
+        }
+    }
+
+    private function memoryLimitInBytes(string $value): int
+    {
+        $number = (int) $value;
+        $unit = strtolower(substr($value, -1));
+
+        if ($unit === 'g') {
+            return $number * 1024 * 1024 * 1024;
+        }
+        if ($unit === 'm') {
+            return $number * 1024 * 1024;
+        }
+        if ($unit === 'k') {
+            return $number * 1024;
+        }
+
+        return $number;
     }
 
     private function applyStyles(Spreadsheet $spreadsheet, int $lastRow): void
