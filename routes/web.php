@@ -102,6 +102,7 @@ Route::middleware('auth')->group(function () {
 
     // Lonas
     Route::get('/lonas', [LonaController::class, 'index'])->name('lonas.index')->middleware('permission:lonas.ver');
+    Route::get('/lonas/export.xlsx', [LonaController::class, 'export'])->name('lonas.export.xlsx')->middleware('permission:lonas.ver');
     Route::get('/lonas/mapa', [LonaController::class, 'map'])->name('lonas.map')->middleware('permission:lonas.ver');
     Route::get('/lonas/mapa/data', [LonaController::class, 'mapData'])->name('lonas.map.data')->middleware('permission:lonas.ver');
     Route::get('/lonas/create', [LonaController::class, 'create'])->name('lonas.create')->middleware('permission:lonas.crear');

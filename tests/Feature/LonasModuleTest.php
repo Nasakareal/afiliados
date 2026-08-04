@@ -11,6 +11,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use Tests\TestCase;
 
 class LonasModuleTest extends TestCase
@@ -88,6 +89,71 @@ class LonasModuleTest extends TestCase
         $this->assertSame('https://'.$googleUrl, $lona->ubicacion_google);
         $this->assertEqualsWithDelta(19.701789, $lona->lat, 0.0000001);
         $this->assertEqualsWithDelta(-101.2071705, $lona->lng, 0.0000001);
+    }
+
+    public function test_lonas_excel_exports_all_filtered_rows_with_their_photos(): void
+    {
+        Storage::fake('local');
+        $user = User::factory()->create(['must_change_password' => false]);
+        $user->assignRole('Lonas');
+
+        $photo = UploadedFile::fake()->image('lona.jpg', 120, 90);
+        Storage::disk('local')->put('lonas/prueba.jpg', file_get_contents($photo->getRealPath()));
+
+        foreach (range(1, 21) as $number) {
+            Lona::create([
+                'seccion' => '0012',
+                'direccion' => 'Avenida Centro '.$number,
+                'ubicacion_google' => 'https://www.google.com/maps?q=19.7026,-101.1922',
+                'lat' => 19.7026,
+                'lng' => -101.1922,
+                'foto_path' => 'lonas/prueba.jpg',
+                'foto_nombre_original' => 'lona-'.$number.'.jpg',
+                'foto_bytes_original' => 12345,
+                'foto_bytes_final' => 6789,
+                'responsable' => 'Responsable '.$number,
+                'capturado_por' => $user->id,
+            ]);
+        }
+
+        Lona::create([
+            'seccion' => '9999',
+            'direccion' => 'Otra ubicación',
+            'ubicacion_google' => 'https://www.google.com/maps?q=20,-100',
+            'lat' => 20,
+            'lng' => -100,
+            'foto_path' => 'lonas/prueba.jpg',
+            'responsable' => 'No debe exportarse',
+            'capturado_por' => $user->id,
+        ]);
+
+        $response = $this->actingAs($user)->get(route('lonas.export.xlsx', [
+            'q' => 'Centro',
+            'seccion' => '0012',
+        ]));
+
+        $response->assertOk();
+        $response->assertHeader('content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+
+        $path = $response->baseResponse->getFile()->getPathname();
+        $workbook = IOFactory::load($path);
+        $sheet = $workbook->getActiveSheet();
+
+        $this->assertSame('Listado de lonas', $sheet->getCell('A1')->getValue());
+        $this->assertSame('Sección', $sheet->getCell('C4')->getValue());
+        $this->assertSame('0012', $sheet->getCell('C5')->getValue());
+        $this->assertStringStartsWith('Avenida Centro ', $sheet->getCell('D5')->getValue());
+        $this->assertSame('Capturista', $sheet->getCell('G4')->getValue());
+        $this->assertSame($user->name, $sheet->getCell('G5')->getValue());
+        $this->assertSame(25, $sheet->getHighestDataRow());
+        $this->assertCount(21, $sheet->getDrawingCollection());
+        $this->assertSame(
+            'https://www.google.com/maps?q=19.7026,-101.1922',
+            $sheet->getCell('J5')->getHyperlink()->getUrl()
+        );
+
+        $workbook->disconnectWorksheets();
+        @unlink($path);
     }
 
     public function test_generic_lonas_seeder_creates_thirty_restricted_users(): void

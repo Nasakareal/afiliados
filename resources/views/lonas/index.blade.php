@@ -9,7 +9,11 @@
       <h1 class="h3 mb-1">Lonas registradas</h1>
       <p class="text-muted mb-0">Consulta las capturas y su ubicación.</p>
     </div>
-    <div class="d-flex gap-2">
+    <div class="d-flex flex-wrap gap-2">
+      <a href="{{ route('lonas.export.xlsx', array_filter(['q' => $q, 'seccion' => $seccion], fn ($value) => $value !== '')) }}"
+         class="btn btn-outline-success">
+        <i class="fa-solid fa-file-excel me-1"></i> Descargar Excel
+      </a>
       <a href="{{ route('lonas.map') }}" class="btn btn-outline-primary">
         <i class="fa-solid fa-map-location-dot me-1"></i> Ver mapa
       </a>
