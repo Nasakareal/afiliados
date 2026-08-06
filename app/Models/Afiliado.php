@@ -9,11 +9,17 @@ class Afiliado extends Model
 {
     use SoftDeletes;
 
+    public const TIPOS_VINCULO = [
+        'dv' => 'DV',
+        'comite' => 'Comité',
+        'mov' => 'MOV',
+    ];
+
     protected $fillable = [
         'capturista_id',
         'nombre','apellido_paterno','apellido_materno',
         'edad','sexo',
-        'telefono','email',
+        'telefono','email','clave_elector','tipo_vinculo','numero_mov',
         'municipio','cve_mun','localidad','colonia','calle','numero_ext','numero_int','cp',
         'lat','lng',
         'seccion','distrito_federal','distrito_local',
@@ -27,6 +33,12 @@ class Afiliado extends Model
         'lng'  => 'float',
         'fecha_convencimiento' => 'datetime',
     ];
+
+    public function setClaveElectorAttribute($value): void
+    {
+        $normalizada = preg_replace('/\s+/', '', mb_strtoupper(trim((string) $value), 'UTF-8'));
+        $this->attributes['clave_elector'] = $normalizada !== '' ? $normalizada : null;
+    }
 
     public function capturista()
     {

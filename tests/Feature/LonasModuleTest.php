@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Lona;
 use App\Models\User;
 use Database\Seeders\DistrictCoordinatorUsersSeeder;
+use Database\Seeders\InternalDistrictUsersSeeder;
 use Database\Seeders\LonasUsersSeeder;
 use Database\Seeders\PermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -212,6 +213,50 @@ class LonasModuleTest extends TestCase
         $this->assertSame(
             60,
             User::where('email', 'like', '%@gladyadorez.com')->count()
+        );
+    }
+
+    public function test_internal_district_seeder_creates_24_accounts_without_altering_external_accounts(): void
+    {
+        $this->seed(DistrictCoordinatorUsersSeeder::class);
+
+        $externalUsersBefore = User::where('email', 'like', 'distrito%@gladyadorez.com')
+            ->where('email', 'not like', 'distritointerno%@gladyadorez.com')
+            ->orderBy('email')
+            ->get(['id', 'name', 'email', 'password', 'updated_at'])
+            ->toArray();
+
+        $this->seed(InternalDistrictUsersSeeder::class);
+
+        $internalUsers = User::where('email', 'like', 'distritointerno%@gladyadorez.com')
+            ->orderBy('email')
+            ->get();
+
+        $this->assertCount(24, $internalUsers);
+        $this->assertSame('distritointerno01@gladyadorez.com', $internalUsers->first()->email);
+        $this->assertSame('Distrito Local Interno 01', $internalUsers->first()->name);
+        $this->assertSame('distritointerno24@gladyadorez.com', $internalUsers->last()->email);
+
+        foreach ($internalUsers as $user) {
+            $this->assertFalse($user->must_change_password);
+            $this->assertTrue($user->hasExactRoles('Lonas'));
+            $this->assertTrue($user->can('lonas.ver'));
+            $this->assertTrue($user->can('lonas.crear'));
+            $this->assertFalse($user->can('afiliados.ver'));
+        }
+
+        $externalUsersAfter = User::where('email', 'like', 'distrito%@gladyadorez.com')
+            ->where('email', 'not like', 'distritointerno%@gladyadorez.com')
+            ->orderBy('email')
+            ->get(['id', 'name', 'email', 'password', 'updated_at'])
+            ->toArray();
+
+        $this->assertSame($externalUsersBefore, $externalUsersAfter);
+
+        $this->seed(InternalDistrictUsersSeeder::class);
+        $this->assertSame(
+            24,
+            User::where('email', 'like', 'distritointerno%@gladyadorez.com')->count()
         );
     }
 }

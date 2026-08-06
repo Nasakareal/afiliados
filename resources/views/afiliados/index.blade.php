@@ -11,20 +11,27 @@
   <div class="card card-outline card-primary">
     <div class="card-header d-flex justify-content-between align-items-center">
       <h3 class="card-title">Referentes / Referencias registradas</h3>
-      @can('afiliados.crear')
-      <div class="btn-group">
+      <div class="d-flex gap-2">
+        @php
+          $exportParams = request()->query();
+          $exportParams['page'] = $afiliados->currentPage();
+        @endphp
+        <a href="{{ route('afiliados.exportar_pagina', $exportParams) }}" class="btn btn-outline-danger btn-sm">
+          <i class="fa fa-file-pdf"></i> Exportar esta página
+        </a>
+        @can('afiliados.crear')
         <a href="{{ route('registro') }}" class="btn btn-primary btn-sm">
           <i class="fa fa-plus"></i> Nuevo
         </a>
+        @endcan
       </div>
-      @endcan
     </div>
 
     <div class="card-body">
       {{-- Filtros --}}
       <form method="GET" action="{{ route('afiliados.index') }}" class="row g-2 mb-3">
         <div class="col-12 col-md-4">
-          <input type="text" name="q" value="{{ $q ?? '' }}" class="form-control form-control-sm" placeholder="Buscar: nombre, teléfono, email">
+          <input type="text" name="q" value="{{ $q ?? '' }}" class="form-control form-control-sm" placeholder="Buscar: nombre, teléfono, email o clave">
         </div>
         <div class="col-6 col-md-2">
           <input type="text" name="seccion" value="{{ $seccion ?? '' }}" class="form-control form-control-sm" placeholder="Sección">
@@ -45,6 +52,13 @@
         </div>
         <div class="col-6 col-md-2">
           <input type="number" name="capturista_id" value="{{ $capId ?? '' }}" class="form-control form-control-sm" placeholder="ID Capturista">
+        </div>
+        <div class="col-6 col-md-2">
+          <select name="per_page" class="form-control form-control-sm" onchange="this.form.submit()" aria-label="Registros por página">
+            @foreach($perPageOptions as $option)
+              <option value="{{ $option }}" {{ (int)request('per_page', 25) === $option ? 'selected' : '' }}>{{ $option }} por página</option>
+            @endforeach
+          </select>
         </div>
         <div class="col-6 col-md-2">
           <button class="btn btn-outline-primary btn-sm w-100"><i class="fa fa-search"></i> Filtrar</button>
@@ -84,6 +98,7 @@
             <th class="text-center" style="width:60px">#</th>
             <th>Nombre</th>
             <th>Contacto</th>
+            <th>Clave / indicador</th>
             <th>Municipio</th>
             <th>Sección</th>
             <th>Referente/Referencia</th> {{-- NUEVA COLUMNA (mapea a perfil) --}}
@@ -107,6 +122,15 @@
             <td>
               @if($a->telefono)<div><i class="fa fa-phone"></i> {{ $a->telefono }}</div>@endif
               @if($a->email)<div class="small text-muted"><i class="fa fa-envelope"></i> {{ $a->email }}</div>@endif
+            </td>
+            <td>
+              <code>{{ $a->clave_elector ?: '—' }}</code>
+              @if($a->tipo_vinculo)
+                <div class="small text-muted">
+                  {{ $tiposVinculo[$a->tipo_vinculo] ?? strtoupper($a->tipo_vinculo) }}
+                  @if($a->tipo_vinculo === 'mov' && $a->numero_mov) #{{ $a->numero_mov }} @endif
+                </div>
+              @endif
             </td>
             <td>
               {{ $a->s_municipio ?? $a->municipio }}
@@ -151,8 +175,12 @@
         </tbody>
       </table>
 
-      <div class="mt-2">
-        {{ $afiliados->links() }}
+      <div class="mt-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <div class="small text-muted">
+          Registros {{ $afiliados->firstItem() ?: 0 }}–{{ $afiliados->lastItem() ?: 0 }} · Página {{ $afiliados->currentPage() }}.
+          Se omite el conteo total para mantener buen rendimiento con millones de registros.
+        </div>
+        <div>{{ $afiliados->links() }}</div>
       </div>
     </div>
   </div>

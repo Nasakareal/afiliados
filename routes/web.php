@@ -37,6 +37,7 @@ Route::middleware('auth')->group(function () {
 
     // Afiliados
     Route::get('/afiliados', [AfiliadoController::class,'index'])->name('afiliados.index')->middleware('permission:afiliados.ver');
+    Route::get('/afiliados/exportar-pagina', [AfiliadoController::class,'exportarPagina'])->name('afiliados.exportar_pagina')->middleware('permission:afiliados.ver');
     Route::get('/afiliados/create', [AfiliadoController::class,'create'])->name('afiliados.create')->middleware('permission:afiliados.crear');
     Route::post('/afiliados', [AfiliadoController::class,'store'])->name('afiliados.store')->middleware('permission:afiliados.crear');
     Route::get('/afiliados/{afiliado}', [AfiliadoController::class,'show'])->name('afiliados.show')->middleware('permission:afiliados.ver');

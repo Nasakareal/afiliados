@@ -95,6 +95,8 @@
             @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
           </div>
 
+          @include('afiliados._campos_electorales', ['afiliado' => $afiliado])
+
           {{-- Ubicación --}}
           <div class="col-md-4">
             <label class="form-label {{ $req('municipio') ? 'required' : '' }}">Municipio</label>

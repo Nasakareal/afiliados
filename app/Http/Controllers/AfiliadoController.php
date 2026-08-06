@@ -9,9 +9,12 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class AfiliadoController extends Controller
 {
+    public const PER_PAGE_OPTIONS = [25, 50, 100, 200, 300, 500];
+
     public function index(Request $request)
     {
         $q         = trim((string)$request->query('q'));
@@ -23,6 +26,8 @@ class AfiliadoController extends Controller
 
         $full = $this->fullNameField();
         $hasCveMun = Schema::hasColumn('afiliados', 'cve_mun');
+        $perPage = $this->perPage($request);
+        $clave = $this->normalizeClaveElector($q);
 
         $afiliados = Afiliado::query()
             ->leftJoin('secciones', function($j) use ($hasCveMun){
@@ -34,8 +39,8 @@ class AfiliadoController extends Controller
                 }
             })
             ->leftJoin('users','users.id','=','afiliados.capturista_id')
-            ->when($q !== '', function($qb) use ($q, $full){
-                $qb->where(function($w) use ($q, $full){
+            ->when($q !== '', function($qb) use ($q, $full, $clave){
+                $qb->where(function($w) use ($q, $full, $clave){
                     if ($full === 'nombre_completo') {
                         $w->where('afiliados.nombre_completo','like',"%{$q}%");
                     } else {
@@ -43,7 +48,8 @@ class AfiliadoController extends Controller
                         $w->whereRaw("CONCAT_WS(' ',afiliados.nombre,afiliados.apellido_paterno,afiliados.apellido_materno) like ?", ["%{$q}%"]);
                     }
                     $w->orWhere('afiliados.telefono','like',"%{$q}%")
-                      ->orWhere('afiliados.email','like',"%{$q}%");
+                      ->orWhere('afiliados.email','like',"%{$q}%")
+                      ->orWhere('afiliados.clave_elector','like',"{$clave}%");
                 });
             })
             ->when($seccion,   fn($qb)=>$qb->where('afiliados.seccion',$seccion))
@@ -63,10 +69,61 @@ class AfiliadoController extends Controller
                 'users.name as capturista_nombre',
             ])
             ->orderByDesc('afiliados.id')
-            ->paginate(20)
+            ->simplePaginate($perPage)
             ->withQueryString();
 
-        return view('afiliados.index', compact('afiliados','q','seccion','cveMun','municipio','estatus','capId'));
+        $perPageOptions = self::PER_PAGE_OPTIONS;
+        $tiposVinculo = Afiliado::TIPOS_VINCULO;
+
+        return view('afiliados.index', compact('afiliados','q','seccion','cveMun','municipio','estatus','capId','perPageOptions','tiposVinculo'));
+    }
+
+    public function exportarPagina(Request $request)
+    {
+        $q = trim((string) $request->query('q'));
+        $full = $this->fullNameField();
+        $clave = $this->normalizeClaveElector($q);
+        $perPage = $this->perPage($request);
+        $page = max(1, min((int) $request->query('page', 1), 100000000));
+
+        $afiliados = Afiliado::query()
+            ->when($q !== '', function ($query) use ($q, $full, $clave) {
+                $query->where(function ($where) use ($q, $full, $clave) {
+                    if ($full === 'nombre_completo') {
+                        $where->where('nombre_completo', 'like', "%{$q}%");
+                    } else {
+                        $where->whereRaw("CONCAT_WS(' ',nombre,apellido_paterno,apellido_materno) like ?", ["%{$q}%"]);
+                    }
+
+                    $where->orWhere('telefono', 'like', "%{$q}%")
+                        ->orWhere('email', 'like', "%{$q}%")
+                        ->orWhere('clave_elector', 'like', "{$clave}%");
+                });
+            })
+            ->when($request->query('seccion'), fn ($query, $value) => $query->where('seccion', $value))
+            ->when($request->query('cve_mun'), fn ($query, $value) => $query->where('cve_mun', $value))
+            ->when($request->query('municipio'), fn ($query, $value) => $query->where('municipio', $value))
+            ->when($request->query('estatus'), fn ($query, $value) => $query->where('estatus', $value))
+            ->when($request->query('capturista_id'), fn ($query, $value) => $query->where('capturista_id', $value))
+            ->orderByDesc('id')
+            ->forPage($page, $perPage)
+            ->get();
+
+        if ($afiliados->isEmpty()) {
+            return redirect()->route('afiliados.index', $request->except('page'))
+                ->with('error', 'La página seleccionada no contiene registros para exportar.');
+        }
+
+        return Pdf::loadView('afiliados.pdf_pagina', [
+            'afiliados' => $afiliados,
+            'paginaListado' => $page,
+            'perPage' => $perPage,
+            'numeroInicial' => (($page - 1) * $perPage) + 1,
+        ])->setPaper('a4', 'landscape')->download(sprintf(
+            'personas_convencidas_pagina_%d_%s.pdf',
+            $page,
+            now('America/Mexico_City')->format('Ymd_His')
+        ));
     }
 
     public function create()
@@ -92,6 +149,7 @@ class AfiliadoController extends Controller
     public function store(Request $request)
     {
         $full = $this->fullNameField();
+        $this->normalizeElectoralFields($request);
 
         // Normaliza nombre (sin acentos, MAYÚSCULAS y sin espacios dobles)
         $raw  = $this->squish($request->input($full, ''));
@@ -99,7 +157,11 @@ class AfiliadoController extends Controller
         $request->merge([$full => $name]);
 
         $rules = $this->rulesStore();
-        $data  = $request->validate($rules);
+        $data  = $request->validate($rules, $this->validationMessages());
+
+        if (($data['tipo_vinculo'] ?? null) !== 'mov') {
+            $data['numero_mov'] = null;
+        }
 
         // Default si no mandan fecha
         if (empty($data['fecha_convencimiento'])) {
@@ -155,6 +217,7 @@ class AfiliadoController extends Controller
     public function update(Request $request, Afiliado $afiliado)
     {
         $full = $this->fullNameField();
+        $this->normalizeElectoralFields($request);
 
         // Normaliza nombre (sin acentos, MAYÚSCULAS y sin espacios dobles)
         $raw  = $this->squish($request->input($full, $afiliado->{$full} ?? ''));
@@ -162,7 +225,11 @@ class AfiliadoController extends Controller
         $request->merge([$full => $name]);
 
         $rules = $this->rulesUpdate($afiliado);
-        $data  = $request->validate($rules);
+        $data  = $request->validate($rules, $this->validationMessages());
+
+        if (($data['tipo_vinculo'] ?? null) !== 'mov') {
+            $data['numero_mov'] = null;
+        }
 
         if (empty($data['fecha_convencimiento'])) {
             $data['fecha_convencimiento'] = now();
@@ -216,6 +283,9 @@ class AfiliadoController extends Controller
             'localidad'        => ['nullable','string','max:150'],
             'colonia'          => ['nullable','string','max:150'],
             'telefono'         => ['nullable','string','max:30'],
+            'clave_elector'    => ['nullable','string','max:30', Rule::unique('afiliados', 'clave_elector')],
+            'tipo_vinculo'     => ['nullable','string', Rule::in(array_keys(Afiliado::TIPOS_VINCULO))],
+            'numero_mov'       => ['nullable','string','max:50'],
 
             // Obligatorios (según tu último store)
             'municipio'        => ['required','string','max:120'],
@@ -241,6 +311,9 @@ class AfiliadoController extends Controller
             'sexo'             => ['nullable', Rule::in(['M','F','Otro'])],
             'email'            => ['nullable','email','max:150'],
             'telefono'         => ['nullable','string','max:30'],
+            'clave_elector'    => ['nullable','string','max:30', Rule::unique('afiliados', 'clave_elector')->ignore($afiliado->id, 'id')],
+            'tipo_vinculo'     => ['nullable','string', Rule::in(array_keys(Afiliado::TIPOS_VINCULO))],
+            'numero_mov'       => ['nullable','string','max:50'],
             'distrito_federal' => ['nullable','integer'],
             'distrito_local'   => ['nullable','integer'],
             'localidad'        => ['nullable','string','max:150'],
@@ -275,6 +348,35 @@ class AfiliadoController extends Controller
             $map[$field] = $hasRequired;
         }
         return $map;
+    }
+
+    private function perPage(Request $request): int
+    {
+        $requested = (int) $request->query('per_page', 25);
+
+        return in_array($requested, self::PER_PAGE_OPTIONS, true) ? $requested : 25;
+    }
+
+    private function normalizeElectoralFields(Request $request): void
+    {
+        $clave = $this->normalizeClaveElector((string) $request->input('clave_elector'));
+        $request->merge([
+            'clave_elector' => $clave !== '' ? $clave : null,
+            'tipo_vinculo' => $request->filled('tipo_vinculo') ? $request->input('tipo_vinculo') : null,
+        ]);
+    }
+
+    private function normalizeClaveElector(string $value): string
+    {
+        return preg_replace('/\s+/', '', mb_strtoupper(trim($value), 'UTF-8'));
+    }
+
+    private function validationMessages(): array
+    {
+        return [
+            'clave_elector.unique' => 'La clave de elector ya pertenece a otro registro.',
+            'tipo_vinculo.in' => 'Selecciona únicamente DV, Comité o MOV.',
+        ];
     }
 
     /* =========================

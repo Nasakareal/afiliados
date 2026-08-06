@@ -67,6 +67,37 @@
     /* Evitar que el activo se pinte granate dentro del navbar rosa */
     nav.navbar-rosa .nav-link.active,
     nav.navbar-rosa .dropdown-item.active { color:#fff !important; }
+
+    /* El offcanvas móvil tiene fondo blanco: recuperar contraste y navegación. */
+    @media (max-width: 991.98px) {
+      nav.navbar-rosa .offcanvas .nav-link {
+        color:#212529 !important;
+        opacity:1;
+      }
+
+      nav.navbar-rosa .offcanvas .nav-link:hover,
+      nav.navbar-rosa .offcanvas .nav-link:focus,
+      nav.navbar-rosa .offcanvas .nav-link.active {
+        color:var(--granate) !important;
+      }
+
+      nav.navbar-rosa .offcanvas .dropdown-item.active {
+        color:#fff !important;
+        background-color:var(--rosa-2);
+      }
+
+      nav.navbar-rosa .offcanvas .btn-outline-light {
+        color:var(--granate);
+        border-color:var(--granate);
+      }
+
+      nav.navbar-rosa .offcanvas .btn-outline-light:hover,
+      nav.navbar-rosa .offcanvas .btn-outline-light:focus {
+        color:#fff;
+        background-color:var(--granate);
+        border-color:var(--granate);
+      }
+    }
   </style>
 
   {{-- Acepta ambos stacks para CSS de vistas --}}
@@ -271,7 +302,7 @@
   });
 
   // Cerrar offcanvas al navegar (móvil)
-  document.querySelectorAll('#mainNav .nav-link, #mainNav .dropdown-item').forEach(a=>{
+  document.querySelectorAll('#mainNav .nav-link:not([data-bs-toggle="dropdown"]), #mainNav .dropdown-item').forEach(a=>{
     a.addEventListener('click',()=>{
       const oc = bootstrap.Offcanvas.getInstance(document.getElementById('mainNav'));
       oc?.hide();

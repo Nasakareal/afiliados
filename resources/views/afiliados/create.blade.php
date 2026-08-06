@@ -6,14 +6,6 @@
   <h1 class="text-center w-100">Crear afiliado</h1>
 @endsection
 
-@extends('layouts.app')
-
-@section('title','Nuevo afiliado')
-
-@section('content_header')
-  <h1 class="text-center w-100">Crear afiliado</h1>
-@endsection
-
 @section('content')
 <div class="container-xl">
   <div class="card card-outline card-primary">
@@ -85,6 +77,8 @@
                    {{ $req('email') ? 'required' : '' }}>
             @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
           </div>
+
+          @include('afiliados._campos_electorales')
 
           {{-- Ubicación --}}
           <div class="col-md-4">

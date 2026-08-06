@@ -11,6 +11,8 @@ use App\Http\Resources\AfiliadoResource;
 
 class AfiliadoApiController extends Controller
 {
+    private const PER_PAGE_OPTIONS = [25, 50, 100, 200, 300, 500];
+
     public function index(Request $request)
     {
         $q         = trim((string)$request->query('q'));
@@ -19,13 +21,17 @@ class AfiliadoApiController extends Controller
         $municipio = $request->query('municipio');
         $estatus   = $request->query('estatus');
         $capId     = $request->query('capturista_id');
+        $requested = (int) $request->query('per_page', 25);
+        $perPage = in_array($requested, self::PER_PAGE_OPTIONS, true) ? $requested : 25;
+        $clave = preg_replace('/\s+/', '', mb_strtoupper($q, 'UTF-8'));
 
         $rows = Afiliado::query()
-            ->when($q !== '', function($qb) use ($q){
-                $qb->where(function($w) use ($q){
+            ->when($q !== '', function($qb) use ($q, $clave){
+                $qb->where(function($w) use ($q, $clave){
                     $w->whereRaw("CONCAT_WS(' ',nombre,apellido_paterno,apellido_materno) like ?", ["%{$q}%"])
                       ->orWhere('telefono','like',"%{$q}%")
-                      ->orWhere('email','like',"%{$q}%");
+                      ->orWhere('email','like',"%{$q}%")
+                      ->orWhere('clave_elector','like',"{$clave}%");
                 });
             })
             ->when($seccion,   fn($qb)=>$qb->where('seccion',$seccion))
@@ -34,7 +40,7 @@ class AfiliadoApiController extends Controller
             ->when($estatus,   fn($qb)=>$qb->where('estatus',$estatus))
             ->when($capId,     fn($qb)=>$qb->where('capturista_id',$capId))
             ->orderByDesc('id')
-            ->paginate(20)
+            ->simplePaginate($perPage)
             ->withQueryString();
 
         return AfiliadoResource::collection($rows);
@@ -68,7 +74,18 @@ class AfiliadoApiController extends Controller
 
     private function rules(Request $request, ?int $id = null): array
     {
-        return $request->validate([
+        $clave = preg_replace('/\s+/', '', mb_strtoupper(trim((string) $request->input('clave_elector')), 'UTF-8'));
+        $request->merge([
+            'clave_elector' => $clave !== '' ? $clave : null,
+            'tipo_vinculo' => $request->filled('tipo_vinculo') ? $request->input('tipo_vinculo') : null,
+        ]);
+
+        $unique = Rule::unique('afiliados', 'clave_elector');
+        if ($id) {
+            $unique->ignore($id, 'id');
+        }
+
+        $data = $request->validate([
             'nombre'            => ['required','string','max:120'],
             'apellido_paterno'  => ['nullable','string','max:120'],
             'apellido_materno'  => ['nullable','string','max:120'],
@@ -76,6 +93,9 @@ class AfiliadoApiController extends Controller
             'sexo'              => ['nullable', Rule::in(['M','F','Otro'])],
             'telefono'          => ['nullable','string','max:30'],
             'email'             => ['nullable','email','max:150'],
+            'clave_elector'     => ['nullable','string','max:30',$unique],
+            'tipo_vinculo'      => ['nullable','string',Rule::in(array_keys(Afiliado::TIPOS_VINCULO))],
+            'numero_mov'        => ['nullable','string','max:50'],
             'municipio'         => ['required','string','max:120'],
             'cve_mun'           => ['nullable','string','size:3'],
             'localidad'         => ['nullable','string','max:150'],
@@ -93,6 +113,15 @@ class AfiliadoApiController extends Controller
             'observaciones'     => ['nullable','string'],
             'estatus'           => ['nullable', Rule::in(['pendiente','validado','descartado'])],
             'fecha_convencimiento' => ['nullable','date'],
+        ], [
+            'clave_elector.unique' => 'La clave de elector ya pertenece a otro registro.',
+            'tipo_vinculo.in' => 'Selecciona únicamente DV, Comité o MOV.',
         ]);
+
+        if (($data['tipo_vinculo'] ?? null) !== 'mov') {
+            $data['numero_mov'] = null;
+        }
+
+        return $data;
     }
 }

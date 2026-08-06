@@ -85,6 +85,19 @@
 
               <dt class="col-sm-4">Email</dt>
               <dd class="col-sm-8">{{ $afiliado->email ?: '—' }}</dd>
+
+              <dt class="col-sm-4">Clave de elector</dt>
+              <dd class="col-sm-8"><code>{{ $afiliado->clave_elector ?: '—' }}</code></dd>
+
+              <dt class="col-sm-4">Indicador</dt>
+              <dd class="col-sm-8">
+                @if($afiliado->tipo_vinculo)
+                  {{ \App\Models\Afiliado::TIPOS_VINCULO[$afiliado->tipo_vinculo] ?? strtoupper($afiliado->tipo_vinculo) }}
+                  @if($afiliado->tipo_vinculo === 'mov' && $afiliado->numero_mov) #{{ $afiliado->numero_mov }} @endif
+                @else
+                  —
+                @endif
+              </dd>
             </dl>
           </div>
         </div>
