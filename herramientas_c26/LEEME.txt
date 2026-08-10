@@ -1,0 +1,40 @@
+MONITOR DE SOLO LECTURA PARA SEMEX C26
+======================================
+
+Conexion confirmada:
+  Adaptador TX pin 3  -> controlador RX pin 2
+  Adaptador RX pin 2  -> controlador TX pin 3
+  Adaptador GND pin 5 -> controlador GND pin 5
+
+Puerto: COM6
+Formato: 2400 baudios, 8 bits, sin paridad, 1 bit de parada (8N1)
+Control de flujo: ninguno
+
+Uso:
+  1. Cierra Tera Term.
+  2. Conecta y energiza el controlador en banco de pruebas.
+  3. Haz doble clic en ABRIR_MONITOR_C26.cmd.
+  4. Para cerrar, presiona Ctrl+C.
+
+El programa envía una sola consulta ENQ (0x05) para activar la telemetría.
+Este comando fue aislado y verificado después de un arranque silencioso. No
+contiene datos de configuración y no modifica la programación.
+
+Trama descubierta:
+  <SALIDAS><CODIGO><TIEMPO+ETAPA><PLAN>
+
+Ejemplo:
+  <D9BFFF><04A><1701><01>
+  0x17 = 23 segundos restantes; 0x01 = etapa 1.
+
+Ciclo observado durante 150 segundos:
+  Etapa 1: 23 s
+  Etapa 2: 40 s
+  Etapa 3:  3 s
+  Etapa 4: 26 s
+  Etapa 5:  3 s
+  Total aproximado: 95 s
+
+No se deben probar comandos de escritura con el controlador conectado a una
+intersección pública. La escritura seguirá deshabilitada hasta conocer el
+protocolo y validar una configuración en banco de pruebas.
