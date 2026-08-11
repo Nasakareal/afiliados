@@ -13,5 +13,6 @@ npm-debug.log
 yarn-error.log
 credenciales_distritos_coordinadores.txt
 credenciales_distritos_internos.txt
+credenciales_lonas_31_80.txt
 /.idea
 /.vscode

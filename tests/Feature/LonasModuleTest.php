@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Lona;
 use App\Models\User;
+use Database\Seeders\AdditionalLonasUsersSeeder;
 use Database\Seeders\DistrictCoordinatorUsersSeeder;
 use Database\Seeders\InternalDistrictUsersSeeder;
 use Database\Seeders\LonasUsersSeeder;
@@ -257,6 +258,64 @@ class LonasModuleTest extends TestCase
         $this->assertSame(
             24,
             User::where('email', 'like', 'distritointerno%@gladyadorez.com')->count()
+        );
+    }
+
+    public function test_additional_lonas_seeder_creates_50_accounts_without_altering_previous_accounts(): void
+    {
+        $this->seed(LonasUsersSeeder::class);
+        $this->seed(DistrictCoordinatorUsersSeeder::class);
+        $this->seed(InternalDistrictUsersSeeder::class);
+
+        $previousUsersBefore = User::where('email', 'like', '%@gladyadorez.com')
+            ->orderBy('email')
+            ->get(['id', 'name', 'email', 'password', 'updated_at'])
+            ->toArray();
+
+        $this->seed(AdditionalLonasUsersSeeder::class);
+
+        $additionalUsers = User::whereBetween('email', [
+            'lonas31@gladyadorez.com',
+            'lonas80@gladyadorez.com',
+        ])->orderBy('email')->get();
+
+        $this->assertCount(50, $additionalUsers);
+        $this->assertSame('lonas31@gladyadorez.com', $additionalUsers->first()->email);
+        $this->assertSame('Captura Lonas 31', $additionalUsers->first()->name);
+        $this->assertSame('lonas80@gladyadorez.com', $additionalUsers->last()->email);
+
+        foreach ($additionalUsers as $index => $user) {
+            $suffix = str_pad((string) ($index + 31), 2, '0', STR_PAD_LEFT);
+
+            $this->assertTrue(Hash::check("Lonas{$suffix}!", $user->password));
+            $this->assertFalse($user->must_change_password);
+            $this->assertTrue($user->hasExactRoles('Lonas'));
+            $this->assertTrue($user->can('lonas.ver'));
+            $this->assertTrue($user->can('lonas.crear'));
+            $this->assertFalse($user->can('afiliados.ver'));
+        }
+
+        $previousUsersAfter = User::where('email', 'like', '%@gladyadorez.com')
+            ->where(function ($query) {
+                $query->where('email', 'not like', 'lonas%@gladyadorez.com')
+                    ->orWhereBetween('email', [
+                        'lonas01@gladyadorez.com',
+                        'lonas30@gladyadorez.com',
+                    ]);
+            })
+            ->orderBy('email')
+            ->get(['id', 'name', 'email', 'password', 'updated_at'])
+            ->toArray();
+
+        $this->assertSame($previousUsersBefore, $previousUsersAfter);
+
+        $this->seed(AdditionalLonasUsersSeeder::class);
+        $this->assertSame(
+            50,
+            User::whereBetween('email', [
+                'lonas31@gladyadorez.com',
+                'lonas80@gladyadorez.com',
+            ])->count()
         );
     }
 }
