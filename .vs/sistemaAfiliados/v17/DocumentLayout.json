@@ -3,20 +3,12 @@
   "WorkspaceRootPath": "C:\\wamp64\\www\\sistemaAfiliados\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\wamp64\\www\\sistemaAfiliados\\resources\\views\\soporte.blade.php||{3B902123-F8A7-4915-9F01-361F908088D0}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:resources\\views\\soporte.blade.php||{3B902123-F8A7-4915-9F01-361F908088D0}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\wamp64\\www\\sistemaAfiliados\\resources\\views\\lonas\\index.blade.php||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:resources\\views\\lonas\\index.blade.php||{3B902123-F8A7-4915-9F01-361F908088D0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\wamp64\\www\\sistemaAfiliados\\resources\\views\\welcome.blade.php||{3B902123-F8A7-4915-9F01-361F908088D0}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:resources\\views\\welcome.blade.php||{3B902123-F8A7-4915-9F01-361F908088D0}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\wamp64\\www\\sistemaAfiliados\\routes\\web.php||{3B902123-F8A7-4915-9F01-361F908088D0}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:routes\\web.php||{3B902123-F8A7-4915-9F01-361F908088D0}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\wamp64\\www\\sistemaAfiliados\\resources\\views\\layouts\\app.blade.php||{3B902123-F8A7-4915-9F01-361F908088D0}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:resources\\views\\layouts\\app.blade.php||{3B902123-F8A7-4915-9F01-361F908088D0}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\wamp64\\www\\sistemaAfiliados\\app\\Http\\Controllers\\LonaController.php||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:app\\Http\\Controllers\\LonaController.php||{3B902123-F8A7-4915-9F01-361F908088D0}"
     }
   ],
   "DocumentGroupContainers": [
@@ -26,58 +18,33 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "welcome.blade.php",
-              "DocumentMoniker": "C:\\wamp64\\www\\sistemaAfiliados\\resources\\views\\welcome.blade.php",
-              "RelativeDocumentMoniker": "resources\\views\\welcome.blade.php",
-              "ToolTip": "C:\\wamp64\\www\\sistemaAfiliados\\resources\\views\\welcome.blade.php",
-              "RelativeToolTip": "resources\\views\\welcome.blade.php",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAFsAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002338|",
-              "WhenOpened": "2026-08-10T20:05:15.056Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "soporte.blade.php",
-              "DocumentMoniker": "C:\\wamp64\\www\\sistemaAfiliados\\resources\\views\\soporte.blade.php",
-              "RelativeDocumentMoniker": "resources\\views\\soporte.blade.php",
-              "ToolTip": "C:\\wamp64\\www\\sistemaAfiliados\\resources\\views\\soporte.blade.php",
-              "RelativeToolTip": "resources\\views\\soporte.blade.php",
-              "ViewState": "AgIAALcAAAAAAAAAAAAYwOYAAAAAAAAAAAAAAA==",
+              "Title": "index.blade.php",
+              "DocumentMoniker": "C:\\wamp64\\www\\sistemaAfiliados\\resources\\views\\lonas\\index.blade.php",
+              "RelativeDocumentMoniker": "resources\\views\\lonas\\index.blade.php",
+              "ToolTip": "C:\\wamp64\\www\\sistemaAfiliados\\resources\\views\\lonas\\index.blade.php",
+              "RelativeToolTip": "resources\\views\\lonas\\index.blade.php",
+              "ViewState": "AgIAAJMAAAAAAAAAAAAuwMMAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002338|",
-              "WhenOpened": "2026-08-10T20:04:59.5Z",
+              "WhenOpened": "2026-08-13T20:16:29.615Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "web.php",
-              "DocumentMoniker": "C:\\wamp64\\www\\sistemaAfiliados\\routes\\web.php",
-              "RelativeDocumentMoniker": "routes\\web.php",
-              "ToolTip": "C:\\wamp64\\www\\sistemaAfiliados\\routes\\web.php",
-              "RelativeToolTip": "routes\\web.php",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABsAAAA0AAAAAAAAAA==",
+              "DocumentIndex": 1,
+              "Title": "LonaController.php",
+              "DocumentMoniker": "C:\\wamp64\\www\\sistemaAfiliados\\app\\Http\\Controllers\\LonaController.php",
+              "RelativeDocumentMoniker": "app\\Http\\Controllers\\LonaController.php",
+              "ToolTip": "C:\\wamp64\\www\\sistemaAfiliados\\app\\Http\\Controllers\\LonaController.php",
+              "RelativeToolTip": "app\\Http\\Controllers\\LonaController.php",
+              "ViewState": "AgIAAKsAAAAAAAAAAAAAAM8AAAAjAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002338|",
-              "WhenOpened": "2026-01-16T12:58:47.351Z",
+              "WhenOpened": "2026-08-13T20:10:33.491Z",
               "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "app.blade.php",
-              "DocumentMoniker": "C:\\wamp64\\www\\sistemaAfiliados\\resources\\views\\layouts\\app.blade.php",
-              "RelativeDocumentMoniker": "resources\\views\\layouts\\app.blade.php",
-              "ToolTip": "C:\\wamp64\\www\\sistemaAfiliados\\resources\\views\\layouts\\app.blade.php",
-              "RelativeToolTip": "resources\\views\\layouts\\app.blade.php",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAGMAAAApAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002338|",
-              "WhenOpened": "2025-09-19T18:11:27.648Z"
             }
           ]
         }

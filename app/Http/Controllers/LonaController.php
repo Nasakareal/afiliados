@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Lona;
+use App\Models\User;
 use App\Services\GoogleMapsUrlParser;
 use App\Services\LonaPhotoProcessor;
 use App\Services\LonasExcelExporter;
@@ -24,22 +25,36 @@ class LonaController extends Controller
     {
         $q = trim((string) $request->query('q'));
         $seccion = trim((string) $request->query('seccion'));
+        $capturista = trim((string) $request->query('capturista'));
 
-        $lonas = $this->filteredQuery($q, $seccion)
+        $lonas = $this->filteredQuery($q, $seccion, $capturista)
             ->latest()
             ->paginate(20)
             ->withQueryString();
 
-        return view('lonas.index', compact('lonas', 'q', 'seccion'));
+        $capturistas = User::query()
+            ->whereHas('lonasCapturadas')
+            ->withCount('lonasCapturadas')
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
+        return view('lonas.index', compact(
+            'lonas',
+            'q',
+            'seccion',
+            'capturista',
+            'capturistas'
+        ));
     }
 
     public function export(Request $request, LonasExcelExporter $exporter)
     {
         $q = trim((string) $request->query('q'));
         $seccion = trim((string) $request->query('seccion'));
+        $capturista = trim((string) $request->query('capturista'));
 
         $path = $exporter->create(
-            $this->filteredQuery($q, $seccion)
+            $this->filteredQuery($q, $seccion, $capturista)
         );
 
         return response()->download(
@@ -182,16 +197,20 @@ class LonaController extends Controller
         );
     }
 
-    private function filteredQuery(string $q, string $seccion)
+    private function filteredQuery(string $q, string $seccion, string $capturista = '')
     {
         return Lona::with('capturista:id,name')
             ->when($q !== '', function ($query) use ($q) {
                 $query->where(function ($where) use ($q) {
                     $where->where('direccion', 'like', "%{$q}%")
-                        ->orWhere('responsable', 'like', "%{$q}%");
+                        ->orWhere('responsable', 'like', "%{$q}%")
+                        ->orWhereHas('capturista', function ($user) use ($q) {
+                            $user->where('name', 'like', "%{$q}%");
+                        });
                 });
             })
-            ->when($seccion !== '', fn ($query) => $query->where('seccion', $seccion));
+            ->when($seccion !== '', fn ($query) => $query->where('seccion', $seccion))
+            ->when($capturista !== '', fn ($query) => $query->where('capturado_por', $capturista));
     }
 
     private function validateLona(Request $request, bool $photoRequired): array
