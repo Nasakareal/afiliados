@@ -11,11 +11,15 @@ class SeccionApiController extends Controller
 {
     public function index(Request $request)
     {
+        $term      = trim((string) $request->query('q'));
         $cveMun    = $request->query('cve_mun');
         $municipio = $request->query('municipio');
         $perPage   = (int) ($request->query('per_page', 50));
 
         $rows = Seccion::query()
+            ->when($term !== '', fn($q) => $q->where(fn($w) => $w
+                ->where('seccion', 'like', "%{$term}%")
+                ->orWhere('municipio', 'like', "%{$term}%")))
             ->when($cveMun, fn($q) => $q->where('cve_mun', $cveMun))
             ->when($municipio, fn($q) => $q->where('municipio', $municipio))
             ->orderBy('seccion')

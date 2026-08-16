@@ -11,9 +11,16 @@ use Carbon\Carbon;
 
 class ActividadApiController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $rows = Actividad::with('creador')->latest()->paginate(20);
+        $term = trim((string) $request->query('q'));
+        $perPage = min(100, max(1, (int) $request->query('per_page', 20)));
+        $rows = Actividad::with('creador')
+            ->when($term !== '', fn ($q) => $q->where(fn ($w) => $w
+                ->where('titulo', 'like', "%{$term}%")
+                ->orWhere('descripcion', 'like', "%{$term}%")
+                ->orWhere('lugar', 'like', "%{$term}%")))
+            ->latest()->paginate($perPage);
         return ActividadResource::collection($rows);
     }
 

@@ -7,6 +7,17 @@ use Illuminate\Support\Facades\DB;
 
 class ReporteApiController extends Controller
 {
+    public function afiliados()
+    {
+        $rows = DB::table('afiliados')
+            ->whereNull('deleted_at')
+            ->selectRaw("COALESCE(estatus, 'sin estatus') as estatus, COUNT(*) as total")
+            ->groupBy('estatus')->orderByDesc('total')->get()
+            ->map(fn ($row) => ['label' => ucfirst($row->estatus), 'estatus' => $row->estatus, 'total' => $row->total]);
+
+        return response()->json($rows);
+    }
+
     public function secciones()
     {
         $rows = DB::table('afiliados')

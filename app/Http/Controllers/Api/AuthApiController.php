@@ -32,7 +32,7 @@ class AuthApiController extends Controller
 
     public function me(Request $request)
     {
-        return response()->json($request->user());
+        return response()->json($this->userPayload($request->user()));
     }
 
     public function logout(Request $request)
