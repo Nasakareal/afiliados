@@ -97,6 +97,7 @@ class LonaApiController extends Controller
 
         if ($newPhoto && $oldPath !== $newPhoto['path']) {
             Storage::disk('local')->delete($oldPath);
+            Storage::disk('local')->delete($this->feedPhotoPath($lona));
         }
 
         return response()->json($this->payload($lona->fresh()->load('capturista:id,name')));
@@ -107,34 +108,114 @@ class LonaApiController extends Controller
         $photoPath = $lona->foto_path;
         $lona->forceDelete();
         Storage::disk('local')->delete($photoPath);
+        Storage::disk('local')->delete($this->feedPhotoPath($lona));
 
         return response()->json(['ok' => true]);
     }
 
-    public function mapData()
+    public function mapData(Request $request)
     {
-        $lonas = Lona::with('capturista:id,name')
+        $limit = min(300, max(25, (int) $request->query('limit', 180)));
+        $bbox = array_map('floatval', explode(',', (string) $request->query('bbox', '')));
+
+        $query = Lona::query()
+            ->select([
+                'id', 'seccion', 'direccion', 'responsable', 'lat', 'lng',
+                'foto_path', 'capturado_por', 'created_at',
+            ])
+            ->with('capturista:id,name')
+            ->whereNotNull('lat')
+            ->whereNotNull('lng');
+
+        if (count($bbox) === 4) {
+            [$minLng, $minLat, $maxLng, $maxLat] = $bbox;
+            if ($minLng < $maxLng && $minLat < $maxLat) {
+                $query->whereBetween('lat', [$minLat, $maxLat])
+                    ->whereBetween('lng', [$minLng, $maxLng]);
+            }
+        }
+
+        $lonas = $query
             ->latest()
+            ->limit($limit)
             ->get()
-            ->map(fn (Lona $lona) => $this->payload($lona));
+            ->map(fn (Lona $lona) => $this->mapPayload($lona));
 
         return response()->json($lonas);
     }
 
-    public function photo(Lona $lona)
+    public function photo(Request $request, Lona $lona)
     {
         if (!$lona->foto_path || !Storage::disk('local')->exists($lona->foto_path)) {
             abort(404);
         }
 
+        $path = $lona->foto_path;
+        if ($request->query('variant') === 'feed') {
+            $path = $this->ensureFeedPhoto($lona) ?: $path;
+        }
+
         return response()->file(
-            Storage::disk('local')->path($lona->foto_path),
+            Storage::disk('local')->path($path),
             [
                 'Content-Type' => 'image/jpeg',
-                'Cache-Control' => 'private, max-age=86400',
+                'Cache-Control' => 'private, max-age=604800',
                 'X-Content-Type-Options' => 'nosniff',
             ]
         );
+    }
+
+    private function ensureFeedPhoto(Lona $lona): ?string
+    {
+        $targetPath = $this->feedPhotoPath($lona);
+        if (Storage::disk('local')->exists($targetPath)) {
+            return $targetPath;
+        }
+
+        $raw = @file_get_contents(Storage::disk('local')->path($lona->foto_path));
+        $source = $raw === false ? false : @imagecreatefromstring($raw);
+        unset($raw);
+        if (!$source) {
+            return null;
+        }
+
+        $sourceWidth = imagesx($source);
+        $sourceHeight = imagesy($source);
+        $scale = min(1, 960 / max($sourceWidth, $sourceHeight));
+        $width = max(1, (int) round($sourceWidth * $scale));
+        $height = max(1, (int) round($sourceHeight * $scale));
+        $target = imagecreatetruecolor($width, $height);
+        $white = imagecolorallocate($target, 255, 255, 255);
+        imagefill($target, 0, 0, $white);
+        imagecopyresampled(
+            $target,
+            $source,
+            0,
+            0,
+            0,
+            0,
+            $width,
+            $height,
+            $sourceWidth,
+            $sourceHeight
+        );
+
+        ob_start();
+        imagejpeg($target, null, 68);
+        $jpeg = ob_get_clean();
+        imagedestroy($target);
+        imagedestroy($source);
+
+        if ($jpeg === false || !Storage::disk('local')->put($targetPath, $jpeg)) {
+            return null;
+        }
+
+        return $targetPath;
+    }
+
+    private function feedPhotoPath(Lona $lona): string
+    {
+        return 'lonas/feed/' . $lona->id . '.jpg';
     }
 
     private function payload(Lona $lona): array
@@ -154,6 +235,23 @@ class LonaApiController extends Controller
                 : null,
             'created_at' => optional($lona->created_at)->toIso8601String(),
             'updated_at' => optional($lona->updated_at)->toIso8601String(),
+        ];
+    }
+
+    private function mapPayload(Lona $lona): array
+    {
+        return [
+            'id' => $lona->id,
+            'seccion' => $lona->seccion,
+            'direccion' => $lona->direccion,
+            'responsable' => $lona->responsable,
+            'lat' => (float) $lona->lat,
+            'lng' => (float) $lona->lng,
+            'foto_url' => route('api.lonas.photo', $lona),
+            'capturista' => $lona->relationLoaded('capturista') && $lona->capturista
+                ? ['id' => $lona->capturista->id, 'name' => $lona->capturista->name]
+                : null,
+            'created_at' => optional($lona->created_at)->toIso8601String(),
         ];
     }
 

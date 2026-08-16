@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\MapaApiController;
 use App\Http\Controllers\Api\ReporteApiController;
 use App\Http\Controllers\Api\DeviceApiController;
 use App\Http\Controllers\Api\AdminApiController;
+use App\Http\Controllers\Api\FeedApiController;
 
 Route::prefix('v1')->group(function () {
     Route::post('/auth/login', [AuthApiController::class, 'login'])->name('api.auth.login');
@@ -19,6 +20,8 @@ Route::prefix('v1')->group(function () {
         Route::post('/auth/logout', [AuthApiController::class, 'logout'])->name('api.auth.logout');
 
         Route::post('/devices', [DeviceApiController::class, 'store'])->name('api.devices.store');
+        Route::get('/feed', [FeedApiController::class, 'index'])
+            ->name('api.feed.index')->middleware('permission:lonas.ver');
 
         Route::get('/afiliados', [AfiliadoApiController::class, 'index'])->middleware('permission:afiliados.ver');
         Route::post('/afiliados', [AfiliadoApiController::class, 'store'])->middleware('permission:afiliados.crear');
