@@ -3,12 +3,16 @@
   "WorkspaceRootPath": "C:\\wamp64\\www\\sistemaAfiliados\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\wamp64\\www\\sistemaAfiliados\\resources\\views\\lonas\\index.blade.php||{3B902123-F8A7-4915-9F01-361F908088D0}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:resources\\views\\lonas\\index.blade.php||{3B902123-F8A7-4915-9F01-361F908088D0}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\wamp64\\www\\sistemaAfiliados\\app\\Services\\LonasExcelExporter.php||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:app\\Services\\LonasExcelExporter.php||{3B902123-F8A7-4915-9F01-361F908088D0}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\wamp64\\www\\sistemaAfiliados\\app\\Http\\Controllers\\LonaController.php||{3B902123-F8A7-4915-9F01-361F908088D0}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:app\\Http\\Controllers\\LonaController.php||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\wamp64\\www\\sistemaAfiliados\\resources\\views\\lonas\\index.blade.php||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:resources\\views\\lonas\\index.blade.php||{3B902123-F8A7-4915-9F01-361F908088D0}"
     }
   ],
   "DocumentGroupContainers": [
@@ -23,12 +27,25 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "LonasExcelExporter.php",
+              "DocumentMoniker": "C:\\wamp64\\www\\sistemaAfiliados\\app\\Services\\LonasExcelExporter.php",
+              "RelativeDocumentMoniker": "app\\Services\\LonasExcelExporter.php",
+              "ToolTip": "C:\\wamp64\\www\\sistemaAfiliados\\app\\Services\\LonasExcelExporter.php",
+              "RelativeToolTip": "app\\Services\\LonasExcelExporter.php",
+              "ViewState": "AgIAAB0DAAAAAAAAAAAqwHcDAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002338|",
+              "WhenOpened": "2026-08-19T21:10:45.227Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
               "Title": "index.blade.php",
               "DocumentMoniker": "C:\\wamp64\\www\\sistemaAfiliados\\resources\\views\\lonas\\index.blade.php",
               "RelativeDocumentMoniker": "resources\\views\\lonas\\index.blade.php",
               "ToolTip": "C:\\wamp64\\www\\sistemaAfiliados\\resources\\views\\lonas\\index.blade.php",
               "RelativeToolTip": "resources\\views\\lonas\\index.blade.php",
-              "ViewState": "AgIAAJMAAAAAAAAAAAAuwMMAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAJQAAAAAAAAAAAAqwMMAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002338|",
               "WhenOpened": "2026-08-13T20:16:29.615Z",
               "EditorCaption": ""
@@ -41,7 +58,7 @@
               "RelativeDocumentMoniker": "app\\Http\\Controllers\\LonaController.php",
               "ToolTip": "C:\\wamp64\\www\\sistemaAfiliados\\app\\Http\\Controllers\\LonaController.php",
               "RelativeToolTip": "app\\Http\\Controllers\\LonaController.php",
-              "ViewState": "AgIAAKsAAAAAAAAAAAAAAM8AAAAjAAAAAAAAAA==",
+              "ViewState": "AgIAAOUAAAAAAAAAAAAqwBQBAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002338|",
               "WhenOpened": "2026-08-13T20:10:33.491Z",
               "EditorCaption": ""
