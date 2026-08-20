@@ -3,16 +3,8 @@
   "WorkspaceRootPath": "C:\\wamp64\\www\\sistemaAfiliados\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\wamp64\\www\\sistemaAfiliados\\app\\Http\\Controllers\\LonaController.php||{3B902123-F8A7-4915-9F01-361F908088D0}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:app\\Http\\Controllers\\LonaController.php||{3B902123-F8A7-4915-9F01-361F908088D0}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\wamp64\\www\\sistemaAfiliados\\app\\Services\\LonasExcelExporter.php||{3B902123-F8A7-4915-9F01-361F908088D0}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:app\\Services\\LonasExcelExporter.php||{3B902123-F8A7-4915-9F01-361F908088D0}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\wamp64\\www\\sistemaAfiliados\\resources\\views\\lonas\\index.blade.php||{3B902123-F8A7-4915-9F01-361F908088D0}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:resources\\views\\lonas\\index.blade.php||{3B902123-F8A7-4915-9F01-361F908088D0}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\wamp64\\www\\sistemaAfiliados\\config\\app.php||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:config\\app.php||{3B902123-F8A7-4915-9F01-361F908088D0}"
     }
   ],
   "DocumentGroupContainers": [
@@ -22,44 +14,19 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "LonasExcelExporter.php",
-              "DocumentMoniker": "C:\\wamp64\\www\\sistemaAfiliados\\app\\Services\\LonasExcelExporter.php",
-              "RelativeDocumentMoniker": "app\\Services\\LonasExcelExporter.php",
-              "ToolTip": "C:\\wamp64\\www\\sistemaAfiliados\\app\\Services\\LonasExcelExporter.php",
-              "RelativeToolTip": "app\\Services\\LonasExcelExporter.php",
-              "ViewState": "AgIAAPsBAAAAAAAAAAAqwCsCAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002338|",
-              "WhenOpened": "2026-08-19T21:10:45.227Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "index.blade.php",
-              "DocumentMoniker": "C:\\wamp64\\www\\sistemaAfiliados\\resources\\views\\lonas\\index.blade.php",
-              "RelativeDocumentMoniker": "resources\\views\\lonas\\index.blade.php",
-              "ToolTip": "C:\\wamp64\\www\\sistemaAfiliados\\resources\\views\\lonas\\index.blade.php",
-              "RelativeToolTip": "resources\\views\\lonas\\index.blade.php",
-              "ViewState": "AgIAAJQAAAAAAAAAAAAqwMMAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002338|",
-              "WhenOpened": "2026-08-13T20:16:29.615Z"
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "LonaController.php",
-              "DocumentMoniker": "C:\\wamp64\\www\\sistemaAfiliados\\app\\Http\\Controllers\\LonaController.php",
-              "RelativeDocumentMoniker": "app\\Http\\Controllers\\LonaController.php",
-              "ToolTip": "C:\\wamp64\\www\\sistemaAfiliados\\app\\Http\\Controllers\\LonaController.php",
-              "RelativeToolTip": "app\\Http\\Controllers\\LonaController.php",
-              "ViewState": "AgIAAOUAAAAAAAAAAAAqwBQBAAAAAAAAAAAAAA==",
+              "Title": "app.php",
+              "DocumentMoniker": "C:\\wamp64\\www\\sistemaAfiliados\\config\\app.php",
+              "RelativeDocumentMoniker": "config\\app.php",
+              "ToolTip": "C:\\wamp64\\www\\sistemaAfiliados\\config\\app.php",
+              "RelativeToolTip": "config\\app.php",
+              "ViewState": "AgIAAC0AAAAAAAAAAAAAAEUAAAAoAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002338|",
-              "WhenOpened": "2026-08-13T20:10:33.491Z",
+              "WhenOpened": "2026-08-20T02:21:33.985Z",
               "EditorCaption": ""
             }
           ]
