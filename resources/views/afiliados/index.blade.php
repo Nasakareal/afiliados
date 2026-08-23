@@ -15,9 +15,13 @@
         @php
           $exportParams = request()->query();
           $exportParams['page'] = $afiliados->currentPage();
+          $excelParams = request()->except('page');
         @endphp
         <a href="{{ route('afiliados.exportar_pagina', $exportParams) }}" class="btn btn-outline-danger btn-sm">
           <i class="fa fa-file-pdf"></i> Exportar esta página
+        </a>
+        <a href="{{ route('afiliados.exportar_excel', $excelParams) }}" class="btn btn-outline-success btn-sm">
+          <i class="fa fa-file-excel"></i> Exportar Excel
         </a>
         @can('afiliados.crear')
         <a href="{{ route('registro') }}" class="btn btn-primary btn-sm">
@@ -51,7 +55,12 @@
           </select>
         </div>
         <div class="col-6 col-md-2">
-          <input type="number" name="capturista_id" value="{{ $capId ?? '' }}" class="form-control form-control-sm" placeholder="ID Capturista">
+          <div class="col-6 col-md-2">
+              <input type="text" name="referente" value="{{ $referente ?? '' }}" class="form-control form-control-sm" placeholder="Referente / Referencia">
+            </div>
+            <div class="col-6 col-md-2">
+              <input type="text" name="capturista" value="{{ $capturista ?? '' }}" class="form-control form-control-sm" placeholder="Nombre del capturista">
+            </div>
         </div>
         <div class="col-6 col-md-2">
           <select name="per_page" class="form-control form-control-sm" onchange="this.form.submit()" aria-label="Registros por página">

@@ -15,6 +15,7 @@ use App\Http\Controllers\Settings\AppSettingController;
 use App\Http\Controllers\Settings\ComunicadoController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LonaController;
+use App\Http\Controllers\MetaAvanceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,6 +40,7 @@ Route::middleware('auth')->group(function () {
     // Afiliados
     Route::get('/afiliados', [AfiliadoController::class,'index'])->name('afiliados.index')->middleware('permission:afiliados.ver');
     Route::get('/afiliados/exportar-pagina', [AfiliadoController::class,'exportarPagina'])->name('afiliados.exportar_pagina')->middleware('permission:afiliados.ver');
+    Route::get('/afiliados/exportar-excel', [AfiliadoController::class,'exportarExcel'])->name('afiliados.exportar_excel')->middleware('permission:afiliados.ver');
     Route::get('/afiliados/create', [AfiliadoController::class,'create'])->name('afiliados.create')->middleware('permission:afiliados.crear');
     Route::post('/afiliados', [AfiliadoController::class,'store'])->name('afiliados.store')->middleware('permission:afiliados.crear');
     Route::get('/afiliados/{afiliado}', [AfiliadoController::class,'show'])->name('afiliados.show')->middleware('permission:afiliados.ver');
@@ -114,6 +116,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/lonas/{lona}/edit', [LonaController::class, 'edit'])->name('lonas.edit')->middleware('permission:lonas.editar');
     Route::put('/lonas/{lona}', [LonaController::class, 'update'])->name('lonas.update')->middleware('permission:lonas.editar');
     Route::delete('/lonas/{lona}', [LonaController::class, 'destroy'])->name('lonas.destroy')->middleware('permission:lonas.borrar');
+
+    // Avance y metas
+    Route::get('/avance', [MetaAvanceController::class,'index'])->name('avance.index')->middleware('permission:avance.ver');
+    Route::post('/avance/metas', [MetaAvanceController::class,'store'])->name('avance.metas.store')->middleware('permission:avance.metas');
+    Route::put('/avance/metas/{metaAvance}', [MetaAvanceController::class,'update'])->name('avance.metas.update')->middleware('permission:avance.metas');
+    Route::delete('/avance/metas/{metaAvance}', [MetaAvanceController::class,'destroy'])->name('avance.metas.destroy')->middleware('permission:avance.metas');
 
     // Settings
     Route::prefix('settings')->name('settings.')->group(function () {

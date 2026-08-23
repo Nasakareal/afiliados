@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Afiliado;
+use App\Services\AfiliadosExcelExporter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -22,7 +23,8 @@ class AfiliadoController extends Controller
         $cveMun    = $request->query('cve_mun');
         $municipio = $request->query('municipio');
         $estatus   = $request->query('estatus');
-        $capId     = $request->query('capturista_id');
+        $referente  = trim((string)$request->query('referente'));
+        $capturista = trim((string)$request->query('capturista'));
 
         $full = $this->fullNameField();
         $hasCveMun = Schema::hasColumn('afiliados', 'cve_mun');
@@ -44,7 +46,6 @@ class AfiliadoController extends Controller
                     if ($full === 'nombre_completo') {
                         $w->where('afiliados.nombre_completo','like',"%{$q}%");
                     } else {
-                        // Fallback: nombre + apellidos
                         $w->whereRaw("CONCAT_WS(' ',afiliados.nombre,afiliados.apellido_paterno,afiliados.apellido_materno) like ?", ["%{$q}%"]);
                     }
                     $w->orWhere('afiliados.telefono','like',"%{$q}%")
@@ -55,8 +56,9 @@ class AfiliadoController extends Controller
             ->when($seccion,   fn($qb)=>$qb->where('afiliados.seccion',$seccion))
             ->when($cveMun,    fn($qb)=>$qb->where('afiliados.cve_mun',$cveMun))
             ->when($municipio, fn($qb)=>$qb->where('afiliados.municipio',$municipio))
-            ->when($estatus,   fn($qb)=>$qb->where('afiliados.estatus',$estatus))
-            ->when($capId,     fn($qb)=>$qb->where('afiliados.capturista_id',$capId))
+            ->when($estatus, fn($qb)=>$qb->where('afiliados.estatus',$estatus))
+            ->when($referente !== '', fn($qb)=>$qb->where('afiliados.perfil','like',"%{$referente}%"))
+            ->when($capturista !== '', fn($qb)=>$qb->where('users.name','like',"%{$capturista}%"))
             ->select([
                 'afiliados.*',
                 'secciones.municipio as s_municipio',
@@ -75,7 +77,7 @@ class AfiliadoController extends Controller
         $perPageOptions = self::PER_PAGE_OPTIONS;
         $tiposVinculo = Afiliado::TIPOS_VINCULO;
 
-        return view('afiliados.index', compact('afiliados','q','seccion','cveMun','municipio','estatus','capId','perPageOptions','tiposVinculo'));
+        return view('afiliados.index', compact('afiliados','q','seccion','cveMun','municipio','estatus','referente','capturista','perPageOptions','tiposVinculo'));
     }
 
     public function exportarPagina(Request $request)
@@ -104,7 +106,12 @@ class AfiliadoController extends Controller
             ->when($request->query('cve_mun'), fn ($query, $value) => $query->where('cve_mun', $value))
             ->when($request->query('municipio'), fn ($query, $value) => $query->where('municipio', $value))
             ->when($request->query('estatus'), fn ($query, $value) => $query->where('estatus', $value))
-            ->when($request->query('capturista_id'), fn ($query, $value) => $query->where('capturista_id', $value))
+            ->when($request->query('referente'), fn ($query, $value) => $query->where('perfil', 'like', "%{$value}%"))
+            ->when($request->query('capturista'), function ($query, $value) {
+                $query->whereHas('capturista', function ($user) use ($value) {
+                    $user->where('name', 'like', "%{$value}%");
+                });
+            })
             ->orderByDesc('id')
             ->forPage($page, $perPage)
             ->get();
@@ -377,6 +384,161 @@ class AfiliadoController extends Controller
             'clave_elector.unique' => 'La clave de elector ya pertenece a otro registro.',
             'tipo_vinculo.in' => 'Selecciona únicamente DV, Comité o MOV.',
         ];
+    }
+
+    public function exportarExcel(Request $request,AfiliadosExcelExporter $exporter) {
+        $q = trim((string) $request->query('q'));
+        $seccion = $request->query('seccion');
+        $cveMun = $request->query('cve_mun');
+        $municipio = $request->query('municipio');
+        $estatus = $request->query('estatus');
+        $referente = trim((string)$request->query('referente'));
+        $capturista = trim((string)$request->query('capturista'));
+
+        $full = $this->fullNameField();
+        $hasCveMun = Schema::hasColumn('afiliados', 'cve_mun');
+        $clave = $this->normalizeClaveElector($q);
+
+        $query = Afiliado::query()
+            ->leftJoin('secciones', function ($join) use ($hasCveMun) {
+                $join->on(
+                    'secciones.seccion',
+                    '=',
+                    'afiliados.seccion'
+                );
+
+                if ($hasCveMun) {
+                    $join->on(
+                        'secciones.cve_mun',
+                        '=',
+                        'afiliados.cve_mun'
+                    );
+                } else {
+                    $join->on(
+                        'secciones.municipio',
+                        '=',
+                        'afiliados.municipio'
+                    );
+                }
+            })
+            ->leftJoin(
+                'users',
+                'users.id',
+                '=',
+                'afiliados.capturista_id'
+            )
+            ->when(
+                $q !== '',
+                function ($query) use ($q, $full, $clave) {
+                    $query->where(
+                        function ($where) use ($q, $full, $clave) {
+                            if ($full === 'nombre_completo') {
+                                $where->where(
+                                    'afiliados.nombre_completo',
+                                    'like',
+                                    "%{$q}%"
+                                );
+                            } else {
+                                $where->whereRaw(
+                                    "CONCAT_WS(' ', afiliados.nombre, afiliados.apellido_paterno, afiliados.apellido_materno) like ?",
+                                    ["%{$q}%"]
+                                );
+                            }
+
+                            $where
+                                ->orWhere(
+                                    'afiliados.telefono',
+                                    'like',
+                                    "%{$q}%"
+                                )
+                                ->orWhere(
+                                    'afiliados.email',
+                                    'like',
+                                    "%{$q}%"
+                                )
+                                ->orWhere(
+                                    'afiliados.clave_elector',
+                                    'like',
+                                    "{$clave}%"
+                                );
+                        }
+                    );
+                }
+            )
+            ->when(
+                $seccion,
+                fn ($query) =>
+                    $query->where(
+                        'afiliados.seccion',
+                        $seccion
+                    )
+            )
+            ->when(
+                $cveMun,
+                fn ($query) =>
+                    $query->where(
+                        'afiliados.cve_mun',
+                        $cveMun
+                    )
+            )
+            ->when(
+                $municipio,
+                fn ($query) =>
+                    $query->where(
+                        'afiliados.municipio',
+                        $municipio
+                    )
+            )
+            ->when(
+                $estatus,
+                fn ($query) =>
+                    $query->where(
+                        'afiliados.estatus',
+                        $estatus
+                    )
+            )
+            ->when(
+                $referente !== '',
+                fn ($query) =>
+                    $query->where(
+                        'afiliados.perfil',
+                        'like',
+                        "%{$referente}%"
+                    )
+            )
+            ->when(
+                $capturista !== '',
+                fn ($query) =>
+                    $query->where(
+                        'users.name',
+                        'like',
+                        "%{$capturista}%"
+                    )
+            )
+            ->select([
+                'afiliados.*',
+                'secciones.municipio as s_municipio',
+                'secciones.cve_mun as s_cve_mun',
+                'secciones.lista_nominal as s_lista_nominal',
+                'secciones.distrito_local as s_distrito_local',
+                'secciones.distrito_federal as s_distrito_federal',
+                'users.name as capturista_nombre',
+            ]);
+
+        $path = $exporter->create($query);
+
+        return response()->download(
+            $path,
+            'personas_convencidas_'
+            .now('America/Mexico_City')->format('Ymd_His')
+            .'.xlsx',
+            [
+                'Content-Type' =>
+                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'Cache-Control' =>
+                    'no-store, no-cache, must-revalidate, max-age=0',
+            ]
+        )->deleteFileAfterSend(true);
     }
 
     /* =========================

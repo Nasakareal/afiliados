@@ -1,8 +1,11 @@
 {
   "ExpandedNodes": [
     "",
-    "\\config"
+    "\\resources",
+    "\\resources\\views",
+    "\\resources\\views\\avance",
+    "\\resources\\views\\lonas"
   ],
-  "SelectedNode": "\\config\\app.php",
+  "SelectedNode": "\\resources\\views\\lonas\\index.blade.php",
   "PreviewInSolutionExplorer": false
 }
