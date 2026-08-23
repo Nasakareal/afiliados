@@ -3,9 +3,8 @@
     "",
     "\\resources",
     "\\resources\\views",
-    "\\resources\\views\\avance",
-    "\\resources\\views\\lonas"
+    "\\resources\\views\\afiliados"
   ],
-  "SelectedNode": "\\resources\\views\\lonas\\index.blade.php",
+  "SelectedNode": "\\resources\\views\\afiliados\\index.blade.php",
   "PreviewInSolutionExplorer": false
 }

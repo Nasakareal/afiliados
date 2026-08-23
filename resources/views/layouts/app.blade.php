@@ -200,6 +200,14 @@
           </li>
           @endcan
 
+            @can('avance.ver')
+            <li class="nav-item">
+                <a class="nav-link {{ is_active(['avance.*']) }}" href="{{ route('avance.index') }}">
+                <i class="fa-solid fa-chart-line me-1"></i> Avance
+                </a>
+            </li>
+            @endcan
+
           @can('reportes.ver')
           <li class="nav-item dropdown keep-open">
             <a class="nav-link dropdown-toggle {{ is_active(['reportes.secciones','reportes.capturistas']) }}" href="#" data-bs-toggle="dropdown" role="button">
