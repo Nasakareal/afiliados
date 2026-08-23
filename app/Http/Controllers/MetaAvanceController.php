@@ -16,7 +16,7 @@ class MetaAvanceController extends Controller
         $fechaFin = trim((string)$request->query('fecha_fin', now()->endOfMonth()->toDateString()));
         $cveMun = trim((string)$request->query('cve_mun'));
         $distritoLocal = trim((string)$request->query('distrito_local'));
-        $distritoFederal = trim((string)$request->query('distrito_federal'));
+        $distritoFederal = trim((string)$request->query('distrito_federal', '3'));
         $referente = trim((string)$request->query('referente'));
         $capturistaId = $request->filled('capturista_id') ? (int)$request->query('capturista_id') : null;
 
@@ -167,6 +167,35 @@ class MetaAvanceController extends Controller
             ->orderBy('distrito_federal')
             ->pluck('distrito_federal');
 
+        $cabecerasDistritosFederales = [
+            '1' => 'Lázaro Cárdenas',
+            '2' => 'Puruándiro',
+            '3' => 'Zitácuaro',
+            '4' => 'Jiquilpan',
+            '5' => 'Zamora',
+            '6' => 'Ciudad Hidalgo',
+            '7' => 'Zacapu',
+            '8' => 'Morelia',
+            '9' => 'Uruapan',
+            '10' => 'Morelia',
+            '11' => 'Pátzcuaro',
+        ];
+
+        $nombreDistritoFederal = $distritoFederal !== ''
+            ? ($cabecerasDistritosFederales[(string)$distritoFederal] ?? '')
+            : 'Michoacán';
+
+        $municipioPorSeccion = DB::table('secciones')
+            ->select('seccion', 'cve_mun', 'municipio')
+            ->when($distritoFederal !== '', fn($q) => $q->where('distrito_federal', $distritoFederal))
+            ->get()
+            ->mapWithKeys(function ($seccion) {
+                return [(string)(int)$seccion->seccion => [
+                    'cve_mun' => $seccion->cve_mun,
+                    'municipio' => $seccion->municipio,
+                ]];
+            });
+
         return view('avance.index', compact(
             'avance',
             'totales',
@@ -180,7 +209,9 @@ class MetaAvanceController extends Controller
             'capturistas',
             'referentes',
             'distritosLocales',
-            'distritosFederales'
+            'distritosFederales',
+            'nombreDistritoFederal',
+            'municipioPorSeccion'
         ));
     }
 

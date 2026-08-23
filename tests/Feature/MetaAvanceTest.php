@@ -35,6 +35,8 @@ class MetaAvanceTest extends TestCase
         $this->actingAs($admin)
             ->get(route('avance.index'))
             ->assertOk()
+            ->assertSeeText('Distrito 03 Zitácuaro')
+            ->assertSee('avanceDistrictMap')
             ->assertSeeInOrder(['Meta<br>nacional', 'Avance<br>nacional'], false)
             ->assertSeeInOrder(['Meta<br>estatal', 'Avance<br>estatal'], false)
             ->assertSee('Asignar meta');
