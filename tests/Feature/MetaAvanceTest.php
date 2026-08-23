@@ -35,11 +35,17 @@ class MetaAvanceTest extends TestCase
         $this->actingAs($admin)
             ->get(route('avance.index'))
             ->assertOk()
-            ->assertSeeText('Distrito 03 Zitácuaro')
+            ->assertSeeText('Michoacán')
+            ->assertSeeText('Todos los distritos')
             ->assertSee('avanceDistrictMap')
             ->assertSeeInOrder(['Meta<br>nacional', 'Avance<br>nacional'], false)
             ->assertSeeInOrder(['Meta<br>estatal', 'Avance<br>estatal'], false)
             ->assertSee('Asignar meta');
+
+        $this->actingAs($admin)
+            ->get(route('avance.index', ['distrito_federal' => '3']))
+            ->assertOk()
+            ->assertSeeText('Distrito 03 Zitácuaro');
     }
 
     public function test_admin_saves_both_goals_for_the_same_period(): void

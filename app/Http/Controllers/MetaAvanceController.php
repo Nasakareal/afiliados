@@ -16,7 +16,7 @@ class MetaAvanceController extends Controller
         $fechaFin = trim((string)$request->query('fecha_fin', now()->endOfMonth()->toDateString()));
         $cveMun = trim((string)$request->query('cve_mun'));
         $distritoLocal = trim((string)$request->query('distrito_local'));
-        $distritoFederal = trim((string)$request->query('distrito_federal', '3'));
+        $distritoFederal = trim((string)$request->query('distrito_federal'));
         $referente = trim((string)$request->query('referente'));
         $capturistaId = $request->filled('capturista_id') ? (int)$request->query('capturista_id') : null;
 

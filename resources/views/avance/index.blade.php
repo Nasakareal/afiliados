@@ -7,6 +7,7 @@
 <style>
   .avance-page { --azul-reporte:#1d3376; --gris-reporte:#eef1eb; --rosa-reporte:#d91785; }
   .avance-page .report-actions .btn { border-radius:.45rem; }
+  .district-quick-filter { min-width:190px; }
   .avance-periodo { color:#667085; font-size:.82rem; }
 
   .avance-summary {
@@ -104,6 +105,21 @@
       <div class="avance-periodo">{{ $tituloDistrito }} · {{ \Carbon\Carbon::parse($fechaInicio)->format('d/m/Y') }} al {{ \Carbon\Carbon::parse($fechaFin)->format('d/m/Y') }}</div>
     </div>
     <div class="report-actions d-flex gap-2">
+      <form method="GET" action="{{ route('avance.index') }}" id="districtQuickFilter" class="district-quick-filter">
+        <input type="hidden" name="fecha_inicio" value="{{ $fechaInicio }}">
+        <input type="hidden" name="fecha_fin" value="{{ $fechaFin }}">
+        @if($referente !== '')<input type="hidden" name="referente" value="{{ $referente }}">@endif
+        @if($capturistaId)<input type="hidden" name="capturista_id" value="{{ $capturistaId }}">@endif
+        <label for="quickDistritoFederal" class="visually-hidden">Distrito federal</label>
+        <select name="distrito_federal" id="quickDistritoFederal" class="form-select form-select-sm" title="Cambiar distrito federal">
+          <option value="">Todos los distritos</option>
+          @foreach($distritosFederales as $distrito)
+            <option value="{{ $distrito }}" {{ (string)$distritoFederal === (string)$distrito ? 'selected' : '' }}>
+              DFn {{ str_pad($distrito, 2, '0', STR_PAD_LEFT) }}
+            </option>
+          @endforeach
+        </select>
+      </form>
       <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalFiltros">
         <i class="fa-solid fa-filter me-1"></i> Filtros
       </button>
@@ -208,7 +224,7 @@
         <div class="col-md-6"><label class="form-label">Referente / Referencia</label><select name="referente" class="form-select"><option value="">Todos</option>@foreach($referentes as $nombreReferente)<option value="{{ $nombreReferente }}" {{ $referente === $nombreReferente ? 'selected' : '' }}>{{ $nombreReferente }}</option>@endforeach</select></div>
         <div class="col-md-6"><label class="form-label">Capturista</label><select name="capturista_id" class="form-select"><option value="">Todos</option>@foreach($capturistas as $usuario)<option value="{{ $usuario->id }}" {{ (string)$capturistaId === (string)$usuario->id ? 'selected' : '' }}>{{ $usuario->name }}</option>@endforeach</select></div>
       </div></div>
-      <div class="modal-footer"><a href="{{ route('avance.index') }}" class="btn btn-outline-secondary">Restablecer al DFn 03</a><button class="btn btn-granate"><i class="fa-solid fa-check me-1"></i> Aplicar</button></div>
+      <div class="modal-footer"><a href="{{ route('avance.index') }}" class="btn btn-outline-secondary">Mostrar todo</a><button class="btn btn-granate"><i class="fa-solid fa-check me-1"></i> Aplicar</button></div>
     </form>
   </div></div>
 </div>
@@ -231,6 +247,13 @@
 @endsection
 
 @push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.getElementById('quickDistritoFederal')?.addEventListener('change', function () {
+    this.form.submit();
+  });
+});
+</script>
 @if($avance->isNotEmpty())
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
