@@ -38,6 +38,9 @@ class PermissionsSeeder extends Seeder
             // Mapa y reportes
             'mapa.ver', 'reportes.ver',
 
+            // Avance y asignación de metas
+            'avance.ver', 'avance.metas',
+
             // Settings / administración
             'settings.ver', 'settings.editar',
 
@@ -78,6 +81,7 @@ class PermissionsSeeder extends Seeder
             'afiliados.ver','afiliados.crear','afiliados.editar','afiliados.borrar',
             'actividades.ver','actividades.crear','actividades.editar','actividades.borrar',
             'secciones.ver','mapa.ver','reportes.ver',
+            'avance.ver',
             'lonas.ver','lonas.crear','lonas.editar','lonas.borrar',
         ]);
 
@@ -90,7 +94,7 @@ class PermissionsSeeder extends Seeder
         // Consulta: solo lectura general (aditivo)
         $roleView->givePermissionTo([
             'afiliados.ver','secciones.ver','actividades.ver','mapa.ver','reportes.ver',
-            'lonas.ver',
+            'lonas.ver','avance.ver',
         ]);
 
         // Usuarios genéricos de lonas: únicamente este módulo (captura, listado y mapa).

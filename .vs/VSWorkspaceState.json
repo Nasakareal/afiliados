@@ -3,8 +3,8 @@
     "",
     "\\resources",
     "\\resources\\views",
-    "\\resources\\views\\afiliados"
+    "\\resources\\views\\avance"
   ],
-  "SelectedNode": "\\resources\\views\\afiliados\\index.blade.php",
+  "SelectedNode": "\\resources\\views\\avance",
   "PreviewInSolutionExplorer": false
 }

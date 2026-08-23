@@ -10,8 +10,8 @@ class MetaAvance extends Model
 {
     use HasFactory;
 
-    public const TIPO_CONVENCIDOS = 'convencidos';
-    public const TIPO_LONAS = 'lonas';
+    public const TIPO_NACIONAL = 'nacional';
+    public const TIPO_ESTATAL = 'estatal';
 
     protected $fillable = [
         'tipo',
@@ -39,8 +39,8 @@ class MetaAvance extends Model
     public static function tipos(): array
     {
         return [
-            self::TIPO_CONVENCIDOS => 'Convencidos',
-            self::TIPO_LONAS => 'Lonas',
+            self::TIPO_NACIONAL => 'Meta nacional',
+            self::TIPO_ESTATAL => 'Meta estatal',
         ];
     }
 }
