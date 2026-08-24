@@ -12,9 +12,9 @@
 
   .avance-summary {
     display:grid;
-    grid-template-columns:.75fr .9fr 1fr 1fr 1.05fr 1fr 1fr 1.05fr;
+    grid-template-columns:.75fr .9fr 1fr 1fr 1.05fr;
     margin-bottom:1.15rem;
-    min-width:850px;
+    min-width:600px;
   }
   .avance-summary-wrap { border-radius:.35rem; box-shadow:0 8px 22px rgba(22,39,93,.08); overflow-x:auto; }
   .avance-summary-head,
@@ -48,7 +48,7 @@
   }
 
   .district-table-scroll { max-height:560px; overflow:auto; }
-  .district-table { margin:0; min-width:760px; }
+  .district-table { margin:0; min-width:640px; }
   .district-table thead { position:sticky; top:0; z-index:3; }
   .district-table thead th {
     background:var(--azul-reporte); border-color:rgba(255,255,255,.25); color:#fff;
@@ -143,14 +143,11 @@
 
   <div class="avance-summary-wrap">
     <div class="avance-summary">
-      @foreach(['DFn','Secciones','Meta nacional','Avance nacional','% avance nacional','Meta estatal','Avance estatal','% avance estatal'] as $encabezado)
+      @foreach(['DFn','Secciones','Meta estatal','Avance estatal','% avance estatal'] as $encabezado)
         <div class="avance-summary-head">{{ $encabezado }}</div>
       @endforeach
       <div class="avance-summary-value">{{ $dfTexto }}</div>
       <div class="avance-summary-value">{{ number_format($totales['secciones']) }}</div>
-      <div class="avance-summary-value">{{ number_format($totales['meta_nacional']) }}</div>
-      <div class="avance-summary-value">{{ number_format($totales['avance_nacional']) }}</div>
-      <div class="avance-summary-value pct {{ $pctClass($totales['porcentaje_nacional'], $totales['meta_nacional']) }}">{{ number_format($totales['porcentaje_nacional'], 2) }}%</div>
       <div class="avance-summary-value">{{ number_format($totales['meta_estatal']) }}</div>
       <div class="avance-summary-value">{{ number_format($totales['avance_estatal']) }}</div>
       <div class="avance-summary-value pct {{ $pctClass($totales['porcentaje_estatal'], $totales['meta_estatal']) }}">{{ number_format($totales['porcentaje_estatal'], 2) }}%</div>
@@ -172,9 +169,12 @@
         <table class="table district-table">
           <thead>
             <tr>
-              <th>DFn</th><th>Municipio</th><th>Secciones</th><th>Meta<br>nacional</th>
-              <th>Avance<br>nacional</th><th>% avance<br>nacional</th><th>Meta<br>estatal</th>
-              <th>Avance<br>estatal</th><th>% avance<br>estatal</th>
+              <th>DFn</th>
+              <th>Municipio</th>
+              <th>Secciones</th>
+              <th>Meta<br>estatal</th>
+              <th>Avance<br>estatal</th>
+              <th>% avance<br>estatal</th>
             </tr>
           </thead>
           <tbody>
@@ -185,63 +185,216 @@
                   <div class="d-flex align-items-center justify-content-between gap-1">
                     <span>{{ $fila['municipio'] }}</span>
                     @can('avance.metas')
-                      <button type="button" class="btn btn-sm btn-link edit-meta btn-asignar-meta"
-                        title="Editar metas" data-bs-toggle="modal" data-bs-target="#modalMeta"
-                        data-cve-mun="{{ $fila['cve_mun'] }}" data-meta-nacional="{{ $fila['meta_nacional'] }}"
-                        data-meta-estatal="{{ $fila['meta_estatal'] }}"><i class="fa-solid fa-pen-to-square"></i></button>
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-link edit-meta btn-asignar-meta"
+                        title="Editar meta estatal"
+                        data-bs-toggle="modal"
+                        data-bs-target="#modalMeta"
+                        data-cve-mun="{{ $fila['cve_mun'] }}"
+                        data-meta-estatal="{{ $fila['meta_estatal'] }}"
+                      >
+                        <i class="fa-solid fa-pen-to-square"></i>
+                      </button>
                     @endcan
                   </div>
                 </td>
                 <td>{{ number_format($fila['secciones']) }}</td>
-                <td>{{ $fila['meta_nacional'] > 0 ? number_format($fila['meta_nacional']) : '—' }}</td>
-                <td>{{ number_format($fila['avance_nacional']) }}</td>
-                <td class="pct-cell {{ $pctClass($fila['porcentaje_nacional'], $fila['meta_nacional']) }}">{{ $fila['meta_nacional'] > 0 ? number_format($fila['porcentaje_nacional'], 2).'%' : 'Sin meta' }}</td>
                 <td>{{ $fila['meta_estatal'] > 0 ? number_format($fila['meta_estatal']) : '—' }}</td>
                 <td>{{ number_format($fila['avance_estatal']) }}</td>
-                <td class="pct-cell {{ $pctClass($fila['porcentaje_estatal'], $fila['meta_estatal']) }}">{{ $fila['meta_estatal'] > 0 ? number_format($fila['porcentaje_estatal'], 2).'%' : 'Sin meta' }}</td>
+                <td class="pct-cell {{ $pctClass($fila['porcentaje_estatal'], $fila['meta_estatal']) }}">
+                  {{ $fila['meta_estatal'] > 0 ? number_format($fila['porcentaje_estatal'], 2).'%' : 'Sin meta' }}
+                </td>
               </tr>
             @empty
-              <tr><td colspan="9" class="py-5 text-muted">Sin información para mostrar.</td></tr>
+              <tr>
+                <td colspan="6" class="py-5 text-muted">Sin información para mostrar.</td>
+              </tr>
             @endforelse
           </tbody>
         </table>
       </div>
     </section>
   </div>
+
   <div class="report-footline"></div>
 </div>
 
 <div class="modal fade" id="modalFiltros" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content">
-    <form method="GET" action="{{ route('avance.index') }}">
-      <div class="modal-header"><h5 class="modal-title"><i class="fa-solid fa-filter me-1"></i> Filtros del reporte</h5><button class="btn-close" type="button" data-bs-dismiss="modal"></button></div>
-      <div class="modal-body"><div class="row g-3">
-        <div class="col-md-4"><label class="form-label">Distrito federal</label><select name="distrito_federal" class="form-select"><option value="">Todos</option>@foreach($distritosFederales as $distrito)<option value="{{ $distrito }}" {{ (string)$distritoFederal === (string)$distrito ? 'selected' : '' }}>Distrito {{ str_pad($distrito, 2, '0', STR_PAD_LEFT) }}</option>@endforeach</select></div>
-        <div class="col-md-4"><label class="form-label">Desde</label><input type="date" name="fecha_inicio" value="{{ $fechaInicio }}" class="form-control"></div>
-        <div class="col-md-4"><label class="form-label">Hasta</label><input type="date" name="fecha_fin" value="{{ $fechaFin }}" class="form-control"></div>
-        <div class="col-md-6"><label class="form-label">Distrito local</label><select name="distrito_local" class="form-select"><option value="">Todos</option>@foreach($distritosLocales as $distrito)<option value="{{ $distrito }}" {{ (string)$distritoLocal === (string)$distrito ? 'selected' : '' }}>Distrito {{ $distrito }}</option>@endforeach</select></div>
-        <div class="col-md-6"><label class="form-label">Municipio</label><select name="cve_mun" class="form-select"><option value="">Todos</option>@foreach($avance as $fila)<option value="{{ $fila['cve_mun'] }}" {{ (string)$cveMun === (string)$fila['cve_mun'] ? 'selected' : '' }}>{{ $fila['municipio'] }}</option>@endforeach</select></div>
-        <div class="col-md-6"><label class="form-label">Referente / Referencia</label><select name="referente" class="form-select"><option value="">Todos</option>@foreach($referentes as $nombreReferente)<option value="{{ $nombreReferente }}" {{ $referente === $nombreReferente ? 'selected' : '' }}>{{ $nombreReferente }}</option>@endforeach</select></div>
-        <div class="col-md-6"><label class="form-label">Capturista</label><select name="capturista_id" class="form-select"><option value="">Todos</option>@foreach($capturistas as $usuario)<option value="{{ $usuario->id }}" {{ (string)$capturistaId === (string)$usuario->id ? 'selected' : '' }}>{{ $usuario->name }}</option>@endforeach</select></div>
-      </div></div>
-      <div class="modal-footer"><a href="{{ route('avance.index') }}" class="btn btn-outline-secondary">Mostrar todo</a><button class="btn btn-granate"><i class="fa-solid fa-check me-1"></i> Aplicar</button></div>
-    </form>
-  </div></div>
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <form method="GET" action="{{ route('avance.index') }}">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="fa-solid fa-filter me-1"></i> Filtros del reporte
+          </h5>
+          <button class="btn-close" type="button" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label">Distrito federal</label>
+              <select name="distrito_federal" class="form-select">
+                <option value="">Todos</option>
+                @foreach($distritosFederales as $distrito)
+                  <option value="{{ $distrito }}" {{ (string)$distritoFederal === (string)$distrito ? 'selected' : '' }}>
+                    Distrito {{ str_pad($distrito, 2, '0', STR_PAD_LEFT) }}
+                  </option>
+                @endforeach
+              </select>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Desde</label>
+              <input type="date" name="fecha_inicio" value="{{ $fechaInicio }}" class="form-control">
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Hasta</label>
+              <input type="date" name="fecha_fin" value="{{ $fechaFin }}" class="form-control">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Distrito local</label>
+              <select name="distrito_local" class="form-select">
+                <option value="">Todos</option>
+                @foreach($distritosLocales as $distrito)
+                  <option value="{{ $distrito }}" {{ (string)$distritoLocal === (string)$distrito ? 'selected' : '' }}>
+                    Distrito {{ $distrito }}
+                  </option>
+                @endforeach
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Municipio</label>
+              <select name="cve_mun" class="form-select">
+                <option value="">Todos</option>
+                @foreach($avance as $fila)
+                  <option value="{{ $fila['cve_mun'] }}" {{ (string)$cveMun === (string)$fila['cve_mun'] ? 'selected' : '' }}>
+                    {{ $fila['municipio'] }}
+                  </option>
+                @endforeach
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Referente / Referencia</label>
+              <select name="referente" class="form-select">
+                <option value="">Todos</option>
+                @foreach($referentes as $nombreReferente)
+                  <option value="{{ $nombreReferente }}" {{ $referente === $nombreReferente ? 'selected' : '' }}>
+                    {{ $nombreReferente }}
+                  </option>
+                @endforeach
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Capturista</label>
+              <select name="capturista_id" class="form-select">
+                <option value="">Todos</option>
+                @foreach($capturistas as $usuario)
+                  <option value="{{ $usuario->id }}" {{ (string)$capturistaId === (string)$usuario->id ? 'selected' : '' }}>
+                    {{ $usuario->name }}
+                  </option>
+                @endforeach
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <a href="{{ route('avance.index') }}" class="btn btn-outline-secondary">Mostrar todo</a>
+          <button class="btn btn-granate">
+            <i class="fa-solid fa-check me-1"></i> Aplicar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
 
 @can('avance.metas')
 <div class="modal fade" id="modalMeta" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
-    <form method="POST" action="{{ route('avance.metas.store') }}">@csrf
-      <div class="modal-header"><h5 class="modal-title"><i class="fa-solid fa-bullseye me-1"></i> Asignar metas</h5><button class="btn-close" type="button" data-bs-dismiss="modal"></button></div>
-      <div class="modal-body">
-        <div class="mb-3"><label class="form-label">Municipio</label><select name="cve_mun" id="meta_cve_mun" class="form-select" required><option value="">Selecciona un municipio</option>@foreach($avance as $fila)<option value="{{ $fila['cve_mun'] }}" data-secciones="{{ $fila['secciones'] }}" data-meta-nacional="{{ $fila['meta_nacional'] }}" data-meta-estatal="{{ $fila['meta_estatal'] }}" {{ old('cve_mun') === $fila['cve_mun'] ? 'selected' : '' }}>{{ $fila['municipio'] }}</option>@endforeach</select><div class="form-text">Sugerencia: nacional = 2 por sección y estatal = 5 por sección.</div></div>
-        <div class="row g-3 mb-3"><div class="col-6"><label class="form-label">Meta nacional</label><input type="number" name="meta_nacional" id="meta_nacional" value="{{ old('meta_nacional') }}" min="1" class="form-control" required></div><div class="col-6"><label class="form-label">Meta estatal</label><input type="number" name="meta_estatal" id="meta_estatal" value="{{ old('meta_estatal') }}" min="1" class="form-control" required></div></div>
-        <div class="row g-3"><div class="col-6"><label class="form-label">Fecha de inicio</label><input type="date" name="fecha_inicio" value="{{ old('fecha_inicio',$fechaInicio) }}" class="form-control" required></div><div class="col-6"><label class="form-label">Fecha de término</label><input type="date" name="fecha_fin" value="{{ old('fecha_fin',$fechaFin) }}" class="form-control" required></div></div>
-      </div>
-      <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button><button class="btn btn-granate"><i class="fa-solid fa-floppy-disk me-1"></i> Guardar metas</button></div>
-    </form>
-  </div></div>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form method="POST" action="{{ route('avance.metas.store') }}">
+        @csrf
+
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="fa-solid fa-bullseye me-1"></i> Asignar meta estatal
+          </h5>
+          <button class="btn-close" type="button" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-12">
+              <label for="meta_cve_mun" class="form-label">Municipio</label>
+              <select name="cve_mun" id="meta_cve_mun" class="form-select" required>
+                <option value="">Selecciona un municipio</option>
+                @foreach($avance as $fila)
+                  <option
+                    value="{{ $fila['cve_mun'] }}"
+                    data-secciones="{{ $fila['secciones'] }}"
+                    {{ (string)old('cve_mun') === (string)$fila['cve_mun'] ? 'selected' : '' }}
+                  >
+                    {{ $fila['municipio'] }}
+                  </option>
+                @endforeach
+              </select>
+            </div>
+
+            <div class="col-12">
+              <label for="meta_estatal" class="form-label">Meta estatal</label>
+              <input
+                type="number"
+                name="meta_estatal"
+                id="meta_estatal"
+                value="{{ old('meta_estatal') }}"
+                class="form-control"
+                min="0"
+                step="1"
+                required
+              >
+            </div>
+
+            <div class="col-6">
+              <label class="form-label">Fecha de inicio</label>
+              <input
+                type="date"
+                name="fecha_inicio"
+                value="{{ old('fecha_inicio',$fechaInicio) }}"
+                class="form-control"
+                required
+              >
+            </div>
+
+            <div class="col-6">
+              <label class="form-label">Fecha de término</label>
+              <input
+                type="date"
+                name="fecha_fin"
+                value="{{ old('fecha_fin',$fechaFin) }}"
+                class="form-control"
+                required
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button class="btn btn-granate">
+            <i class="fa-solid fa-floppy-disk me-1"></i> Guardar meta
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
 @endcan
 @endsection
@@ -254,38 +407,89 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 </script>
+
 @if($avance->isNotEmpty())
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   const selectedDistrict = @json((string)$distritoFederal);
   const sectionMunicipalities = @json($municipioPorSeccion);
-  const map = L.map('avanceDistrictMap', {attributionControl:false, zoomControl:false, dragging:false, scrollWheelZoom:false, doubleClickZoom:false, boxZoom:false, keyboard:false, tap:false});
+
+  const map = L.map('avanceDistrictMap', {
+    attributionControl:false,
+    zoomControl:false,
+    dragging:false,
+    scrollWheelZoom:false,
+    doubleClickZoom:false,
+    boxZoom:false,
+    keyboard:false,
+    tap:false
+  });
 
   fetch(@json(asset('maps/out/SECCION.geojson')))
     .then(response => response.json())
     .then(geojson => {
-      const features = geojson.features.filter(feature => !selectedDistrict || String(feature.properties?.DISTRITO_F ?? '') === selectedDistrict);
-      const municipalityLayers = {};
-      const layer = L.geoJSON({type:'FeatureCollection', features}, {
-        interactive:false,
-        style:{color:'#8793b8', weight:.65, fillColor:'#f4f5ed', fillOpacity:.96},
-        onEachFeature(feature, sectionLayer) {
-          const section = String(Number(feature.properties?.SECCION ?? 0));
-          const municipality = sectionMunicipalities[section];
-          if (municipality) (municipalityLayers[municipality.cve_mun] ||= {name:municipality.municipio,layers:[]}).layers.push(sectionLayer);
-        }
-      }).addTo(map);
+      const features = geojson.features.filter(
+        feature => !selectedDistrict || String(feature.properties?.DISTRITO_F ?? '') === selectedDistrict
+      );
 
-      if (layer.getBounds().isValid()) map.fitBounds(layer.getBounds(), {padding:[18,18]});
+      const municipalityLayers = {};
+
+      const layer = L.geoJSON(
+        {
+          type:'FeatureCollection',
+          features
+        },
+        {
+          interactive:false,
+          style:{
+            color:'#8793b8',
+            weight:.65,
+            fillColor:'#f4f5ed',
+            fillOpacity:.96
+          },
+          onEachFeature(feature, sectionLayer) {
+            const section = String(Number(feature.properties?.SECCION ?? 0));
+            const municipality = sectionMunicipalities[section];
+
+            if (municipality) {
+              (
+                municipalityLayers[municipality.cve_mun] ||= {
+                  name:municipality.municipio,
+                  layers:[]
+                }
+              ).layers.push(sectionLayer);
+            }
+          }
+        }
+      ).addTo(map);
+
+      if (layer.getBounds().isValid()) {
+        map.fitBounds(layer.getBounds(), {padding:[18,18]});
+      }
 
       Object.values(municipalityLayers).forEach(municipality => {
         const bounds = L.featureGroup(municipality.layers).getBounds();
+
         if (!bounds.isValid()) return;
-        L.marker(bounds.getCenter(), {interactive:false, icon:L.divIcon({className:'avance-map-label', html:'<span>'+municipality.name+'</span>', iconSize:null})}).addTo(map);
+
+        L.marker(
+          bounds.getCenter(),
+          {
+            interactive:false,
+            icon:L.divIcon({
+              className:'avance-map-label',
+              html:'<span>'+municipality.name+'</span>',
+              iconSize:null
+            })
+          }
+        ).addTo(map);
       });
     })
-    .catch(() => document.getElementById('avanceDistrictMap').innerHTML = '<div class="district-map-empty">No fue posible cargar el mapa electoral.</div>');
+    .catch(() => {
+      document.getElementById('avanceDistrictMap').innerHTML =
+        '<div class="district-map-empty">No fue posible cargar el mapa electoral.</div>';
+    });
 });
 </script>
 @endif
@@ -294,19 +498,42 @@ document.addEventListener('DOMContentLoaded', function () {
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   const municipio = document.getElementById('meta_cve_mun');
-  const nacional = document.getElementById('meta_nacional');
   const estatal = document.getElementById('meta_estatal');
-  function cargar(cve, metaNacional, metaEstatal) {
-    municipio.value = cve || '';
+
+  function metaSugerida() {
     const option = municipio.options[municipio.selectedIndex];
     const secciones = Number(option?.dataset.secciones || 0);
-    nacional.value = Number(metaNacional) > 0 ? metaNacional : (secciones ? secciones * 2 : '');
-    estatal.value = Number(metaEstatal) > 0 ? metaEstatal : (secciones ? secciones * 5 : '');
+
+    return secciones ? secciones * 5 : '';
   }
-  document.querySelectorAll('.btn-asignar-meta').forEach(button => button.addEventListener('click', () => cargar(button.dataset.cveMun, button.dataset.metaNacional, button.dataset.metaEstatal)));
-  document.querySelectorAll('.btn-nueva-meta').forEach(button => button.addEventListener('click', () => cargar('', '', '')));
-  municipio.addEventListener('change', () => { const option=municipio.options[municipio.selectedIndex]; cargar(municipio.value, option?.dataset.metaNacional, option?.dataset.metaEstatal); });
-  @if($errors->any()) bootstrap.Modal.getOrCreateInstance(document.getElementById('modalMeta')).show(); @endif
+
+  function cargar(cve, metaEstatal) {
+    municipio.value = cve || '';
+    estatal.value = Number(metaEstatal) > 0 ? metaEstatal : metaSugerida();
+  }
+
+  document.querySelectorAll('.btn-nueva-meta').forEach(button => {
+    button.addEventListener('click', () => cargar('', ''));
+  });
+
+  document.querySelectorAll('.btn-asignar-meta').forEach(button => {
+    button.addEventListener('click', () => {
+      cargar(
+        button.dataset.cveMun,
+        button.dataset.metaEstatal
+      );
+    });
+  });
+
+  municipio?.addEventListener('change', function () {
+    estatal.value = metaSugerida();
+  });
+
+  @if($errors->any())
+    bootstrap.Modal.getOrCreateInstance(
+      document.getElementById('modalMeta')
+    ).show();
+  @endif
 });
 </script>
 @endcan
