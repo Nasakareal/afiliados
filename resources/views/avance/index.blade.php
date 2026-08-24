@@ -7,7 +7,7 @@
 <style>
   .avance-page { --azul-reporte:#1d3376; --gris-reporte:#eef1eb; --rosa-reporte:#d91785; }
   .avance-page .report-actions .btn { border-radius:.45rem; }
-  .district-quick-filter { display:flex; gap:.45rem; }
+  .district-quick-filter { align-items:center; display:flex; gap:.45rem; }
   .district-quick-filter .form-select { min-width:175px; }
   .avance-periodo { color:#667085; font-size:.82rem; }
 
@@ -41,6 +41,10 @@
   }
   #avanceDistrictMap { background:#f8f9f4; height:560px; width:100%; }
   #avanceDistrictMap .leaflet-control-container { display:none; }
+  .avance-map-legend { align-items:center; background:#fff; border:1px solid #dfe4ee; border-radius:.45rem; bottom:.7rem; box-shadow:0 2px 8px rgba(22,39,93,.16); display:flex; flex-wrap:wrap; font-size:.66rem; gap:.45rem; left:.7rem; padding:.42rem .55rem; position:absolute; z-index:500; }
+  .avance-map-legend span { align-items:center; display:flex; gap:.22rem; }
+  .avance-map-legend i { border:1px solid rgba(0,0,0,.15); display:inline-block; height:10px; width:14px; }
+  .district-map-body { position:relative; }
   .district-map-empty { align-items:center; color:#667085; display:flex; height:560px; justify-content:center; padding:2rem; text-align:center; }
   .avance-map-label { background:transparent; border:0; }
   .avance-map-label span {
@@ -63,6 +67,7 @@
   .district-table tbody tr:nth-child(even) td:not(.pct-cell) { background:#f7f8f4; }
   .district-table .municipio-cell { font-weight:700; text-align:left; }
   .district-table .edit-meta { color:#9b001f; padding:0 .2rem; }
+  .district-table .define-meta { font-size:.64rem; padding:.18rem .38rem; white-space:nowrap; }
   .district-table .pct-cell { color:#fff; font-weight:800; min-width:76px; }
   .pct-success { background:#2f9148 !important; }
   .pct-warning { background:#d8ab00 !important; color:#3b3000 !important; }
@@ -129,7 +134,7 @@
         @if($referente !== '')<input type="hidden" name="referente" value="{{ $referente }}">@endif
         @if($capturistaId)<input type="hidden" name="capturista_id" value="{{ $capturistaId }}">@endif
         <label for="quickDistritoFederal" class="visually-hidden">Distrito federal</label>
-        <select name="distrito_federal" id="quickDistritoFederal" class="form-select form-select-sm" title="Cambiar distrito federal">
+        <select name="distrito_federal" id="quickDistritoFederal" class="form-select form-select-sm" title="Cambiar distrito federal" onchange="this.form.submit()">
           <option value="">Todos los distritos</option>
           @foreach($distritosFederales as $distrito)
             <option value="{{ $distrito }}" {{ (string)$distritoFederal === (string)$distrito ? 'selected' : '' }}>
@@ -138,7 +143,7 @@
           @endforeach
         </select>
         <label for="quickDistritoLocal" class="visually-hidden">Distrito local</label>
-        <select name="distrito_local" id="quickDistritoLocal" class="form-select form-select-sm" title="Cambiar distrito local">
+        <select name="distrito_local" id="quickDistritoLocal" class="form-select form-select-sm" title="Cambiar distrito local" onchange="this.form.submit()">
           <option value="">Todos los locales</option>
           @foreach($distritosLocales as $distrito)
             <option value="{{ $distrito }}" {{ (string)$distritoLocal === (string)$distrito ? 'selected' : '' }}>
@@ -146,6 +151,9 @@
             </option>
           @endforeach
         </select>
+        <button type="submit" class="btn btn-sm btn-outline-primary" title="Aplicar distritos">
+          <i class="fa-solid fa-check"></i><span class="d-none d-xl-inline ms-1">Aplicar</span>
+        </button>
       </form>
       <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalFiltros">
         <i class="fa-solid fa-filter me-1"></i> Filtros
@@ -192,7 +200,17 @@
     <section class="district-map-card">
       <div class="district-ribbon">{{ $tituloDistrito }}</div>
       @if($avance->isNotEmpty())
-        <div id="avanceDistrictMap" aria-label="Mapa de {{ $tituloDistrito }}"></div>
+        <div class="district-map-body">
+          <div id="avanceDistrictMap" aria-label="Mapa de {{ $tituloDistrito }}"></div>
+          <div class="avance-map-legend" aria-label="Escala de convencidos">
+            <strong>Convencidos:</strong>
+            <span><i style="background:#f8cbd7"></i>0–4</span>
+            <span><i style="background:#f08aa7"></i>5–19</span>
+            <span><i style="background:#e34b6a"></i>20–49</span>
+            <span><i style="background:#d61a3c"></i>50–99</span>
+            <span><i style="background:#b80027"></i>100+</span>
+          </div>
+        </div>
       @else
         <div class="district-map-empty">No hay secciones para los filtros seleccionados.</div>
       @endif
@@ -219,26 +237,28 @@
               <tr>
                 <td>{{ $fila['distritos_federales'] ?: '—' }}</td>
                 <td class="municipio-cell">
-                  <div class="d-flex align-items-center justify-content-between gap-1">
-                    <span>{{ $fila['municipio'] }}</span>
-                    @can('avance.metas')
-                      <button
-                        type="button"
-                        class="btn btn-sm btn-link edit-meta btn-asignar-meta"
-                        title="Editar metas"
-                        data-bs-toggle="modal"
-                        data-bs-target="#modalMeta"
-                        data-cve-mun="{{ $fila['cve_mun'] }}"
-                        data-meta-convencidos="{{ $fila['meta_convencidos'] }}"
-                        data-meta-lonas="{{ $fila['meta_lonas'] }}"
-                      >
-                        <i class="fa-solid fa-pen-to-square"></i>
-                      </button>
-                    @endcan
-                  </div>
+                  <span>{{ $fila['municipio'] }}</span>
                 </td>
                 <td>{{ number_format($fila['secciones']) }}</td>
-                <td>{{ $fila['meta_convencidos'] > 0 ? number_format($fila['meta_convencidos']) : '—' }}</td>
+                <td>
+                  @can('avance.metas')
+                    <button
+                      type="button"
+                      class="btn btn-outline-danger define-meta btn-asignar-meta"
+                      title="Definir metas de {{ $fila['municipio'] }}"
+                      data-bs-toggle="modal"
+                      data-bs-target="#modalMeta"
+                      data-cve-mun="{{ $fila['cve_mun'] }}"
+                      data-meta-convencidos="{{ $fila['meta_convencidos'] }}"
+                      data-meta-lonas="{{ $fila['meta_lonas'] }}"
+                    >
+                      <i class="fa-solid {{ $fila['meta_convencidos'] > 0 ? 'fa-pen' : 'fa-plus' }} me-1"></i>
+                      {{ $fila['meta_convencidos'] > 0 ? number_format($fila['meta_convencidos']) : 'Definir' }}
+                    </button>
+                  @else
+                    {{ $fila['meta_convencidos'] > 0 ? number_format($fila['meta_convencidos']) : '—' }}
+                  @endcan
+                </td>
                 <td>{{ number_format($fila['total_convencidos']) }}</td>
                 <td class="pct-cell {{ $pctClass($fila['porcentaje_convencidos'], $fila['meta_convencidos']) }}">
                   {{ $fila['meta_convencidos'] > 0 ? number_format($fila['porcentaje_convencidos'], 2).'%' : 'Sin meta' }}
@@ -506,6 +526,15 @@ document.addEventListener('DOMContentLoaded', function () {
   const selectedDistrict = @json((string)$distritoFederal);
   const selectedLocalDistrict = @json((string)$distritoLocal);
   const sectionMunicipalities = @json($municipioPorSeccion);
+  const sectionCounts = @json($convencidosPorSeccion);
+
+  function mapColor(total) {
+    return total >= 100 ? '#b80027'
+      : total >= 50 ? '#d61a3c'
+      : total >= 20 ? '#e34b6a'
+      : total >= 5 ? '#f08aa7'
+      : '#f8cbd7';
+  }
 
   const map = L.map('avanceDistrictMap', {
     attributionControl:false,
@@ -534,16 +563,33 @@ document.addEventListener('DOMContentLoaded', function () {
           features
         },
         {
-          interactive:false,
-          style:{
-            color:'#8793b8',
-            weight:.65,
-            fillColor:'#f4f5ed',
-            fillOpacity:.96
+          interactive:true,
+          style(feature) {
+            const section = String(Number(feature.properties?.SECCION ?? 0));
+            return {
+              color:'#6f7896',
+              weight:.7,
+              fillColor:mapColor(Number(sectionCounts[section] || 0)),
+              fillOpacity:.84
+            };
           },
           onEachFeature(feature, sectionLayer) {
             const section = String(Number(feature.properties?.SECCION ?? 0));
             const municipality = sectionMunicipalities[section];
+            const total = Number(sectionCounts[section] || 0);
+
+            sectionLayer.bindPopup(
+              '<strong>Sección '+section+'</strong><br>'+
+              (municipality ? municipality.municipio+'<br>' : '')+
+              '<strong>Convencidos:</strong> '+total
+            );
+            sectionLayer.on('mouseover', function () {
+              this.setStyle({weight:1.6, fillOpacity:1});
+              this.bringToFront();
+            });
+            sectionLayer.on('mouseout', function () {
+              layer.resetStyle(this);
+            });
 
             if (municipality) {
               (

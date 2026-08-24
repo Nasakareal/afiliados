@@ -38,6 +38,8 @@ class MetaAvanceTest extends TestCase
             ->assertSeeText('Michoacán')
             ->assertSeeText('Todos los distritos')
             ->assertSeeText('Todos los locales')
+            ->assertSee('id="quickDistritoLocal"', false)
+            ->assertSee('onchange="this.form.submit()"', false)
             ->assertSee('avanceDistrictMap')
             ->assertSeeInOrder(['Meta<br>convencidos', 'Total<br>convencidos'], false)
             ->assertSeeInOrder(['Meta<br>lonas', 'Total<br>lonas'], false)
@@ -188,6 +190,7 @@ class MetaAvanceTest extends TestCase
         $response->assertOk()->assertSeeText('Distrito local 01');
         $this->assertSame(2, $response->viewData('totales')['total_convencidos']);
         $this->assertSame(1, $response->viewData('totales')['total_lonas']);
+        $this->assertSame(2, $response->viewData('convencidosPorSeccion')->get('1'));
         $this->assertSame('Capturista líder', $response->viewData('topCapturistas')->first()->name);
         $this->assertSame(2, (int)$response->viewData('topCapturistas')->first()->total);
         $this->assertSame('Referente líder', $response->viewData('topReferentes')->first()->name);

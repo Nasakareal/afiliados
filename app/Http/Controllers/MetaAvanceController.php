@@ -51,6 +51,23 @@ class MetaAvanceController extends Controller
             ->groupBy('cve_mun')
             ->pluck('total', 'cve_mun');
 
+        $convencidosPorSeccion = DB::table('afiliados')
+            ->select('seccion', DB::raw('COUNT(*) AS total'))
+            ->whereNull('deleted_at')
+            ->whereNotNull('seccion')
+            ->whereRaw(
+                'DATE(COALESCE(fecha_convencimiento, created_at)) BETWEEN ? AND ?',
+                [$fechaInicio, $fechaFin]
+            )
+            ->when($cveMun !== '', fn($q) => $q->where('cve_mun', $cveMun))
+            ->when($distritoLocal !== '', fn($q) => $q->where('distrito_local', $distritoLocal))
+            ->when($distritoFederal !== '', fn($q) => $q->where('distrito_federal', $distritoFederal))
+            ->when($referente !== '', fn($q) => $q->whereRaw('TRIM(perfil) = ?', [$referente]))
+            ->when($capturistaId, fn($q) => $q->where('capturista_id', $capturistaId))
+            ->groupBy('seccion')
+            ->pluck('total', 'seccion')
+            ->mapWithKeys(fn($total, $seccion) => [(string)(int)$seccion => (int)$total]);
+
         $lonas = DB::table('lonas')
             ->join('secciones', 'secciones.seccion', '=', 'lonas.seccion')
             ->select('secciones.cve_mun', DB::raw('COUNT(DISTINCT lonas.id) AS total'))
@@ -266,6 +283,7 @@ class MetaAvanceController extends Controller
             'referentes',
             'topCapturistas',
             'topReferentes',
+            'convencidosPorSeccion',
             'distritosLocales',
             'distritosFederales',
             'nombreDistritoFederal',
