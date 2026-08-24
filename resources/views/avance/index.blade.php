@@ -5,7 +5,7 @@
 @push('css')
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
-  .avance-page { --azul-reporte:#1d3376; --gris-reporte:#eef1eb; --rosa-reporte:#d91785; }
+  .avance-page { --azul-reporte:#1d3376; --gris-reporte:#eef1eb; --rosa-reporte:#d91785; padding-bottom:2.5rem; }
   .avance-page .report-actions .btn { border-radius:.45rem; }
   .district-quick-filter { align-items:center; display:flex; gap:.45rem; }
   .district-quick-filter .form-select { min-width:175px; }
@@ -44,6 +44,8 @@
   .avance-map-legend { align-items:center; background:#fff; border:1px solid #dfe4ee; border-radius:.45rem; bottom:.7rem; box-shadow:0 2px 8px rgba(22,39,93,.16); display:flex; flex-wrap:wrap; font-size:.66rem; gap:.45rem; left:.7rem; padding:.42rem .55rem; position:absolute; z-index:500; }
   .avance-map-legend span { align-items:center; display:flex; gap:.22rem; }
   .avance-map-legend i { border:1px solid rgba(0,0,0,.15); display:inline-block; height:10px; width:14px; }
+  .avance-map-label-toggle { align-items:center; background:#fff; border:1px solid #dfe4ee; border-radius:.45rem; box-shadow:0 2px 8px rgba(22,39,93,.16); cursor:pointer; display:flex; font-size:.7rem; gap:.35rem; padding:.42rem .55rem; position:absolute; right:.7rem; top:.7rem; z-index:500; }
+  .avance-map-label-toggle input { margin:0; }
   .district-map-body { position:relative; }
   .district-map-empty { align-items:center; color:#667085; display:flex; height:560px; justify-content:center; padding:2rem; text-align:center; }
   .avance-map-label { background:transparent; border:0; }
@@ -73,7 +75,7 @@
   .pct-warning { background:#d8ab00 !important; color:#3b3000 !important; }
   .pct-danger { background:#b3262e !important; }
   .pct-empty { background:#747c84 !important; }
-  .ranking-grid { display:grid; gap:1rem; grid-template-columns:repeat(2,minmax(0,1fr)); margin-top:1rem; }
+  .ranking-grid { display:grid; gap:1rem; grid-template-columns:repeat(2,minmax(0,1fr)); margin:1rem 0 2rem; }
   .ranking-card { background:#fff; border:1px solid #dfe4ee; border-radius:.8rem; box-shadow:0 8px 24px rgba(22,39,93,.08); overflow:hidden; }
   .ranking-list { list-style:none; margin:0; padding:0; }
   .ranking-list li { align-items:center; border-bottom:1px solid #edf0f3; display:grid; gap:.7rem; grid-template-columns:30px 1fr auto; padding:.65rem .9rem; }
@@ -82,8 +84,6 @@
   .ranking-position { align-items:center; background:#eef1f8; border-radius:50%; color:var(--azul-reporte); display:flex; font-size:.72rem; font-weight:800; height:26px; justify-content:center; width:26px; }
   .ranking-name { color:#303849; font-size:.82rem; font-weight:700; }
   .ranking-total { color:var(--rosa-reporte); font-size:.82rem; font-weight:800; }
-  .report-footline { background:var(--azul-reporte); height:8px; margin-top:1rem; position:relative; }
-  .report-footline::before { background:var(--rosa-reporte); content:""; height:8px; left:0; position:absolute; top:0; width:44px; }
 
   @media (max-width:1199.98px) {
     .avance-report-grid { grid-template-columns:1fr; }
@@ -124,12 +124,10 @@
   <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
     <div>
       <h1 class="h5 fw-bold mb-1 text-uppercase">Avance distrital</h1>
-      <div class="avance-periodo">{{ $tituloDistrito }} · {{ \Carbon\Carbon::parse($fechaInicio)->format('d/m/Y') }} al {{ \Carbon\Carbon::parse($fechaFin)->format('d/m/Y') }}</div>
+      <div class="avance-periodo">{{ $tituloDistrito }} · Histórico completo</div>
     </div>
     <div class="report-actions d-flex gap-2">
       <form method="GET" action="{{ route('avance.index') }}" id="districtQuickFilter" class="district-quick-filter">
-        <input type="hidden" name="fecha_inicio" value="{{ $fechaInicio }}">
-        <input type="hidden" name="fecha_fin" value="{{ $fechaFin }}">
         @if($cveMun !== '')<input type="hidden" name="cve_mun" value="{{ $cveMun }}">@endif
         @if($referente !== '')<input type="hidden" name="referente" value="{{ $referente }}">@endif
         @if($capturistaId)<input type="hidden" name="capturista_id" value="{{ $capturistaId }}">@endif
@@ -202,6 +200,10 @@
       @if($avance->isNotEmpty())
         <div class="district-map-body">
           <div id="avanceDistrictMap" aria-label="Mapa de {{ $tituloDistrito }}"></div>
+          <label class="avance-map-label-toggle" for="toggleAvanceMunicipalityLabels">
+            <input type="checkbox" id="toggleAvanceMunicipalityLabels">
+            Nombres de municipios
+          </label>
           <div class="avance-map-legend" aria-label="Escala de convencidos">
             <strong>Convencidos:</strong>
             <span><i style="background:#f8cbd7"></i>0–4</span>
@@ -312,7 +314,6 @@
     </section>
   </div>
 
-  <div class="report-footline"></div>
 </div>
 
 <div class="modal fade" id="modalFiltros" tabindex="-1" aria-hidden="true">
@@ -328,7 +329,7 @@
 
         <div class="modal-body">
           <div class="row g-3">
-            <div class="col-md-4">
+            <div class="col-md-6">
               <label class="form-label">Distrito federal</label>
               <select name="distrito_federal" class="form-select">
                 <option value="">Todos</option>
@@ -338,16 +339,6 @@
                   </option>
                 @endforeach
               </select>
-            </div>
-
-            <div class="col-md-4">
-              <label class="form-label">Desde</label>
-              <input type="date" name="fecha_inicio" value="{{ $fechaInicio }}" class="form-control">
-            </div>
-
-            <div class="col-md-4">
-              <label class="form-label">Hasta</label>
-              <input type="date" name="fecha_fin" value="{{ $fechaFin }}" class="form-control">
             </div>
 
             <div class="col-md-6">
@@ -471,27 +462,6 @@
               >
             </div>
 
-            <div class="col-6">
-              <label class="form-label">Fecha de inicio</label>
-              <input
-                type="date"
-                name="fecha_inicio"
-                value="{{ old('fecha_inicio',$fechaInicio) }}"
-                class="form-control"
-                required
-              >
-            </div>
-
-            <div class="col-6">
-              <label class="form-label">Fecha de término</label>
-              <input
-                type="date"
-                name="fecha_fin"
-                value="{{ old('fecha_fin',$fechaFin) }}"
-                class="form-control"
-                required
-              >
-            </div>
           </div>
         </div>
 
@@ -545,6 +515,11 @@ document.addEventListener('DOMContentLoaded', function () {
     boxZoom:false,
     keyboard:false,
     tap:false
+  });
+  const municipalityLabels = L.layerGroup();
+
+  document.getElementById('toggleAvanceMunicipalityLabels')?.addEventListener('change', function () {
+    this.checked ? municipalityLabels.addTo(map) : map.removeLayer(municipalityLabels);
   });
 
   fetch(@json(asset('maps/out/SECCION.geojson')))
@@ -622,7 +597,7 @@ document.addEventListener('DOMContentLoaded', function () {
               iconSize:null
             })
           }
-        ).addTo(map);
+        ).addTo(municipalityLabels);
       });
     })
     .catch(() => {

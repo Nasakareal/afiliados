@@ -10,10 +10,11 @@ use Illuminate\Validation\Rule;
 
 class MetaAvanceController extends Controller
 {
+    private const META_FECHA_INICIO = '2000-01-01';
+    private const META_FECHA_FIN = '2099-12-31';
+
     public function index(Request $request)
     {
-        $fechaInicio = trim((string)$request->query('fecha_inicio', now()->startOfMonth()->toDateString()));
-        $fechaFin = trim((string)$request->query('fecha_fin', now()->endOfMonth()->toDateString()));
         $cveMun = trim((string)$request->query('cve_mun'));
         $distritoLocal = trim((string)$request->query('distrito_local'));
         $distritoFederal = trim((string)$request->query('distrito_federal'));
@@ -39,10 +40,6 @@ class MetaAvanceController extends Controller
             ->select('cve_mun', DB::raw('COUNT(*) AS total'))
             ->whereNull('deleted_at')
             ->whereNotNull('cve_mun')
-            ->whereRaw(
-                'DATE(COALESCE(fecha_convencimiento, created_at)) BETWEEN ? AND ?',
-                [$fechaInicio, $fechaFin]
-            )
             ->when($cveMun !== '', fn($q) => $q->where('cve_mun', $cveMun))
             ->when($distritoLocal !== '', fn($q) => $q->where('distrito_local', $distritoLocal))
             ->when($distritoFederal !== '', fn($q) => $q->where('distrito_federal', $distritoFederal))
@@ -55,10 +52,6 @@ class MetaAvanceController extends Controller
             ->select('seccion', DB::raw('COUNT(*) AS total'))
             ->whereNull('deleted_at')
             ->whereNotNull('seccion')
-            ->whereRaw(
-                'DATE(COALESCE(fecha_convencimiento, created_at)) BETWEEN ? AND ?',
-                [$fechaInicio, $fechaFin]
-            )
             ->when($cveMun !== '', fn($q) => $q->where('cve_mun', $cveMun))
             ->when($distritoLocal !== '', fn($q) => $q->where('distrito_local', $distritoLocal))
             ->when($distritoFederal !== '', fn($q) => $q->where('distrito_federal', $distritoFederal))
@@ -72,7 +65,6 @@ class MetaAvanceController extends Controller
             ->join('secciones', 'secciones.seccion', '=', 'lonas.seccion')
             ->select('secciones.cve_mun', DB::raw('COUNT(DISTINCT lonas.id) AS total'))
             ->whereNull('lonas.deleted_at')
-            ->whereBetween(DB::raw('DATE(lonas.created_at)'), [$fechaInicio, $fechaFin])
             ->when($cveMun !== '', fn($q) => $q->where('secciones.cve_mun', $cveMun))
             ->when($distritoLocal !== '', fn($q) => $q->where('secciones.distrito_local', $distritoLocal))
             ->when($distritoFederal !== '', fn($q) => $q->where('secciones.distrito_federal', $distritoFederal))
@@ -83,8 +75,6 @@ class MetaAvanceController extends Controller
 
         $metas = MetaAvance::query()
             ->where('activa', true)
-            ->whereDate('fecha_inicio', '<=', $fechaFin)
-            ->whereDate('fecha_fin', '>=', $fechaInicio)
             ->when($cveMun !== '', fn($q) => $q->where('cve_mun', $cveMun))
             ->orderBy('id')
             ->get()
@@ -152,10 +142,6 @@ class MetaAvanceController extends Controller
             ->join('users', 'users.id', '=', 'afiliados.capturista_id')
             ->select('users.id', 'users.name', DB::raw('COUNT(*) AS total'))
             ->whereNull('afiliados.deleted_at')
-            ->whereRaw(
-                'DATE(COALESCE(afiliados.fecha_convencimiento, afiliados.created_at)) BETWEEN ? AND ?',
-                [$fechaInicio, $fechaFin]
-            )
             ->when($cveMun !== '', fn($q) => $q->where('afiliados.cve_mun', $cveMun))
             ->when($distritoLocal !== '', fn($q) => $q->where('afiliados.distrito_local', $distritoLocal))
             ->when($distritoFederal !== '', fn($q) => $q->where('afiliados.distrito_federal', $distritoFederal))
@@ -172,10 +158,6 @@ class MetaAvanceController extends Controller
             ->whereNull('deleted_at')
             ->whereNotNull('perfil')
             ->whereRaw("TRIM(perfil) <> ''")
-            ->whereRaw(
-                'DATE(COALESCE(fecha_convencimiento, created_at)) BETWEEN ? AND ?',
-                [$fechaInicio, $fechaFin]
-            )
             ->when($cveMun !== '', fn($q) => $q->where('cve_mun', $cveMun))
             ->when($distritoLocal !== '', fn($q) => $q->where('distrito_local', $distritoLocal))
             ->when($distritoFederal !== '', fn($q) => $q->where('distrito_federal', $distritoFederal))
@@ -272,8 +254,6 @@ class MetaAvanceController extends Controller
         return view('avance.index', compact(
             'avance',
             'totales',
-            'fechaInicio',
-            'fechaFin',
             'cveMun',
             'distritoLocal',
             'distritoFederal',
@@ -302,8 +282,6 @@ class MetaAvanceController extends Controller
             ],
             'meta_convencidos' => ['required', 'integer', 'min:1'],
             'meta_lonas' => ['required', 'integer', 'min:1'],
-            'fecha_inicio' => ['required', 'date'],
-            'fecha_fin' => ['required', 'date', 'after_or_equal:fecha_inicio'],
         ]);
 
         DB::transaction(function () use ($data, $request) {
@@ -311,27 +289,28 @@ class MetaAvanceController extends Controller
                 MetaAvance::TIPO_CONVENCIDOS => $data['meta_convencidos'],
                 MetaAvance::TIPO_LONAS => $data['meta_lonas'],
             ] as $tipo => $cantidad) {
-                MetaAvance::updateOrCreate(
-                    [
-                        'tipo' => $tipo,
-                        'cve_mun' => $data['cve_mun'],
-                        'fecha_inicio' => $data['fecha_inicio'],
-                        'fecha_fin' => $data['fecha_fin'],
-                    ],
-                    [
-                        'meta' => $cantidad,
-                        'activa' => true,
-                        'asignado_por' => $request->user()->id,
-                    ]
-                );
+                $meta = MetaAvance::query()
+                    ->where('tipo', $tipo)
+                    ->where('cve_mun', $data['cve_mun'])
+                    ->latest('id')
+                    ->first();
+
+                $valores = [
+                    'tipo' => $tipo,
+                    'cve_mun' => $data['cve_mun'],
+                    'meta' => $cantidad,
+                    'fecha_inicio' => self::META_FECHA_INICIO,
+                    'fecha_fin' => self::META_FECHA_FIN,
+                    'activa' => true,
+                    'asignado_por' => $request->user()->id,
+                ];
+
+                $meta ? $meta->update($valores) : MetaAvance::create($valores);
             }
         });
 
         return redirect()
-            ->route('avance.index', [
-                'fecha_inicio' => $data['fecha_inicio'],
-                'fecha_fin' => $data['fecha_fin'],
-            ])
+            ->route('avance.index')
             ->with('status', 'Meta guardada correctamente.');
     }
 
@@ -352,16 +331,12 @@ class MetaAvanceController extends Controller
                 Rule::exists('secciones', 'cve_mun'),
             ],
             'meta' => ['required', 'integer', 'min:0'],
-            'fecha_inicio' => ['required', 'date'],
-            'fecha_fin' => ['required', 'date', 'after_or_equal:fecha_inicio'],
         ]);
 
         $duplicada = MetaAvance::query()
             ->where('id', '!=', $metaAvance->id)
             ->where('tipo', $data['tipo'])
             ->where('cve_mun', $data['cve_mun'])
-            ->whereDate('fecha_inicio', $data['fecha_inicio'])
-            ->whereDate('fecha_fin', $data['fecha_fin'])
             ->exists();
 
         if ($duplicada) {
@@ -376,8 +351,8 @@ class MetaAvanceController extends Controller
             'tipo' => $data['tipo'],
             'cve_mun' => $data['cve_mun'],
             'meta' => $data['meta'],
-            'fecha_inicio' => $data['fecha_inicio'],
-            'fecha_fin' => $data['fecha_fin'],
+            'fecha_inicio' => self::META_FECHA_INICIO,
+            'fecha_fin' => self::META_FECHA_FIN,
             'activa' => $request->has('activa')
                 ? $request->boolean('activa')
                 : $metaAvance->activa,

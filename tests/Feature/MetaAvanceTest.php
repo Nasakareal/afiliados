@@ -40,7 +40,12 @@ class MetaAvanceTest extends TestCase
             ->assertSeeText('Todos los locales')
             ->assertSee('id="quickDistritoLocal"', false)
             ->assertSee('onchange="this.form.submit()"', false)
+            ->assertSeeText('Histórico completo')
+            ->assertDontSee('name="fecha_inicio"', false)
+            ->assertDontSee('name="fecha_fin"', false)
             ->assertSee('avanceDistrictMap')
+            ->assertSee('toggleAvanceMunicipalityLabels')
+            ->assertSeeText('Nombres de municipios')
             ->assertSeeInOrder(['Meta<br>convencidos', 'Total<br>convencidos'], false)
             ->assertSeeInOrder(['Meta<br>lonas', 'Total<br>lonas'], false)
             ->assertSeeText('Top capturistas por convencidos')
@@ -53,7 +58,7 @@ class MetaAvanceTest extends TestCase
             ->assertSeeText('Distrito 03 Zitácuaro');
     }
 
-    public function test_admin_saves_convinced_and_banner_goals_for_the_same_period(): void
+    public function test_admin_saves_convinced_and_banner_goals_without_date_filters(): void
     {
         $admin = User::factory()->create(['must_change_password' => false]);
         $admin->assignRole('Admin');
@@ -62,12 +67,7 @@ class MetaAvanceTest extends TestCase
             'cve_mun' => '001',
             'meta_convencidos' => 5,
             'meta_lonas' => 2,
-            'fecha_inicio' => '2026-08-01',
-            'fecha_fin' => '2026-08-31',
-        ])->assertRedirect(route('avance.index', [
-            'fecha_inicio' => '2026-08-01',
-            'fecha_fin' => '2026-08-31',
-        ]));
+        ])->assertRedirect(route('avance.index'));
 
         $this->assertDatabaseHas('meta_avances', [
             'tipo' => MetaAvance::TIPO_CONVENCIDOS,
@@ -91,12 +91,10 @@ class MetaAvanceTest extends TestCase
             'cve_mun' => '001',
             'meta_convencidos' => 5,
             'meta_lonas' => 2,
-            'fecha_inicio' => '2026-08-01',
-            'fecha_fin' => '2026-08-31',
         ])->assertForbidden();
     }
 
-    public function test_local_district_filters_totals_lonas_and_rankings(): void
+    public function test_local_district_filters_historical_totals_lonas_and_rankings(): void
     {
         DB::table('secciones')->insert([
             'seccion' => '0002',
@@ -122,9 +120,9 @@ class MetaAvanceTest extends TestCase
                 'distrito_federal' => 3,
                 'perfil' => 'Referente líder',
                 'estatus' => 'pendiente',
-                'fecha_convencimiento' => '2026-08-10 10:00:00',
-                'created_at' => '2026-08-10 10:00:00',
-                'updated_at' => '2026-08-10 10:00:00',
+                'fecha_convencimiento' => '2025-01-10 10:00:00',
+                'created_at' => '2025-01-10 10:00:00',
+                'updated_at' => '2025-01-10 10:00:00',
             ],
             [
                 'capturista_id' => $leader->id,
@@ -165,8 +163,8 @@ class MetaAvanceTest extends TestCase
                 'foto_path' => 'lonas/uno.jpg',
                 'responsable' => 'Referente líder',
                 'capturado_por' => $leader->id,
-                'created_at' => '2026-08-10 10:00:00',
-                'updated_at' => '2026-08-10 10:00:00',
+                'created_at' => '2025-01-10 10:00:00',
+                'updated_at' => '2025-01-10 10:00:00',
             ],
             [
                 'seccion' => '0002',
@@ -182,8 +180,6 @@ class MetaAvanceTest extends TestCase
         ]);
 
         $response = $this->actingAs($admin)->get(route('avance.index', [
-            'fecha_inicio' => '2026-08-01',
-            'fecha_fin' => '2026-08-31',
             'distrito_local' => 1,
         ]));
 
