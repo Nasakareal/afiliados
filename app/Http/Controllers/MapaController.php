@@ -18,8 +18,6 @@ class MapaController extends Controller
 
     public function index(Request $request)
     {
-        // Para el endpoint /data se mantiene el filtro por estatus si lo usas,
-        // pero para pintar el mapa (choropleth) SIEMPRE contaremos a TODOS.
         $estatus = $request->query('estatus', 'validado');
         $allowed = ['validado','pendiente','descartado','todos'];
         if (!in_array($estatus, $allowed, true)) $estatus = 'validado';
@@ -39,10 +37,10 @@ class MapaController extends Controller
             ->get();
 
         // Mapa para color (todos), y mapas de stats por CVEGEO y por nombre normalizado
-        $conteo = [];             // choropleth (todos)
-        $conteoPorNombre = [];    // fallback choropleth por nombre
-        $statsCVE = [];           // CVEGEO => {total, afiliados, no_afiliados, pendientes, convencidos}
-        $statsNombre = [];        // NOMGEO norm => { ... }
+        $conteo = [];
+        $conteoPorNombre = [];
+        $statsCVE = [];
+        $statsNombre = [];
 
         foreach ($rows as $r) {
             $cvegeo = '16' . $r->cve_mun;
@@ -100,7 +98,7 @@ class MapaController extends Controller
 
     public function data(Request $request)
     {
-        // Aquí sí respetamos el filtro si lo ocupas para puntos/cluster
+        // Aquí sí respetamos el filtro
         $estatus = $request->query('estatus', 'validado');
         $allowed = ['validado','pendiente','descartado','todos'];
         if (!in_array($estatus, $allowed, true)) $estatus = 'validado';

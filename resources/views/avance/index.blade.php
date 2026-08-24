@@ -129,7 +129,19 @@
     <div class="report-actions d-flex gap-2">
       <form method="GET" action="{{ route('avance.index') }}" id="districtQuickFilter" class="district-quick-filter">
         @if($cveMun !== '')<input type="hidden" name="cve_mun" value="{{ $cveMun }}">@endif
-        @if($referente !== '')<input type="hidden" name="referente" value="{{ $referente }}">@endif
+        <label for="quickReferente" class="visually-hidden">Referente</label>
+        <select name="referente" id="quickReferente" class="form-select form-select-sm" title="Cambiar referente" onchange="this.form.submit()">
+            <option value="">Todos los referentes</option>
+
+            @foreach($referentes as $nombreReferente)
+                <option
+                    value="{{ $nombreReferente }}"
+                    {{ $referente === $nombreReferente ? 'selected' : '' }}
+                >
+                    {{ $nombreReferente }}
+                </option>
+            @endforeach
+        </select>
         @if($capturistaId)<input type="hidden" name="capturista_id" value="{{ $capturistaId }}">@endif
         <label for="quickDistritoFederal" class="visually-hidden">Distrito federal</label>
         <select name="distrito_federal" id="quickDistritoFederal" class="form-select form-select-sm" title="Cambiar distrito federal" onchange="this.form.submit()">
@@ -149,7 +161,7 @@
             </option>
           @endforeach
         </select>
-        <button type="submit" class="btn btn-sm btn-outline-primary" title="Aplicar distritos">
+        <button type="submit" class="btn btn-sm btn-outline-primary" title="Aplicar filtros">
           <i class="fa-solid fa-check"></i><span class="d-none d-xl-inline ms-1">Aplicar</span>
         </button>
       </form>
@@ -299,21 +311,36 @@
     </section>
 
     <section class="ranking-card">
-      <div class="district-ribbon"><i class="fa-solid fa-ranking-star me-2"></i>Top referentes por convencidos</div>
-      <ol class="ranking-list">
+      <div class="district-ribbon">
+        <i class="fa-solid fa-ranking-star me-2"></i>
+        Referentes por convencidos
+      </div>
+
+      <ol class="ranking-list referentes-list">
         @forelse($topReferentes as $posicion => $item)
-          <li>
+          <li class="{{ $posicion < 5 ? 'ranking-top-five' : '' }}">
             <span class="ranking-position">{{ $posicion + 1 }}</span>
-            <span class="ranking-name">{{ $item->name }}</span>
+
+            <span class="ranking-name">
+              {{ $item->name }}
+
+              @if($posicion < 5)
+                <span class="top-five-label">TOP 5</span>
+              @endif
+            </span>
+
             <span class="ranking-total">{{ number_format($item->total) }}</span>
           </li>
         @empty
-          <li><span class="ranking-empty text-muted small">Sin registros en el periodo seleccionado.</span></li>
+          <li>
+            <span class="ranking-empty text-muted small">
+              Sin registros en el periodo seleccionado.
+            </span>
+          </li>
         @endforelse
       </ol>
     </section>
   </div>
-
 </div>
 
 <div class="modal fade" id="modalFiltros" tabindex="-1" aria-hidden="true">

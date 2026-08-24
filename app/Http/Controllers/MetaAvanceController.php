@@ -166,7 +166,6 @@ class MetaAvanceController extends Controller
             ->groupByRaw('TRIM(perfil)')
             ->orderByDesc('total')
             ->orderBy('name')
-            ->limit(5)
             ->get();
 
         $capturistas = User::query()
