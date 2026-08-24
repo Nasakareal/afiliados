@@ -51,6 +51,19 @@ class MetaAvanceController extends Controller
             ->groupBy('cve_mun')
             ->pluck('total', 'cve_mun');
 
+        $lonas = DB::table('lonas')
+            ->join('secciones', 'secciones.seccion', '=', 'lonas.seccion')
+            ->select('secciones.cve_mun', DB::raw('COUNT(DISTINCT lonas.id) AS total'))
+            ->whereNull('lonas.deleted_at')
+            ->whereBetween(DB::raw('DATE(lonas.created_at)'), [$fechaInicio, $fechaFin])
+            ->when($cveMun !== '', fn($q) => $q->where('secciones.cve_mun', $cveMun))
+            ->when($distritoLocal !== '', fn($q) => $q->where('secciones.distrito_local', $distritoLocal))
+            ->when($distritoFederal !== '', fn($q) => $q->where('secciones.distrito_federal', $distritoFederal))
+            ->when($referente !== '', fn($q) => $q->whereRaw('TRIM(lonas.responsable) = ?', [$referente]))
+            ->when($capturistaId, fn($q) => $q->where('lonas.capturado_por', $capturistaId))
+            ->groupBy('secciones.cve_mun')
+            ->pluck('total', 'secciones.cve_mun');
+
         $metas = MetaAvance::query()
             ->where('activa', true)
             ->whereDate('fecha_inicio', '<=', $fechaFin)
@@ -60,22 +73,23 @@ class MetaAvanceController extends Controller
             ->get()
             ->groupBy('cve_mun');
 
-        $avance = $municipios->map(function ($municipio) use ($convencidos, $metas) {
+        $avance = $municipios->map(function ($municipio) use ($convencidos, $lonas, $metas) {
             $metasMunicipio = $metas->get($municipio->cve_mun, collect());
 
-            $metaNacional = $metasMunicipio
-                ->where('tipo', MetaAvance::TIPO_NACIONAL)
+            $metaConvencidos = $metasMunicipio
+                ->where('tipo', MetaAvance::TIPO_CONVENCIDOS)
                 ->sortByDesc('id')
                 ->first();
 
-            $metaEstatal = $metasMunicipio
-                ->where('tipo', MetaAvance::TIPO_ESTATAL)
+            $metaLonas = $metasMunicipio
+                ->where('tipo', MetaAvance::TIPO_LONAS)
                 ->sortByDesc('id')
                 ->first();
 
-            $totalAvance = (int)($convencidos[$municipio->cve_mun] ?? 0);
-            $cantidadMetaNacional = (int)($metaNacional->meta ?? 0);
-            $cantidadMetaEstatal = (int)($metaEstatal->meta ?? 0);
+            $totalConvencidos = (int)($convencidos[$municipio->cve_mun] ?? 0);
+            $totalLonas = (int)($lonas[$municipio->cve_mun] ?? 0);
+            $cantidadMetaConvencidos = (int)($metaConvencidos->meta ?? 0);
+            $cantidadMetaLonas = (int)($metaLonas->meta ?? 0);
 
             return [
                 'cve_mun' => $municipio->cve_mun,
@@ -83,38 +97,78 @@ class MetaAvanceController extends Controller
                 'distritos_locales' => $municipio->distritos_locales,
                 'distritos_federales' => $municipio->distritos_federales,
                 'secciones' => (int)$municipio->total_secciones,
-                'meta_nacional_id' => $metaNacional->id ?? null,
-                'meta_nacional' => $cantidadMetaNacional,
-                'avance_nacional' => $totalAvance,
-                'porcentaje_nacional' => $cantidadMetaNacional > 0
-                    ? round(($totalAvance / $cantidadMetaNacional) * 100, 2)
+                'meta_convencidos_id' => $metaConvencidos->id ?? null,
+                'meta_convencidos' => $cantidadMetaConvencidos,
+                'total_convencidos' => $totalConvencidos,
+                'porcentaje_convencidos' => $cantidadMetaConvencidos > 0
+                    ? round(($totalConvencidos / $cantidadMetaConvencidos) * 100, 2)
                     : 0,
-                'meta_estatal_id' => $metaEstatal->id ?? null,
-                'meta_estatal' => $cantidadMetaEstatal,
-                'avance_estatal' => $totalAvance,
-                'porcentaje_estatal' => $cantidadMetaEstatal > 0
-                    ? round(($totalAvance / $cantidadMetaEstatal) * 100, 2)
+                'meta_lonas_id' => $metaLonas->id ?? null,
+                'meta_lonas' => $cantidadMetaLonas,
+                'total_lonas' => $totalLonas,
+                'porcentaje_lonas' => $cantidadMetaLonas > 0
+                    ? round(($totalLonas / $cantidadMetaLonas) * 100, 2)
                     : 0,
             ];
         });
 
-        $totalMetaNacional = (int)$avance->sum('meta_nacional');
-        $totalAvance = (int)$avance->sum('avance_nacional');
-        $totalMetaEstatal = (int)$avance->sum('meta_estatal');
+        $totalMetaConvencidos = (int)$avance->sum('meta_convencidos');
+        $totalConvencidos = (int)$avance->sum('total_convencidos');
+        $totalMetaLonas = (int)$avance->sum('meta_lonas');
+        $totalLonas = (int)$avance->sum('total_lonas');
 
         $totales = [
             'secciones' => (int)$avance->sum('secciones'),
-            'meta_nacional' => $totalMetaNacional,
-            'avance_nacional' => $totalAvance,
-            'porcentaje_nacional' => $totalMetaNacional > 0
-                ? round(($totalAvance / $totalMetaNacional) * 100, 2)
+            'meta_convencidos' => $totalMetaConvencidos,
+            'total_convencidos' => $totalConvencidos,
+            'porcentaje_convencidos' => $totalMetaConvencidos > 0
+                ? round(($totalConvencidos / $totalMetaConvencidos) * 100, 2)
                 : 0,
-            'meta_estatal' => $totalMetaEstatal,
-            'avance_estatal' => $totalAvance,
-            'porcentaje_estatal' => $totalMetaEstatal > 0
-                ? round(($totalAvance / $totalMetaEstatal) * 100, 2)
+            'meta_lonas' => $totalMetaLonas,
+            'total_lonas' => $totalLonas,
+            'porcentaje_lonas' => $totalMetaLonas > 0
+                ? round(($totalLonas / $totalMetaLonas) * 100, 2)
                 : 0,
         ];
+
+        $topCapturistas = DB::table('afiliados')
+            ->join('users', 'users.id', '=', 'afiliados.capturista_id')
+            ->select('users.id', 'users.name', DB::raw('COUNT(*) AS total'))
+            ->whereNull('afiliados.deleted_at')
+            ->whereRaw(
+                'DATE(COALESCE(afiliados.fecha_convencimiento, afiliados.created_at)) BETWEEN ? AND ?',
+                [$fechaInicio, $fechaFin]
+            )
+            ->when($cveMun !== '', fn($q) => $q->where('afiliados.cve_mun', $cveMun))
+            ->when($distritoLocal !== '', fn($q) => $q->where('afiliados.distrito_local', $distritoLocal))
+            ->when($distritoFederal !== '', fn($q) => $q->where('afiliados.distrito_federal', $distritoFederal))
+            ->when($referente !== '', fn($q) => $q->whereRaw('TRIM(afiliados.perfil) = ?', [$referente]))
+            ->when($capturistaId, fn($q) => $q->where('afiliados.capturista_id', $capturistaId))
+            ->groupBy('users.id', 'users.name')
+            ->orderByDesc('total')
+            ->orderBy('users.name')
+            ->limit(5)
+            ->get();
+
+        $topReferentes = DB::table('afiliados')
+            ->selectRaw('TRIM(perfil) AS name, COUNT(*) AS total')
+            ->whereNull('deleted_at')
+            ->whereNotNull('perfil')
+            ->whereRaw("TRIM(perfil) <> ''")
+            ->whereRaw(
+                'DATE(COALESCE(fecha_convencimiento, created_at)) BETWEEN ? AND ?',
+                [$fechaInicio, $fechaFin]
+            )
+            ->when($cveMun !== '', fn($q) => $q->where('cve_mun', $cveMun))
+            ->when($distritoLocal !== '', fn($q) => $q->where('distrito_local', $distritoLocal))
+            ->when($distritoFederal !== '', fn($q) => $q->where('distrito_federal', $distritoFederal))
+            ->when($referente !== '', fn($q) => $q->whereRaw('TRIM(perfil) = ?', [$referente]))
+            ->when($capturistaId, fn($q) => $q->where('capturista_id', $capturistaId))
+            ->groupByRaw('TRIM(perfil)')
+            ->orderByDesc('total')
+            ->orderBy('name')
+            ->limit(5)
+            ->get();
 
         $capturistas = User::query()
             ->where(function ($query) {
@@ -187,6 +241,8 @@ class MetaAvanceController extends Controller
 
         $municipioPorSeccion = DB::table('secciones')
             ->select('seccion', 'cve_mun', 'municipio')
+            ->when($cveMun !== '', fn($q) => $q->where('cve_mun', $cveMun))
+            ->when($distritoLocal !== '', fn($q) => $q->where('distrito_local', $distritoLocal))
             ->when($distritoFederal !== '', fn($q) => $q->where('distrito_federal', $distritoFederal))
             ->get()
             ->mapWithKeys(function ($seccion) {
@@ -208,6 +264,8 @@ class MetaAvanceController extends Controller
             'capturistaId',
             'capturistas',
             'referentes',
+            'topCapturistas',
+            'topReferentes',
             'distritosLocales',
             'distritosFederales',
             'nombreDistritoFederal',
@@ -224,16 +282,16 @@ class MetaAvanceController extends Controller
                 'size:3',
                 Rule::exists('secciones', 'cve_mun'),
             ],
-            'meta_nacional' => ['required', 'integer', 'min:1'],
-            'meta_estatal' => ['required', 'integer', 'min:1'],
+            'meta_convencidos' => ['required', 'integer', 'min:1'],
+            'meta_lonas' => ['required', 'integer', 'min:1'],
             'fecha_inicio' => ['required', 'date'],
             'fecha_fin' => ['required', 'date', 'after_or_equal:fecha_inicio'],
         ]);
 
         DB::transaction(function () use ($data, $request) {
             foreach ([
-                MetaAvance::TIPO_NACIONAL => $data['meta_nacional'],
-                MetaAvance::TIPO_ESTATAL => $data['meta_estatal'],
+                MetaAvance::TIPO_CONVENCIDOS => $data['meta_convencidos'],
+                MetaAvance::TIPO_LONAS => $data['meta_lonas'],
             ] as $tipo => $cantidad) {
                 MetaAvance::updateOrCreate(
                     [
@@ -265,8 +323,8 @@ class MetaAvanceController extends Controller
             'tipo' => [
                 'required',
                 Rule::in([
-                    MetaAvance::TIPO_NACIONAL,
-                    MetaAvance::TIPO_ESTATAL,
+                    MetaAvance::TIPO_CONVENCIDOS,
+                    MetaAvance::TIPO_LONAS,
                 ]),
             ],
             'cve_mun' => [

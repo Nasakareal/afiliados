@@ -7,14 +7,15 @@
 <style>
   .avance-page { --azul-reporte:#1d3376; --gris-reporte:#eef1eb; --rosa-reporte:#d91785; }
   .avance-page .report-actions .btn { border-radius:.45rem; }
-  .district-quick-filter { min-width:190px; }
+  .district-quick-filter { display:flex; gap:.45rem; }
+  .district-quick-filter .form-select { min-width:175px; }
   .avance-periodo { color:#667085; font-size:.82rem; }
 
   .avance-summary {
     display:grid;
-    grid-template-columns:.75fr .9fr 1fr 1fr 1.05fr;
+    grid-template-columns:.65fr .75fr repeat(6, 1fr);
     margin-bottom:1.15rem;
-    min-width:600px;
+    min-width:920px;
   }
   .avance-summary-wrap { border-radius:.35rem; box-shadow:0 8px 22px rgba(22,39,93,.08); overflow-x:auto; }
   .avance-summary-head,
@@ -48,7 +49,7 @@
   }
 
   .district-table-scroll { max-height:560px; overflow:auto; }
-  .district-table { margin:0; min-width:640px; }
+  .district-table { margin:0; min-width:980px; }
   .district-table thead { position:sticky; top:0; z-index:3; }
   .district-table thead th {
     background:var(--azul-reporte); border-color:rgba(255,255,255,.25); color:#fff;
@@ -67,6 +68,15 @@
   .pct-warning { background:#d8ab00 !important; color:#3b3000 !important; }
   .pct-danger { background:#b3262e !important; }
   .pct-empty { background:#747c84 !important; }
+  .ranking-grid { display:grid; gap:1rem; grid-template-columns:repeat(2,minmax(0,1fr)); margin-top:1rem; }
+  .ranking-card { background:#fff; border:1px solid #dfe4ee; border-radius:.8rem; box-shadow:0 8px 24px rgba(22,39,93,.08); overflow:hidden; }
+  .ranking-list { list-style:none; margin:0; padding:0; }
+  .ranking-list li { align-items:center; border-bottom:1px solid #edf0f3; display:grid; gap:.7rem; grid-template-columns:30px 1fr auto; padding:.65rem .9rem; }
+  .ranking-list li:last-child { border-bottom:0; }
+  .ranking-list .ranking-empty { grid-column:1 / -1; }
+  .ranking-position { align-items:center; background:#eef1f8; border-radius:50%; color:var(--azul-reporte); display:flex; font-size:.72rem; font-weight:800; height:26px; justify-content:center; width:26px; }
+  .ranking-name { color:#303849; font-size:.82rem; font-weight:700; }
+  .ranking-total { color:var(--rosa-reporte); font-size:.82rem; font-weight:800; }
   .report-footline { background:var(--azul-reporte); height:8px; margin-top:1rem; position:relative; }
   .report-footline::before { background:var(--rosa-reporte); content:""; height:8px; left:0; position:absolute; top:0; width:44px; }
 
@@ -74,6 +84,11 @@
     .avance-report-grid { grid-template-columns:1fr; }
     #avanceDistrictMap { height:420px; }
     .district-table-scroll { max-height:none; }
+  }
+  @media (max-width:767.98px) {
+    .district-quick-filter { width:100%; }
+    .district-quick-filter .form-select { min-width:0; }
+    .ranking-grid { grid-template-columns:1fr; }
   }
   @media print {
     .report-actions,.navbar,.app-footer { display:none !important; }
@@ -94,9 +109,11 @@
       return 'pct-danger';
     };
     $dfTexto = $distritoFederal !== '' ? str_pad($distritoFederal, 2, '0', STR_PAD_LEFT) : 'Todos';
+    $dlTexto = $distritoLocal !== '' ? str_pad($distritoLocal, 2, '0', STR_PAD_LEFT) : 'Todos';
     $tituloDistrito = $distritoFederal !== ''
       ? 'Distrito '.$dfTexto.($nombreDistritoFederal ? ' '.$nombreDistritoFederal : '')
       : 'Michoacán';
+    if ($distritoLocal !== '') $tituloDistrito .= ' · Distrito local '.$dlTexto;
   @endphp
 
   <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
@@ -108,6 +125,7 @@
       <form method="GET" action="{{ route('avance.index') }}" id="districtQuickFilter" class="district-quick-filter">
         <input type="hidden" name="fecha_inicio" value="{{ $fechaInicio }}">
         <input type="hidden" name="fecha_fin" value="{{ $fechaFin }}">
+        @if($cveMun !== '')<input type="hidden" name="cve_mun" value="{{ $cveMun }}">@endif
         @if($referente !== '')<input type="hidden" name="referente" value="{{ $referente }}">@endif
         @if($capturistaId)<input type="hidden" name="capturista_id" value="{{ $capturistaId }}">@endif
         <label for="quickDistritoFederal" class="visually-hidden">Distrito federal</label>
@@ -116,6 +134,15 @@
           @foreach($distritosFederales as $distrito)
             <option value="{{ $distrito }}" {{ (string)$distritoFederal === (string)$distrito ? 'selected' : '' }}>
               DFn {{ str_pad($distrito, 2, '0', STR_PAD_LEFT) }}
+            </option>
+          @endforeach
+        </select>
+        <label for="quickDistritoLocal" class="visually-hidden">Distrito local</label>
+        <select name="distrito_local" id="quickDistritoLocal" class="form-select form-select-sm" title="Cambiar distrito local">
+          <option value="">Todos los locales</option>
+          @foreach($distritosLocales as $distrito)
+            <option value="{{ $distrito }}" {{ (string)$distritoLocal === (string)$distrito ? 'selected' : '' }}>
+              DL {{ str_pad($distrito, 2, '0', STR_PAD_LEFT) }}
             </option>
           @endforeach
         </select>
@@ -143,14 +170,21 @@
 
   <div class="avance-summary-wrap">
     <div class="avance-summary">
-      @foreach(['DFn','Secciones','Meta estatal','Avance estatal','% avance estatal'] as $encabezado)
+      @foreach(['DFn / DL','Secciones','Meta convencidos','Total convencidos','% convencidos','Meta lonas','Total lonas','% lonas'] as $encabezado)
         <div class="avance-summary-head">{{ $encabezado }}</div>
       @endforeach
-      <div class="avance-summary-value">{{ $dfTexto }}</div>
+      <div class="avance-summary-value">{{ $dfTexto }} / {{ $dlTexto }}</div>
       <div class="avance-summary-value">{{ number_format($totales['secciones']) }}</div>
-      <div class="avance-summary-value">{{ number_format($totales['meta_estatal']) }}</div>
-      <div class="avance-summary-value">{{ number_format($totales['avance_estatal']) }}</div>
-      <div class="avance-summary-value pct {{ $pctClass($totales['porcentaje_estatal'], $totales['meta_estatal']) }}">{{ number_format($totales['porcentaje_estatal'], 2) }}%</div>
+      <div class="avance-summary-value">{{ number_format($totales['meta_convencidos']) }}</div>
+      <div class="avance-summary-value">{{ number_format($totales['total_convencidos']) }}</div>
+      <div class="avance-summary-value pct {{ $pctClass($totales['porcentaje_convencidos'], $totales['meta_convencidos']) }}">
+        {{ $totales['meta_convencidos'] > 0 ? number_format($totales['porcentaje_convencidos'], 2).'%' : 'Sin meta' }}
+      </div>
+      <div class="avance-summary-value">{{ number_format($totales['meta_lonas']) }}</div>
+      <div class="avance-summary-value">{{ number_format($totales['total_lonas']) }}</div>
+      <div class="avance-summary-value pct {{ $pctClass($totales['porcentaje_lonas'], $totales['meta_lonas']) }}">
+        {{ $totales['meta_lonas'] > 0 ? number_format($totales['porcentaje_lonas'], 2).'%' : 'Sin meta' }}
+      </div>
     </div>
   </div>
 
@@ -172,9 +206,12 @@
               <th>DFn</th>
               <th>Municipio</th>
               <th>Secciones</th>
-              <th>Meta<br>estatal</th>
-              <th>Avance<br>estatal</th>
-              <th>% avance<br>estatal</th>
+              <th>Meta<br>convencidos</th>
+              <th>Total<br>convencidos</th>
+              <th>%<br>convencidos</th>
+              <th>Meta<br>lonas</th>
+              <th>Total<br>lonas</th>
+              <th>%<br>lonas</th>
             </tr>
           </thead>
           <tbody>
@@ -188,11 +225,12 @@
                       <button
                         type="button"
                         class="btn btn-sm btn-link edit-meta btn-asignar-meta"
-                        title="Editar meta estatal"
+                        title="Editar metas"
                         data-bs-toggle="modal"
                         data-bs-target="#modalMeta"
                         data-cve-mun="{{ $fila['cve_mun'] }}"
-                        data-meta-estatal="{{ $fila['meta_estatal'] }}"
+                        data-meta-convencidos="{{ $fila['meta_convencidos'] }}"
+                        data-meta-lonas="{{ $fila['meta_lonas'] }}"
                       >
                         <i class="fa-solid fa-pen-to-square"></i>
                       </button>
@@ -200,20 +238,57 @@
                   </div>
                 </td>
                 <td>{{ number_format($fila['secciones']) }}</td>
-                <td>{{ $fila['meta_estatal'] > 0 ? number_format($fila['meta_estatal']) : '—' }}</td>
-                <td>{{ number_format($fila['avance_estatal']) }}</td>
-                <td class="pct-cell {{ $pctClass($fila['porcentaje_estatal'], $fila['meta_estatal']) }}">
-                  {{ $fila['meta_estatal'] > 0 ? number_format($fila['porcentaje_estatal'], 2).'%' : 'Sin meta' }}
+                <td>{{ $fila['meta_convencidos'] > 0 ? number_format($fila['meta_convencidos']) : '—' }}</td>
+                <td>{{ number_format($fila['total_convencidos']) }}</td>
+                <td class="pct-cell {{ $pctClass($fila['porcentaje_convencidos'], $fila['meta_convencidos']) }}">
+                  {{ $fila['meta_convencidos'] > 0 ? number_format($fila['porcentaje_convencidos'], 2).'%' : 'Sin meta' }}
+                </td>
+                <td>{{ $fila['meta_lonas'] > 0 ? number_format($fila['meta_lonas']) : '—' }}</td>
+                <td>{{ number_format($fila['total_lonas']) }}</td>
+                <td class="pct-cell {{ $pctClass($fila['porcentaje_lonas'], $fila['meta_lonas']) }}">
+                  {{ $fila['meta_lonas'] > 0 ? number_format($fila['porcentaje_lonas'], 2).'%' : 'Sin meta' }}
                 </td>
               </tr>
             @empty
               <tr>
-                <td colspan="6" class="py-5 text-muted">Sin información para mostrar.</td>
+                <td colspan="9" class="py-5 text-muted">Sin información para mostrar.</td>
               </tr>
             @endforelse
           </tbody>
         </table>
       </div>
+    </section>
+  </div>
+
+  <div class="ranking-grid">
+    <section class="ranking-card">
+      <div class="district-ribbon"><i class="fa-solid fa-trophy me-2"></i>Top capturistas por convencidos</div>
+      <ol class="ranking-list">
+        @forelse($topCapturistas as $posicion => $item)
+          <li>
+            <span class="ranking-position">{{ $posicion + 1 }}</span>
+            <span class="ranking-name">{{ $item->name }}</span>
+            <span class="ranking-total">{{ number_format($item->total) }}</span>
+          </li>
+        @empty
+          <li><span class="ranking-empty text-muted small">Sin registros en el periodo seleccionado.</span></li>
+        @endforelse
+      </ol>
+    </section>
+
+    <section class="ranking-card">
+      <div class="district-ribbon"><i class="fa-solid fa-ranking-star me-2"></i>Top referentes por convencidos</div>
+      <ol class="ranking-list">
+        @forelse($topReferentes as $posicion => $item)
+          <li>
+            <span class="ranking-position">{{ $posicion + 1 }}</span>
+            <span class="ranking-name">{{ $item->name }}</span>
+            <span class="ranking-total">{{ number_format($item->total) }}</span>
+          </li>
+        @empty
+          <li><span class="ranking-empty text-muted small">Sin registros en el periodo seleccionado.</span></li>
+        @endforelse
+      </ol>
     </section>
   </div>
 
@@ -325,7 +400,7 @@
 
         <div class="modal-header">
           <h5 class="modal-title">
-            <i class="fa-solid fa-bullseye me-1"></i> Asignar meta estatal
+            <i class="fa-solid fa-bullseye me-1"></i> Asignar metas
           </h5>
           <button class="btn-close" type="button" data-bs-dismiss="modal"></button>
         </div>
@@ -348,15 +423,29 @@
               </select>
             </div>
 
-            <div class="col-12">
-              <label for="meta_estatal" class="form-label">Meta estatal</label>
+            <div class="col-md-6">
+              <label for="meta_convencidos" class="form-label">Meta de convencidos</label>
               <input
                 type="number"
-                name="meta_estatal"
-                id="meta_estatal"
-                value="{{ old('meta_estatal') }}"
+                name="meta_convencidos"
+                id="meta_convencidos"
+                value="{{ old('meta_convencidos') }}"
                 class="form-control"
-                min="0"
+                min="1"
+                step="1"
+                required
+              >
+            </div>
+
+            <div class="col-md-6">
+              <label for="meta_lonas" class="form-label">Meta de lonas</label>
+              <input
+                type="number"
+                name="meta_lonas"
+                id="meta_lonas"
+                value="{{ old('meta_lonas') }}"
+                class="form-control"
+                min="1"
                 step="1"
                 required
               >
@@ -402,8 +491,10 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-  document.getElementById('quickDistritoFederal')?.addEventListener('change', function () {
-    this.form.submit();
+  ['quickDistritoFederal', 'quickDistritoLocal'].forEach(function (id) {
+    document.getElementById(id)?.addEventListener('change', function () {
+      this.form.submit();
+    });
   });
 });
 </script>
@@ -413,6 +504,7 @@ document.addEventListener('DOMContentLoaded', function () {
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   const selectedDistrict = @json((string)$distritoFederal);
+  const selectedLocalDistrict = @json((string)$distritoLocal);
   const sectionMunicipalities = @json($municipioPorSeccion);
 
   const map = L.map('avanceDistrictMap', {
@@ -430,7 +522,8 @@ document.addEventListener('DOMContentLoaded', function () {
     .then(response => response.json())
     .then(geojson => {
       const features = geojson.features.filter(
-        feature => !selectedDistrict || String(feature.properties?.DISTRITO_F ?? '') === selectedDistrict
+        feature => (!selectedDistrict || String(feature.properties?.DISTRITO_F ?? '') === selectedDistrict)
+          && (!selectedLocalDistrict || String(feature.properties?.DISTRITO_L ?? '') === selectedLocalDistrict)
       );
 
       const municipalityLayers = {};
@@ -498,18 +591,24 @@ document.addEventListener('DOMContentLoaded', function () {
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   const municipio = document.getElementById('meta_cve_mun');
-  const estatal = document.getElementById('meta_estatal');
+  const convencidos = document.getElementById('meta_convencidos');
+  const lonas = document.getElementById('meta_lonas');
 
-  function metaSugerida() {
+  function metasSugeridas() {
     const option = municipio.options[municipio.selectedIndex];
     const secciones = Number(option?.dataset.secciones || 0);
 
-    return secciones ? secciones * 5 : '';
+    return {
+      convencidos: secciones ? secciones * 5 : '',
+      lonas: secciones || ''
+    };
   }
 
-  function cargar(cve, metaEstatal) {
+  function cargar(cve, metaConvencidos, metaLonas) {
     municipio.value = cve || '';
-    estatal.value = Number(metaEstatal) > 0 ? metaEstatal : metaSugerida();
+    const sugeridas = metasSugeridas();
+    convencidos.value = Number(metaConvencidos) > 0 ? metaConvencidos : sugeridas.convencidos;
+    lonas.value = Number(metaLonas) > 0 ? metaLonas : sugeridas.lonas;
   }
 
   document.querySelectorAll('.btn-nueva-meta').forEach(button => {
@@ -520,13 +619,16 @@ document.addEventListener('DOMContentLoaded', function () {
     button.addEventListener('click', () => {
       cargar(
         button.dataset.cveMun,
-        button.dataset.metaEstatal
+        button.dataset.metaConvencidos,
+        button.dataset.metaLonas
       );
     });
   });
 
   municipio?.addEventListener('change', function () {
-    estatal.value = metaSugerida();
+    const sugeridas = metasSugeridas();
+    convencidos.value = sugeridas.convencidos;
+    lonas.value = sugeridas.lonas;
   });
 
   @if($errors->any())
