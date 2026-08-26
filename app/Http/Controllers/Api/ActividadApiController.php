@@ -7,6 +7,7 @@ use App\Models\Actividad;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Resources\ActividadResource;
+use App\Support\LocalDistrictAccess;
 use Carbon\Carbon;
 
 class ActividadApiController extends Controller
@@ -75,7 +76,10 @@ class ActividadApiController extends Controller
             'lugar'       => 'nullable|string|max:200',
             'estado'      => 'in:programada,cancelada,realizada',
         ]);
-        $a = Actividad::create($v + ['creado_por' => $request->user()->id]);
+        $a = Actividad::create(LocalDistrictAccess::force(
+            $v + ['creado_por' => $request->user()->id],
+            $request->user()
+        ));
         return (new ActividadResource($a))->response()->setStatusCode(201);
     }
 

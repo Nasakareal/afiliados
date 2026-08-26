@@ -55,11 +55,13 @@ class DistrictCoordinatorUsersSeeder extends Seeder
                 $suffix = str_pad((string) $accountNumber, 2, '0', STR_PAD_LEFT);
                 $name = "Distrito Local {$suffix}";
                 $email = "distrito{$suffix}@gladyadorez.com";
+                $distritoLocal = $accountNumber;
             } else {
                 $coordinatorNumber = $accountNumber - 24;
                 $suffix = str_pad((string) $coordinatorNumber, 2, '0', STR_PAD_LEFT);
                 $name = "Coordinador {$suffix}";
                 $email = "coordinador{$suffix}@gladyadorez.com";
+                $distritoLocal = null;
             }
 
             $user = User::where('email', $email)->first() ?? new User();
@@ -70,7 +72,12 @@ class DistrictCoordinatorUsersSeeder extends Seeder
                 'email_verified_at' => now(),
                 'must_change_password' => false,
                 'password_changed_at' => now(),
+                'distrito_local' => $distritoLocal,
             ])->save();
+
+            \DB::table('actividades')
+                ->where('creado_por', $user->id)
+                ->update(['distrito_local' => $distritoLocal]);
 
             $user->syncRoles(['Lonas']);
         }

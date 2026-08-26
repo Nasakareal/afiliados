@@ -243,6 +243,89 @@ class MetaAvanceTest extends TestCase
         $this->assertSame('Referente líder', $response->viewData('topReferentes')->first()->name);
     }
 
+    public function test_user_assigned_to_a_local_district_cannot_view_or_modify_another_one(): void
+    {
+        DB::table('secciones')->insert([
+            'seccion' => '0002',
+            'cve_mun' => '002',
+            'municipio' => 'Municipio fuera del alcance',
+            'distrito_local' => 2,
+            'distrito_federal' => 4,
+        ]);
+
+        $restricted = User::factory()->create([
+            'must_change_password' => false,
+            'distrito_local' => 1,
+        ]);
+        $restricted->assignRole('Admin');
+
+        $insideCapturer = User::factory()->create([
+            'name' => 'Capturista distrito permitido',
+            'must_change_password' => false,
+        ]);
+        $outsideCapturer = User::factory()->create([
+            'name' => 'Capturista distrito ajeno',
+            'must_change_password' => false,
+        ]);
+
+        DB::table('afiliados')->insert([
+            [
+                'capturista_id' => $insideCapturer->id,
+                'nombre' => 'Persona permitida',
+                'municipio' => 'Municipio de prueba',
+                'cve_mun' => '001',
+                'seccion' => '0001',
+                'distrito_local' => 1,
+                'distrito_federal' => 3,
+                'perfil' => 'Referente permitido',
+                'estatus' => 'pendiente',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'capturista_id' => $outsideCapturer->id,
+                'nombre' => 'Persona fuera del alcance',
+                'municipio' => 'Municipio fuera del alcance',
+                'cve_mun' => '002',
+                'seccion' => '0002',
+                'distrito_local' => 2,
+                'distrito_federal' => 4,
+                'perfil' => 'Referente ajeno',
+                'estatus' => 'pendiente',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
+
+        $response = $this->actingAs($restricted)->get(route('avance.index', [
+            'distrito_local' => 2,
+        ]));
+
+        $response->assertOk()
+            ->assertSeeText('Distrito local 01')
+            ->assertDontSeeText('Todos los locales');
+
+        $this->assertSame('1', $response->viewData('distritoLocal'));
+        $this->assertTrue($response->viewData('distritoLocalRestringido'));
+        $this->assertSame([1], $response->viewData('distritosLocales')->map(fn($value) => (int)$value)->all());
+        $this->assertSame([1], $response->viewData('avance')->pluck('distrito_local')->unique()->values()->all());
+        $this->assertSame(1, $response->viewData('totales')['total_convencidos']);
+        $this->assertSame(['Referente permitido'], $response->viewData('referentes')->values()->all());
+        $this->assertSame(['Capturista distrito permitido'], $response->viewData('capturistas')->pluck('name')->all());
+
+        $this->actingAs($restricted)->post(route('avance.metas.store'), [
+            'cve_mun' => '002',
+            'distrito_local' => 2,
+            'meta_convencidos' => 10,
+            'meta_lonas' => 1,
+        ])->assertForbidden();
+
+        $this->assertDatabaseMissing('meta_avances', [
+            'cve_mun' => '002',
+            'distrito_local' => 2,
+        ]);
+    }
+
     public function test_official_goals_match_the_delivered_workbook_totals(): void
     {
         $metas = require database_path('data/official_meta_avances.php');

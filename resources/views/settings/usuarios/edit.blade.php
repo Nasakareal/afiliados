@@ -45,6 +45,19 @@
                 </select>
                 @error('role')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
+            <div class="col-md-12">
+              <label class="form-label">Distrito local asignado</label>
+              <select name="distrito_local" class="form-select @error('distrito_local') is-invalid @enderror">
+                <option value="">Sin restricción (puede ver todos)</option>
+                @foreach($distritosLocales as $distrito)
+                  <option value="{{ $distrito }}" {{ (string) old('distrito_local', $user->distrito_local) === (string) $distrito ? 'selected' : '' }}>
+                    Distrito local {{ str_pad($distrito, 2, '0', STR_PAD_LEFT) }}
+                  </option>
+                @endforeach
+              </select>
+              <div class="form-text">Si asignas uno, el usuario solo podrá consultar información de ese distrito en todos los módulos.</div>
+              @error('distrito_local')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            </div>
         </div>
 
         <div class="mt-4 d-flex gap-2">

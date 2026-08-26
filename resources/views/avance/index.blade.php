@@ -152,15 +152,22 @@
             </option>
           @endforeach
         </select>
-        <label for="quickDistritoLocal" class="visually-hidden">Distrito local</label>
-        <select name="distrito_local" id="quickDistritoLocal" class="form-select form-select-sm" title="Cambiar distrito local" onchange="this.form.submit()">
-          <option value="">Todos los locales</option>
-          @foreach($distritosLocales as $distrito)
-            <option value="{{ $distrito }}" {{ (string)$distritoLocal === (string)$distrito ? 'selected' : '' }}>
-              DL {{ str_pad($distrito, 2, '0', STR_PAD_LEFT) }}
-            </option>
-          @endforeach
-        </select>
+        @if($distritoLocalRestringido)
+          <input type="hidden" name="distrito_local" value="{{ $distritoLocal }}">
+          <span class="form-control form-control-sm bg-light text-nowrap" title="Distrito local asignado">
+            DL {{ str_pad($distritoLocal, 2, '0', STR_PAD_LEFT) }}
+          </span>
+        @else
+          <label for="quickDistritoLocal" class="visually-hidden">Distrito local</label>
+          <select name="distrito_local" id="quickDistritoLocal" class="form-select form-select-sm" title="Cambiar distrito local" onchange="this.form.submit()">
+            <option value="">Todos los locales</option>
+            @foreach($distritosLocales as $distrito)
+              <option value="{{ $distrito }}" {{ (string)$distritoLocal === (string)$distrito ? 'selected' : '' }}>
+                DL {{ str_pad($distrito, 2, '0', STR_PAD_LEFT) }}
+              </option>
+            @endforeach
+          </select>
+        @endif
         <button type="submit" class="btn btn-sm btn-outline-primary" title="Aplicar filtros">
           <i class="fa-solid fa-check"></i><span class="d-none d-xl-inline ms-1">Aplicar</span>
         </button>
@@ -374,14 +381,19 @@
 
             <div class="col-md-6">
               <label class="form-label">Distrito local</label>
-              <select name="distrito_local" class="form-select">
-                <option value="">Todos</option>
-                @foreach($distritosLocales as $distrito)
-                  <option value="{{ $distrito }}" {{ (string)$distritoLocal === (string)$distrito ? 'selected' : '' }}>
-                    Distrito {{ $distrito }}
-                  </option>
-                @endforeach
-              </select>
+              @if($distritoLocalRestringido)
+                <input type="hidden" name="distrito_local" value="{{ $distritoLocal }}">
+                <input type="text" class="form-control" value="Distrito local {{ str_pad($distritoLocal, 2, '0', STR_PAD_LEFT) }} (asignado)" readonly>
+              @else
+                <select name="distrito_local" class="form-select">
+                  <option value="">Todos</option>
+                  @foreach($distritosLocales as $distrito)
+                    <option value="{{ $distrito }}" {{ (string)$distritoLocal === (string)$distrito ? 'selected' : '' }}>
+                      Distrito {{ $distrito }}
+                    </option>
+                  @endforeach
+                </select>
+              @endif
             </div>
 
             <div class="col-md-6">

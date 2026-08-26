@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\User;
 use Database\Seeders\PermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -23,13 +24,24 @@ class AdminApiTest extends TestCase
 
     public function test_mobile_admin_can_manage_users_roles_permissions_and_settings(): void
     {
+        DB::table('secciones')->insert([
+            'seccion' => '0901',
+            'cve_mun' => '090',
+            'municipio' => 'Municipio móvil',
+            'distrito_local' => 9,
+            'distrito_federal' => 1,
+        ]);
+
         $created = $this->postJson('/api/v1/admin/usuarios', [
             'name' => 'Usuario móvil',
             'email' => 'movil@example.test',
             'password' => 'Password123!',
             'password_confirmation' => 'Password123!',
             'role' => 'Consulta',
-        ])->assertCreated()->assertJsonPath('role', 'Consulta');
+            'distrito_local' => 9,
+        ])->assertCreated()
+            ->assertJsonPath('role', 'Consulta')
+            ->assertJsonPath('distrito_local', 9);
 
         $userId = $created->json('id');
         $this->getJson('/api/v1/admin/usuarios')
@@ -39,7 +51,9 @@ class AdminApiTest extends TestCase
             'name' => 'Usuario actualizado',
             'email' => 'movil@example.test',
             'role' => 'Capturista',
-        ])->assertOk()->assertJsonPath('role', 'Capturista');
+        ])->assertOk()
+            ->assertJsonPath('role', 'Capturista')
+            ->assertJsonPath('distrito_local', 9);
 
         $role = $this->postJson('/api/v1/admin/roles', ['name' => 'Móvil'])
             ->assertCreated();

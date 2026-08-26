@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Lona;
 use App\Services\GoogleMapsUrlParser;
 use App\Services\LonaPhotoProcessor;
+use App\Support\LocalDistrictAccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -44,6 +45,9 @@ class LonaApiController extends Controller
     public function store(Request $request, LonaPhotoProcessor $photoProcessor)
     {
         $data = $this->validateLona($request, true);
+        if (!LocalDistrictAccess::sectionIsAllowed($data['seccion'], $request->user())) {
+            abort(403, 'No tienes acceso a esa sección.');
+        }
         $photo = $photoProcessor->process($request->file('foto'));
 
         try {
@@ -72,6 +76,9 @@ class LonaApiController extends Controller
     public function update(Request $request, Lona $lona, LonaPhotoProcessor $photoProcessor)
     {
         $data = $this->validateLona($request, false);
+        if (!LocalDistrictAccess::sectionIsAllowed($data['seccion'], $request->user())) {
+            abort(403, 'No tienes acceso a esa sección.');
+        }
         $newPhoto = $request->hasFile('foto')
             ? $photoProcessor->process($request->file('foto'))
             : null;

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Support\LocalDistrictAccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -12,17 +13,20 @@ class MapaApiController extends Controller
     {
         $rows = DB::table('afiliados')
             ->selectRaw("
-                LPAD(cve_mun, 3, '0')  as cve_mun,
+                cve_mun,
                 municipio,
                 COUNT(*)               as total
             ")
-            ->whereNull('deleted_at')
+            ->whereNull('deleted_at');
+        LocalDistrictAccess::scope($rows);
+        $rows = $rows
             ->groupBy('cve_mun','municipio')
             ->get();
 
         $conteoPorCVE = [];
         foreach ($rows as $r) {
-            $conteoPorCVE['16' . $r->cve_mun] = (int) $r->total;
+            $cveMun = str_pad((string)$r->cve_mun, 3, '0', STR_PAD_LEFT);
+            $conteoPorCVE['16' . $cveMun] = (int) $r->total;
         }
 
         return response()->json([
@@ -48,6 +52,7 @@ class MapaApiController extends Controller
             ->whereNull('deleted_at')
             ->whereNotNull('lat')
             ->whereNotNull('lng');
+        LocalDistrictAccess::scope($q);
 
         if ($estatus !== 'todos') {
             $q->where('estatus', $estatus);

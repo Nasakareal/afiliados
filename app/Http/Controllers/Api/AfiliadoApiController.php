@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use App\Http\Resources\AfiliadoResource;
+use App\Support\LocalDistrictAccess;
 
 class AfiliadoApiController extends Controller
 {
@@ -49,6 +50,10 @@ class AfiliadoApiController extends Controller
     public function store(Request $request)
     {
         $validated = $this->rules($request);
+        if (!LocalDistrictAccess::sectionIsAllowed((string)($validated['seccion'] ?? ''), $request->user())) {
+            abort(403, 'No tienes acceso a esa sección.');
+        }
+        $validated = LocalDistrictAccess::force($validated, $request->user());
         $validated['capturista_id'] = Auth::id();
         $a = Afiliado::create($validated);
         return (new AfiliadoResource($a))->response()->setStatusCode(201);
@@ -62,6 +67,10 @@ class AfiliadoApiController extends Controller
     public function update(Request $request, Afiliado $afiliado)
     {
         $validated = $this->rules($request, $afiliado->id);
+        if (!LocalDistrictAccess::sectionIsAllowed((string)($validated['seccion'] ?? ''), $request->user())) {
+            abort(403, 'No tienes acceso a esa sección.');
+        }
+        $validated = LocalDistrictAccess::force($validated, $request->user());
         $afiliado->update($validated);
         return new AfiliadoResource($afiliado);
     }

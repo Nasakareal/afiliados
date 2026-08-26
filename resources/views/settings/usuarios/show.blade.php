@@ -21,6 +21,10 @@
             <span class="text-muted">Sin rol</span>
           @endforelse
         </dd>
+        <dt class="col-sm-3">Distrito local asignado</dt>
+        <dd class="col-sm-9">
+          {{ $user->distrito_local ? 'Distrito local '.str_pad($user->distrito_local, 2, '0', STR_PAD_LEFT) : 'Sin restricción' }}
+        </dd>
         <dt class="col-sm-3">Creado</dt><dd class="col-sm-9">{{ optional($user->created_at)->format('Y-m-d H:i') }}</dd>
       </dl>
       <div class="d-flex gap-2">

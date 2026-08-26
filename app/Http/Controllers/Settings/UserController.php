@@ -4,20 +4,25 @@ namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Support\LocalDistrictAccess;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
     public function index()
     {
+        $distritoAsignado = LocalDistrictAccess::assigned(auth()->user());
+        $query = User::with('roles')
+            ->when($distritoAsignado !== null, fn($q) => $q->where('distrito_local', $distritoAsignado));
+
         if (!auth()->user()->hasRole('SuperAdmin')) {
-            $usuarios = User::with('roles')
-                ->whereDoesntHave('roles', fn($q) => $q->where('name', 'SuperAdmin'))
-                ->paginate(15);
-        } else {
-            $usuarios = User::with('roles')->paginate(15);
+            $query->whereDoesntHave('roles', fn($q) => $q->where('name', 'SuperAdmin'));
         }
+
+        $usuarios = $query->paginate(15);
 
         return view('settings.usuarios.index', compact('usuarios'));
     }
@@ -28,7 +33,9 @@ class UserController extends Controller
             ? Role::all()
             : Role::where('name', '!=', 'SuperAdmin')->get();
 
-        return view('settings.usuarios.create', compact('roles'));
+        $distritosLocales = $this->distritosLocales();
+
+        return view('settings.usuarios.create', compact('roles', 'distritosLocales'));
     }
 
     public function store(Request $request)
@@ -38,7 +45,13 @@ class UserController extends Controller
             'email'    => 'required|email|unique:users,email',
             'password' => 'required|min:8|confirmed',
             'role'     => 'required|string',
+            'distrito_local' => [
+                'nullable',
+                'integer',
+                Rule::exists('secciones', 'distrito_local'),
+            ],
         ]);
+        $validated = LocalDistrictAccess::force($validated, $request->user());
 
         $role = $this->sanitizeRole($validated['role'] ?? null);
 
@@ -46,6 +59,7 @@ class UserController extends Controller
             'name'     => $validated['name'],
             'email'    => $validated['email'],
             'password' => bcrypt($validated['password']),
+            'distrito_local' => $validated['distrito_local'] ?? null,
         ]);
         $usuario->forceFill([
             'must_change_password' => false,
@@ -62,12 +76,14 @@ class UserController extends Controller
 
     public function show(User $user)
     {
+        $this->guardDistrict($user);
         $this->guardSuper($user);
         return view('settings.usuarios.show', compact('user'));
     }
 
     public function edit(User $user)
     {
+        $this->guardDistrict($user);
         $this->guardSuper($user);
 
         $roles = auth()->user()->hasRole('SuperAdmin')
@@ -75,12 +91,14 @@ class UserController extends Controller
             : Role::where('name', '!=', 'SuperAdmin')->get();
 
         $selectedRole = $user->roles()->pluck('name')->first();
+        $distritosLocales = $this->distritosLocales();
 
-        return view('settings.usuarios.edit', compact('user', 'roles', 'selectedRole'));
+        return view('settings.usuarios.edit', compact('user', 'roles', 'selectedRole', 'distritosLocales'));
     }
 
     public function update(Request $request, User $user)
     {
+        $this->guardDistrict($user);
         $this->guardSuper($user);
 
         $validated = $request->validate([
@@ -88,7 +106,13 @@ class UserController extends Controller
             'email'    => 'required|email|unique:users,email,' . $user->id,
             'password' => 'nullable|min:8|confirmed',
             'role'     => 'required|string',
+            'distrito_local' => [
+                'nullable',
+                'integer',
+                Rule::exists('secciones', 'distrito_local'),
+            ],
         ]);
+        $validated = LocalDistrictAccess::force($validated, $request->user());
 
         $newRole = $this->sanitizeRole($validated['role'] ?? null);
         $oldIsSuper = $user->hasRole('SuperAdmin');
@@ -105,12 +129,16 @@ class UserController extends Controller
 
         $user->name  = $validated['name'];
         $user->email = $validated['email'];
+        $user->distrito_local = $validated['distrito_local'] ?? null;
         if (!empty($validated['password'])) {
             $user->password = bcrypt($validated['password']);
             $user->must_change_password = false;
             $user->password_changed_at = now();
         }
         $user->save();
+        DB::table('actividades')
+            ->where('creado_por', $user->id)
+            ->update(['distrito_local' => $user->distrito_local]);
 
         $user->syncRoles([$newRole]);
 
@@ -120,6 +148,7 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
+        $this->guardDistrict($user);
         $this->guardSuper($user);
 
         if ($user->hasRole('SuperAdmin')) {
@@ -144,6 +173,15 @@ class UserController extends Controller
         }
     }
 
+    private function guardDistrict(User $user): void
+    {
+        $assigned = LocalDistrictAccess::assigned(auth()->user());
+
+        if ($assigned !== null && (int)$user->distrito_local !== $assigned) {
+            abort(403, 'No tienes acceso a usuarios de otro distrito local.');
+        }
+    }
+
     private function sanitizeRole(?string $role): ?string
     {
         if (!$role) return null;
@@ -153,5 +191,16 @@ class UserController extends Controller
         }
 
         return $role;
+    }
+
+    private function distritosLocales()
+    {
+        $query = DB::table('secciones')
+            ->whereNotNull('distrito_local')
+            ->distinct()
+            ->orderBy('distrito_local');
+        LocalDistrictAccess::scope($query);
+
+        return $query->pluck('distrito_local');
     }
 }

@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\RestrictsToLocalDistrict;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Afiliado extends Model
 {
-    use SoftDeletes;
+    use RestrictsToLocalDistrict, SoftDeletes;
 
     public const TIPOS_VINCULO = [
         'dv' => 'DV',

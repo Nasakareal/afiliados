@@ -2,17 +2,20 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\RestrictsToLocalDistrict;
 use Illuminate\Database\Eloquent\Model;
 
 class Actividad extends Model
 {
+    use RestrictsToLocalDistrict;
+
     protected $table = 'actividades';
 
     protected $fillable = [
         'titulo','descripcion',
         'inicio','fin','all_day',
         'lugar',
-        'creado_por',
+        'creado_por','distrito_local',
         'estado',
     ];
 
@@ -20,6 +23,7 @@ class Actividad extends Model
         'inicio'  => 'datetime',
         'fin'     => 'datetime',
         'all_day' => 'boolean',
+        'distrito_local' => 'integer',
     ];
 
     public function creador()

@@ -57,7 +57,12 @@ class InternalDistrictUsersSeeder extends Seeder
                 'email_verified_at' => now(),
                 'must_change_password' => false,
                 'password_changed_at' => now(),
+                'distrito_local' => $index + 1,
             ])->save();
+
+            \DB::table('actividades')
+                ->where('creado_por', $user->id)
+                ->update(['distrito_local' => $index + 1]);
 
             $user->syncRoles([$lonasRole]);
         }

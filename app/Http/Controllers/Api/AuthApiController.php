@@ -50,6 +50,7 @@ class AuthApiController extends Controller
             'id' => $user->id,
             'name' => $user->name,
             'email' => $user->email,
+            'distrito_local' => $user->distrito_local,
             'roles' => $user->getRoleNames()->values(),
             'permissions' => $user->getAllPermissions()->pluck('name')->values(),
         ];

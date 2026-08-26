@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\LocalDistrictAccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -18,6 +19,7 @@ class MapaController extends Controller
 
     public function index(Request $request)
     {
+        $distritoLocalAsignado = LocalDistrictAccess::assigned($request->user());
         $estatus = $request->query('estatus', 'validado');
         $allowed = ['validado','pendiente','descartado','todos'];
         if (!in_array($estatus, $allowed, true)) $estatus = 'validado';
@@ -25,14 +27,16 @@ class MapaController extends Controller
         // === Conteos por municipio SIN filtrar (todos): total, por estatus y derivados
         $rows = DB::table('afiliados')
             ->selectRaw("
-                LPAD(cve_mun,3,'0')              as cve_mun,
+                cve_mun,
                 municipio,
                 COUNT(*)                          as total,
                 SUM(CASE WHEN estatus='validado'   THEN 1 ELSE 0 END) as afiliados,
                 SUM(CASE WHEN estatus='descartado' THEN 1 ELSE 0 END) as no_afiliados,
                 SUM(CASE WHEN estatus='pendiente'  THEN 1 ELSE 0 END) as pendientes
             ")
-            ->whereNull('deleted_at')
+            ->whereNull('deleted_at');
+        LocalDistrictAccess::scope($rows);
+        $rows = $rows
             ->groupBy('cve_mun','municipio')
             ->get();
 
@@ -41,8 +45,10 @@ class MapaController extends Controller
         $conteoPorNombre = [];
         $statsCVE = [];
         $statsNombre = [];
+        $municipiosCVE = [];
 
         foreach ($rows as $r) {
+            $r->cve_mun = str_pad((string)$r->cve_mun, 3, '0', STR_PAD_LEFT);
             $cvegeo = '16' . $r->cve_mun;
 
             $afiliados    = (int)$r->afiliados;
@@ -66,6 +72,7 @@ class MapaController extends Controller
 
             $statsCVE[$cvegeo]    = $stats;
             $statsNombre[$norm]   = $stats;
+            $municipiosCVE[$cvegeo] = $r->municipio;
         }
 
         // === Capas adicionales
@@ -93,6 +100,8 @@ class MapaController extends Controller
             'layers'          => $layers,
             'statsCVE'        => $statsCVE,
             'statsNombre'     => $statsNombre,
+            'municipiosCVE'   => $municipiosCVE,
+            'distritoLocalAsignado' => $distritoLocalAsignado,
         ]);
     }
 
@@ -105,7 +114,9 @@ class MapaController extends Controller
 
         $rows = DB::table('afiliados')
             ->select('id','nombre','apellido_paterno','apellido_materno','municipio','lat','lng')
-            ->whereNull('deleted_at')
+            ->whereNull('deleted_at');
+        LocalDistrictAccess::scope($rows);
+        $rows = $rows
             ->when($estatus !== 'todos', fn($q)=>$q->where('estatus', $estatus))
             ->whereNotNull('lat')->whereNotNull('lng')
             ->limit(2000)

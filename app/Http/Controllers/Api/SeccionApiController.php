@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Seccion;
 use Illuminate\Http\Request;
 use App\Http\Resources\SeccionResource;
+use App\Support\LocalDistrictAccess;
 
 class SeccionApiController extends Controller
 {
@@ -32,6 +33,7 @@ class SeccionApiController extends Controller
     public function store(Request $request)
     {
         $data = $this->rules($request);
+        $data = LocalDistrictAccess::force($data, $request->user());
         $s = Seccion::create($data);
         return (new SeccionResource($s))->response()->setStatusCode(201);
     }
@@ -44,6 +46,7 @@ class SeccionApiController extends Controller
     public function update(Request $request, Seccion $seccion)
     {
         $data = $this->rules($request);
+        $data = LocalDistrictAccess::force($data, $request->user());
         $seccion->update($data);
         return new SeccionResource($seccion);
     }

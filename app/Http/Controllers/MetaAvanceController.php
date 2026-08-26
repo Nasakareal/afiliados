@@ -16,7 +16,11 @@ class MetaAvanceController extends Controller
     public function index(Request $request)
     {
         $cveMun = trim((string)$request->query('cve_mun'));
-        $distritoLocal = trim((string)$request->query('distrito_local'));
+        $distritoLocalAsignado = $request->user()->distrito_local;
+        $distritoLocalRestringido = $distritoLocalAsignado !== null;
+        $distritoLocal = $distritoLocalRestringido
+            ? (string)$distritoLocalAsignado
+            : trim((string)$request->query('distrito_local'));
         $distritoFederal = trim((string)$request->query('distrito_federal'));
         $referente = trim((string)$request->query('referente'));
         $capturistaId = $request->filled('capturista_id') ? (int)$request->query('capturista_id') : null;
@@ -183,17 +187,24 @@ class MetaAvanceController extends Controller
             ->get();
 
         $capturistas = User::query()
-            ->where(function ($query) {
-                $query->whereExists(function ($sub) {
+            ->where(function ($query) use ($cveMun, $distritoLocal, $distritoFederal) {
+                $query->whereExists(function ($sub) use ($cveMun, $distritoLocal, $distritoFederal) {
                     $sub->selectRaw('1')
                         ->from('afiliados')
                         ->whereColumn('afiliados.capturista_id', 'users.id')
-                        ->whereNull('afiliados.deleted_at');
-                })->orWhereExists(function ($sub) {
+                        ->whereNull('afiliados.deleted_at')
+                        ->when($cveMun !== '', fn($q) => $q->where('afiliados.cve_mun', $cveMun))
+                        ->when($distritoLocal !== '', fn($q) => $q->where('afiliados.distrito_local', $distritoLocal))
+                        ->when($distritoFederal !== '', fn($q) => $q->where('afiliados.distrito_federal', $distritoFederal));
+                })->orWhereExists(function ($sub) use ($cveMun, $distritoLocal, $distritoFederal) {
                     $sub->selectRaw('1')
                         ->from('lonas')
+                        ->join('secciones as secciones_capturista', 'secciones_capturista.seccion', '=', 'lonas.seccion')
                         ->whereColumn('lonas.capturado_por', 'users.id')
-                        ->whereNull('lonas.deleted_at');
+                        ->whereNull('lonas.deleted_at')
+                        ->when($cveMun !== '', fn($q) => $q->where('secciones_capturista.cve_mun', $cveMun))
+                        ->when($distritoLocal !== '', fn($q) => $q->where('secciones_capturista.distrito_local', $distritoLocal))
+                        ->when($distritoFederal !== '', fn($q) => $q->where('secciones_capturista.distrito_federal', $distritoFederal));
                 });
             })
             ->orderBy('name')
@@ -203,13 +214,20 @@ class MetaAvanceController extends Controller
             ->selectRaw('TRIM(perfil) AS referente')
             ->whereNull('deleted_at')
             ->whereNotNull('perfil')
-            ->whereRaw("TRIM(perfil) <> ''");
+            ->whereRaw("TRIM(perfil) <> ''")
+            ->when($cveMun !== '', fn($q) => $q->where('cve_mun', $cveMun))
+            ->when($distritoLocal !== '', fn($q) => $q->where('distrito_local', $distritoLocal))
+            ->when($distritoFederal !== '', fn($q) => $q->where('distrito_federal', $distritoFederal));
 
         $referentesLonas = DB::table('lonas')
-            ->selectRaw('TRIM(responsable) AS referente')
-            ->whereNull('deleted_at')
-            ->whereNotNull('responsable')
-            ->whereRaw("TRIM(responsable) <> ''");
+            ->join('secciones as secciones_referente', 'secciones_referente.seccion', '=', 'lonas.seccion')
+            ->selectRaw('TRIM(lonas.responsable) AS referente')
+            ->whereNull('lonas.deleted_at')
+            ->whereNotNull('lonas.responsable')
+            ->whereRaw("TRIM(lonas.responsable) <> ''")
+            ->when($cveMun !== '', fn($q) => $q->where('secciones_referente.cve_mun', $cveMun))
+            ->when($distritoLocal !== '', fn($q) => $q->where('secciones_referente.distrito_local', $distritoLocal))
+            ->when($distritoFederal !== '', fn($q) => $q->where('secciones_referente.distrito_federal', $distritoFederal));
 
         $referentes = DB::query()
             ->fromSub(
@@ -223,12 +241,14 @@ class MetaAvanceController extends Controller
 
         $distritosLocales = DB::table('secciones')
             ->whereNotNull('distrito_local')
+            ->when($distritoLocalRestringido, fn($q) => $q->where('distrito_local', $distritoLocalAsignado))
             ->distinct()
             ->orderBy('distrito_local')
             ->pluck('distrito_local');
 
         $distritosFederales = DB::table('secciones')
             ->whereNotNull('distrito_federal')
+            ->when($distritoLocalRestringido, fn($q) => $q->where('distrito_local', $distritoLocalAsignado))
             ->distinct()
             ->orderBy('distrito_federal')
             ->pluck('distrito_federal');
@@ -269,6 +289,7 @@ class MetaAvanceController extends Controller
             'totales',
             'cveMun',
             'distritoLocal',
+            'distritoLocalRestringido',
             'distritoFederal',
             'referente',
             'capturistaId',
@@ -302,6 +323,8 @@ class MetaAvanceController extends Controller
                     ->where(fn($query) => $query->where('cve_mun', $request->input('cve_mun'))),
             ],
         ]);
+
+        $this->authorizeDistrict($request, (int)$data['distrito_local']);
 
         DB::transaction(function () use ($data, $request) {
             foreach ([
@@ -342,6 +365,8 @@ class MetaAvanceController extends Controller
 
     public function update(Request $request, MetaAvance $metaAvance)
     {
+        $this->authorizeDistrict($request, (int)$metaAvance->distrito_local);
+
         $data = $request->validate([
             'tipo' => [
                 'required',
@@ -364,6 +389,8 @@ class MetaAvanceController extends Controller
                     ->where(fn($query) => $query->where('cve_mun', $request->input('cve_mun'))),
             ],
         ]);
+
+        $this->authorizeDistrict($request, (int)$data['distrito_local']);
 
         $duplicada = MetaAvance::query()
             ->where('id', '!=', $metaAvance->id)
@@ -396,8 +423,9 @@ class MetaAvanceController extends Controller
         return back()->with('status', 'Meta actualizada correctamente.');
     }
 
-    public function destroy(MetaAvance $metaAvance)
+    public function destroy(Request $request, MetaAvance $metaAvance)
     {
+        $this->authorizeDistrict($request, (int)$metaAvance->distrito_local);
         $metaAvance->delete();
 
         return back()->with('status', 'Meta eliminada correctamente.');
@@ -406,5 +434,14 @@ class MetaAvanceController extends Controller
     private static function scopeKey(string $cveMun, $distritoLocal): string
     {
         return $cveMun.'|'.(string)$distritoLocal;
+    }
+
+    private function authorizeDistrict(Request $request, int $distritoLocal): void
+    {
+        $asignado = $request->user()->distrito_local;
+
+        if ($asignado !== null && (int)$asignado !== $distritoLocal) {
+            abort(403, 'No tienes acceso a ese distrito local.');
+        }
     }
 }

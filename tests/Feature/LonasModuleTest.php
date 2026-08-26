@@ -196,6 +196,7 @@ class LonasModuleTest extends TestCase
         $this->assertNotSame($lonasUser->id, $districtUser->id);
         $this->assertSame($lonasUser->id, $preservedLonasUser->id);
         $this->assertSame('Distrito Local 01', $districtUser->name);
+        $this->assertSame(1, $districtUser->distrito_local);
         $this->assertFalse($districtUser->must_change_password);
         $this->assertTrue($districtUser->hasExactRoles('Lonas'));
         $this->assertSame(
@@ -236,7 +237,9 @@ class LonasModuleTest extends TestCase
         $this->assertCount(24, $internalUsers);
         $this->assertSame('distritointerno01@gladyadorez.com', $internalUsers->first()->email);
         $this->assertSame('Distrito Local Interno 01', $internalUsers->first()->name);
+        $this->assertSame(1, $internalUsers->first()->distrito_local);
         $this->assertSame('distritointerno24@gladyadorez.com', $internalUsers->last()->email);
+        $this->assertSame(24, $internalUsers->last()->distrito_local);
 
         foreach ($internalUsers as $user) {
             $this->assertFalse($user->must_change_password);

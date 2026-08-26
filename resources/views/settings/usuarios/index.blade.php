@@ -26,6 +26,7 @@
             <th>Nombre</th>
             <th>Email</th>
             <th>Roles</th>
+            <th>Distrito local</th>
             <th>Creación</th>
             <th class="text-center" style="width:140px">Acciones</th>
           </tr>
@@ -42,6 +43,13 @@
               @empty
                 <span class="text-muted">Sin rol</span>
               @endforelse
+            </td>
+            <td>
+              @if($u->distrito_local)
+                <span class="badge bg-secondary">DL {{ str_pad($u->distrito_local, 2, '0', STR_PAD_LEFT) }}</span>
+              @else
+                <span class="text-muted">Todos</span>
+              @endif
             </td>
             <td>{{ optional($u->created_at)->format('Y-m-d H:i') }}</td>
             <td class="text-center">

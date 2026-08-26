@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Seccion;
+use App\Support\LocalDistrictAccess;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
@@ -62,6 +63,7 @@ class SeccionController extends Controller
         }
 
         $data = $request->validate($this->rulesStore($request));
+        $data = LocalDistrictAccess::force($data, $request->user());
 
         $seccion = Seccion::create($data);
 
@@ -97,6 +99,7 @@ class SeccionController extends Controller
         }
 
         $data = $request->validate($this->rulesUpdate($seccion, $request));
+        $data = LocalDistrictAccess::force($data, $request->user());
 
         $seccion->update($data);
 
@@ -217,6 +220,7 @@ public function importExcel(Request $request)
         $munIndex = $this->municipioIndex();
 
         $total=0; $insertados=0; $actualizados=0; $omitidos=0; $errores=[];
+        $distritoAsignado = LocalDistrictAccess::assigned($request->user());
 
         for ($i = $startIndex; $i < count($rows); $i++) {
             $r = $rows[$i];
@@ -247,6 +251,15 @@ public function importExcel(Request $request)
 
             $df = isset($hdr['distrito_federal']) ? $this->toNullableInt($r[$hdr['distrito_federal']] ?? null) : null;
             $dl = isset($hdr['distrito_local'])   ? $this->toNullableInt($r[$hdr['distrito_local']]   ?? null) : null;
+
+            if ($distritoAsignado !== null && $dl !== null && $dl !== $distritoAsignado) {
+                $omitidos++;
+                $errores[] = "Fila ".($i+1).": pertenece al distrito local {$dl}.";
+                continue;
+            }
+            if ($distritoAsignado !== null) {
+                $dl = $distritoAsignado;
+            }
 
             $seccion = preg_replace('/[^\p{N}\p{L}\-]+/u', '', (string)$seccion);
 
@@ -381,6 +394,19 @@ public function importExcel(Request $request)
 
     private function cargarMunicipiosDesdeGeo()
     {
+        if (LocalDistrictAccess::assigned() !== null) {
+            $query = DB::table('secciones')
+                ->select('cve_mun', 'municipio')
+                ->distinct()
+                ->orderBy('municipio');
+            LocalDistrictAccess::scope($query);
+
+            return $query->get()->map(function ($row) {
+                $row->cve_mun = str_pad((string)$row->cve_mun, 3, '0', STR_PAD_LEFT);
+                return $row;
+            });
+        }
+
         $posibles = [
             public_path('geo/michoacan.json'),
             public_path('geo/16_michoacan.json'),
@@ -415,11 +441,13 @@ public function importExcel(Request $request)
             }
         }
 
-        return DB::table('secciones')
+        $query = DB::table('secciones')
             ->select('cve_mun','municipio')
             ->distinct()
-            ->orderBy('municipio')
-            ->get()
+            ->orderBy('municipio');
+        LocalDistrictAccess::scope($query);
+
+        return $query->get()
             ->map(function($r){
                 $r->cve_mun = str_pad((string)$r->cve_mun, 3, '0', STR_PAD_LEFT);
                 return $r;
@@ -434,6 +462,7 @@ public function importExcel(Request $request)
         }
 
         $q = DB::table('secciones')->where('seccion', $seccion);
+        LocalDistrictAccess::scope($q);
 
         if ($request->filled('cve_mun')) {
             $cve = str_pad((string)$request->input('cve_mun'), 3, '0', STR_PAD_LEFT);

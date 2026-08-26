@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Afiliado;
 use App\Services\AfiliadosExcelExporter;
+use App\Support\LocalDistrictAccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -141,7 +142,9 @@ class AfiliadoController extends Controller
         if ($municipios->count() > 0) {
             $cve = $municipios->first()->cve_mun;
             $secciones = DB::table('secciones')
-                ->where('cve_mun', $cve)
+                ->where('cve_mun', $cve);
+            LocalDistrictAccess::scope($secciones);
+            $secciones = $secciones
                 ->orderBy('seccion')
                 ->pluck('seccion');
         }
@@ -165,6 +168,10 @@ class AfiliadoController extends Controller
 
         $rules = $this->rulesStore();
         $data  = $request->validate($rules, $this->validationMessages());
+        if (!LocalDistrictAccess::sectionIsAllowed((string)$data['seccion'])) {
+            abort(403, 'No tienes acceso a esa sección.');
+        }
+        $data = LocalDistrictAccess::force($data);
 
         if (($data['tipo_vinculo'] ?? null) !== 'mov') {
             $data['numero_mov'] = null;
@@ -190,7 +197,9 @@ class AfiliadoController extends Controller
         $seccionInfo = DB::table('secciones')
             ->where('seccion', $afiliado->seccion)
             ->when($afiliado->cve_mun, fn($q)=>$q->where('cve_mun',$afiliado->cve_mun),
-                                fn($q)=>$q->where('municipio',$afiliado->municipio))
+                                fn($q)=>$q->where('municipio',$afiliado->municipio));
+        LocalDistrictAccess::scope($seccionInfo);
+        $seccionInfo = $seccionInfo
             ->select('seccion','municipio','cve_mun','distrito_local','distrito_federal','lista_nominal','centroid_lat','centroid_lng')
             ->first();
 
@@ -209,7 +218,9 @@ class AfiliadoController extends Controller
 
         $secciones = DB::table('secciones')
             ->when($selCve, fn($q)=>$q->where('cve_mun',$selCve),
-                           fn($q)=>$q->where('municipio',$afiliado->municipio))
+                           fn($q)=>$q->where('municipio',$afiliado->municipio));
+        LocalDistrictAccess::scope($secciones);
+        $secciones = $secciones
             ->orderBy('seccion')
             ->pluck('seccion');
 
@@ -233,6 +244,10 @@ class AfiliadoController extends Controller
 
         $rules = $this->rulesUpdate($afiliado);
         $data  = $request->validate($rules, $this->validationMessages());
+        if (!LocalDistrictAccess::sectionIsAllowed((string)$data['seccion'])) {
+            abort(403, 'No tienes acceso a esa sección.');
+        }
+        $data = LocalDistrictAccess::force($data);
 
         if (($data['tipo_vinculo'] ?? null) !== 'mov') {
             $data['numero_mov'] = null;
@@ -547,6 +562,19 @@ class AfiliadoController extends Controller
 
     private function cargarMunicipiosDesdeGeo()
     {
+        if (LocalDistrictAccess::assigned() !== null) {
+            $query = DB::table('secciones')
+                ->select('cve_mun', 'municipio')
+                ->distinct()
+                ->orderBy('municipio');
+            LocalDistrictAccess::scope($query);
+
+            return $query->get()->map(function ($row) {
+                $row->cve_mun = str_pad((string)$row->cve_mun, 3, '0', STR_PAD_LEFT);
+                return $row;
+            });
+        }
+
         $posibles = [
             public_path('geo/michoacan.json'),
             public_path('geo/16_michoacan.json'),
@@ -581,11 +609,13 @@ class AfiliadoController extends Controller
             }
         }
 
-        return DB::table('secciones')
+        $query = DB::table('secciones')
             ->select('cve_mun','municipio')
             ->distinct()
-            ->orderBy('municipio')
-            ->get()
+            ->orderBy('municipio');
+        LocalDistrictAccess::scope($query);
+
+        return $query->get()
             ->map(function($r){
                 $r->cve_mun = str_pad((string)$r->cve_mun, 3, '0', STR_PAD_LEFT);
                 return $r;

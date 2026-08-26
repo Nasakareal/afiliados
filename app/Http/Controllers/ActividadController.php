@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Actividad;
+use App\Support\LocalDistrictAccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -72,6 +73,7 @@ class ActividadController extends Controller
         ]);
 
         $validated['creado_por'] = Auth::id();
+        $validated = LocalDistrictAccess::force($validated, $request->user());
 
         $actividad = Actividad::create($validated);
 

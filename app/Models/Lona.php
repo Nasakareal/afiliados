@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Support\LocalDistrictAccess;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -9,6 +11,26 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Lona extends Model
 {
     use HasFactory, SoftDeletes;
+
+    protected static function booted(): void
+    {
+        static::addGlobalScope('local_district', function (Builder $builder) {
+            $district = LocalDistrictAccess::assigned();
+            if ($district === null) {
+                return;
+            }
+
+            $builder->whereExists(function ($query) use ($builder, $district) {
+                $query->selectRaw('1')
+                    ->from('secciones as lona_district_sections')
+                    ->whereColumn(
+                        'lona_district_sections.seccion',
+                        $builder->getModel()->qualifyColumn('seccion')
+                    )
+                    ->where('lona_district_sections.distrito_local', $district);
+            });
+        });
+    }
 
     protected $fillable = [
         'seccion',

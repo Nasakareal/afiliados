@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\RestrictsToLocalDistrict;
 use Illuminate\Database\Eloquent\Model;
 
 class Seccion extends Model
 {
+    use RestrictsToLocalDistrict;
+
     protected $table = 'secciones';
 
     protected $fillable = [

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AppSetting;
 use App\Models\Comunicado;
 use App\Models\User;
+use App\Support\LocalDistrictAccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
@@ -17,6 +18,7 @@ class AdminApiController extends Controller
     public function users(Request $request)
     {
         $query = User::with('roles')->orderBy('name');
+        LocalDistrictAccess::scope($query);
         if (!$request->user()->hasRole('SuperAdmin')) {
             $query->whereDoesntHave('roles', fn ($q) => $q->where('name', 'SuperAdmin'));
         }
@@ -37,12 +39,15 @@ class AdminApiController extends Controller
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'role' => ['required', 'string', Rule::exists('roles', 'name')->where('guard_name', 'web')],
+            'distrito_local' => ['nullable', 'integer', Rule::exists('secciones', 'distrito_local')],
         ]);
+        $data = LocalDistrictAccess::force($data, $request->user());
         $this->guardRoleAssignment($request, $data['role']);
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
+            'distrito_local' => $data['distrito_local'] ?? null,
         ]);
         $user->forceFill(['must_change_password' => false, 'password_changed_at' => now()])->save();
         $user->syncRoles([$data['role']]);
@@ -58,17 +63,25 @@ class AdminApiController extends Controller
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
             'role' => ['required', 'string', Rule::exists('roles', 'name')->where('guard_name', 'web')],
+            'distrito_local' => ['nullable', 'integer', Rule::exists('secciones', 'distrito_local')],
         ]);
+        $data = LocalDistrictAccess::force($data, $request->user());
         $this->guardRoleAssignment($request, $data['role']);
         if ($user->hasRole('SuperAdmin') && $data['role'] !== 'SuperAdmin' && User::role('SuperAdmin')->count() <= 1) {
             return response()->json(['message' => 'No puedes quitar el último SuperAdmin.'], 422);
         }
         $user->fill(['name' => $data['name'], 'email' => $data['email']]);
+        if (array_key_exists('distrito_local', $data)) {
+            $user->distrito_local = $data['distrito_local'];
+        }
         if (!empty($data['password'])) {
             $user->password = Hash::make($data['password']);
             $user->password_changed_at = now();
         }
         $user->save();
+        \DB::table('actividades')
+            ->where('creado_por', $user->id)
+            ->update(['distrito_local' => $user->distrito_local]);
         $user->syncRoles([$data['role']]);
 
         return response()->json($this->userData($user));
@@ -210,11 +223,14 @@ class AdminApiController extends Controller
             'email' => $user->email,
             'role' => optional($user->roles->first())->name,
             'roles' => $user->roles->pluck('name')->values(),
+            'distrito_local' => $user->distrito_local,
         ];
     }
 
     private function guardUserAccess(Request $request, User $user): void
     {
+        $assigned = LocalDistrictAccess::assigned($request->user());
+        if ($assigned !== null && (int)$user->distrito_local !== $assigned) abort(403);
         if ($user->hasRole('SuperAdmin') && !$request->user()->hasRole('SuperAdmin')) abort(403);
     }
 

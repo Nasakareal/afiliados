@@ -56,6 +56,15 @@
   const conteoPorNombre = @json($conteoPorNombre) || {};
   const statsCVE        = @json($statsCVE) || {};
   const statsNombre     = @json($statsNombre) || {};
+  const municipalityNames = @json($municipiosCVE) || {};
+  const assignedLocalDistrict = @json($distritoLocalAsignado);
+
+  function localDistrictFeature(feature){
+    if (assignedLocalDistrict === null) return true;
+    const props = feature && feature.properties || {};
+    const value = props.DISTRITO_L ?? props.Distrito_L ?? props.DISTRITO_LOCAL ?? props.DL;
+    return value !== undefined && value !== null && String(value) === String(assignedLocalDistrict);
+  }
 
   function normalize(s){
     return (s || '').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Z0-9 ]/gi,'').trim().toUpperCase();
@@ -106,8 +115,15 @@
   };
   legend.addTo(map);
 
+  function municipalityCve(p){
+    const municipality = p.CVE_MUN ?? p.MUNICIPIO;
+    return (municipality
+      ? String(p.CVE_ENT || p.ENTIDAD || '16') + String(municipality).padStart(3, '0')
+      : p.CVEGEO || '').toString();
+  }
+
   function pickStats(p){
-    const cve = (p.CVEGEO || (String(p.CVE_ENT||'') + String(p.CVE_MUN||''))).toString();
+    const cve = municipalityCve(p);
     if (statsCVE && statsCVE[cve]) return statsCVE[cve];
     const nomN = normalize(p.NOMGEO || '');
     if (statsNombre && statsNombre[nomN]) return statsNombre[nomN];
@@ -138,17 +154,22 @@
   function fitMunicipios(){ munLabels.forEach(fitMunicipio); }
   map.on('zoomend viewreset', fitMunicipios);
 
-  fetch("{{ asset('geo/michoacan.json') }}")
+  fetch(assignedLocalDistrict === null
+    ? @json(asset('geo/michoacan.json'))
+    : @json(asset('maps/out/SECCION.geojson')))
     .then(r => r.json())
     .then(function(geo){
+      if (assignedLocalDistrict !== null) {
+        geo = Object.assign({}, geo, {features:(geo.features || []).filter(localDistrictFeature)});
+      }
       const capaMunicipios = L.geoJSON(geo, {
         pane: 'municipiosPane',
         style: f => styleFeature(pickStats(f.properties||{}).total),
         onEachFeature: function(feature, layer){
           const p  = feature.properties || {};
           const st = pickStats(p);
-          const cve    = (p.CVEGEO || (String(p.CVE_ENT||'') + String(p.CVE_MUN||''))).toString();
-          const nombre = p.NOMGEO || 'Desconocido';
+          const cve = municipalityCve(p);
+          const nombre = municipalityNames[cve] || p.NOMGEO || p.NOM_MUN || (p.SECCION ? `Sección ${p.SECCION}` : 'Desconocido');
           layer.options.className = 'municipio';
           layer.on('click', function(){
             const html = `
@@ -174,6 +195,8 @@
           } catch(_) {
             latlng = layer.getBounds().getCenter();
           }
+
+          if (assignedLocalDistrict !== null) return;
 
           const label = L.marker(latlng, {
             pane: 'labelsPane',
@@ -270,6 +293,10 @@
     fetch("{{ $l['url'] }}")
       .then(r => r.json())
       .then(geo => {
+        if (assignedLocalDistrict !== null) {
+          geo = Object.assign({}, geo, {features:(geo.features || []).filter(localDistrictFeature)});
+          if (!geo.features.length) return;
+        }
         const group = L.layerGroup();
 
         const geoLayer = L.geoJSON(geo, {

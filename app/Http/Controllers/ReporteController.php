@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\LocalDistrictAccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -297,6 +298,7 @@ class ReporteController extends Controller
     private function buildAfiliadosBaseQuery(Request $request, array $ignoreCols = [])
     {
         $q = DB::table('afiliados')->whereNull('afiliados.deleted_at');
+        LocalDistrictAccess::scope($q, 'afiliados.distrito_local');
 
         // ===== incluir/excluir por campo (listas) =====
         $this->applyIncludeExclude($q, 'afiliados.seccion',          $request, 'secciones',           'excluir_secciones',           $ignoreCols);

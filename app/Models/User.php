@@ -12,7 +12,7 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, HasRoles;
 
-    protected $fillable = ['name','email','password'];
+    protected $fillable = ['name','email','password','distrito_local'];
 
     protected $hidden = ['password','remember_token'];
 
@@ -20,6 +20,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'must_change_password' => 'boolean',
         'password_changed_at' => 'datetime',
+        'distrito_local' => 'integer',
     ];
 
     // === Relaciones de conveniencia ===

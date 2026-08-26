@@ -18,6 +18,7 @@ class ActividadResource extends JsonResource
             'lugar'       => $this->lugar,
             'estado'      => $this->estado,
             'creado_por'  => $this->creado_por,
+            'distrito_local' => $this->distrito_local,
             'created_at'  => $this->created_at,
             'updated_at'  => $this->updated_at,
         ];

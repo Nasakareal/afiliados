@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Afiliado;
+use App\Models\Actividad;
 use App\Models\Comunicado;
+use App\Support\LocalDistrictAccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -29,7 +31,9 @@ class DashboardController extends Controller
         $desde = Carbon::today()->subDays(6);
         $raw = DB::table('afiliados')
             ->select(DB::raw('DATE(created_at) as d'), DB::raw('COUNT(*) as c'))
-            ->where('created_at', '>=', $desde->copy()->startOfDay())
+            ->where('created_at', '>=', $desde->copy()->startOfDay());
+        LocalDistrictAccess::scope($raw);
+        $raw = $raw
             ->groupBy('d')->orderBy('d')->get();
 
         $map = [];
@@ -46,16 +50,20 @@ class DashboardController extends Controller
 
         // ---- Top municipios y secciones ----
         $porMunicipio = DB::table('afiliados')
-            ->select('municipio', DB::raw('COUNT(*) as total'))
+            ->select('municipio', DB::raw('COUNT(*) as total'));
+        LocalDistrictAccess::scope($porMunicipio);
+        $porMunicipio = $porMunicipio
             ->groupBy('municipio')->orderByDesc('total')->limit(10)->get();
 
         $porSeccion = DB::table('afiliados')
             ->select('seccion', DB::raw('COUNT(*) as total'))
-            ->whereNotNull('seccion')
+            ->whereNotNull('seccion');
+        LocalDistrictAccess::scope($porSeccion);
+        $porSeccion = $porSeccion
             ->groupBy('seccion')->orderByDesc('total')->limit(10)->get();
 
         // ---- Próximas actividades (7 días) ----
-        $actividades = DB::table('actividades')
+        $actividades = Actividad::query()
             ->where('inicio', '>=', Carbon::now())
             ->where('inicio', '<=', Carbon::now()->addDays(7))
             ->orderBy('inicio')->limit(8)->get();
