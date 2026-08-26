@@ -25,19 +25,20 @@ class MetaAvanceController extends Controller
             ->select(
                 'cve_mun',
                 'municipio',
-                DB::raw('GROUP_CONCAT(DISTINCT distrito_local) AS distritos_locales'),
+                'distrito_local',
                 DB::raw('GROUP_CONCAT(DISTINCT distrito_federal) AS distritos_federales'),
                 DB::raw('COUNT(*) AS total_secciones')
             )
             ->when($cveMun !== '', fn($q) => $q->where('cve_mun', $cveMun))
             ->when($distritoLocal !== '', fn($q) => $q->where('distrito_local', $distritoLocal))
             ->when($distritoFederal !== '', fn($q) => $q->where('distrito_federal', $distritoFederal))
-            ->groupBy('cve_mun', 'municipio')
+            ->groupBy('cve_mun', 'municipio', 'distrito_local')
+            ->orderBy('distrito_local')
             ->orderBy('municipio')
             ->get();
 
         $convencidos = DB::table('afiliados')
-            ->select('cve_mun', DB::raw('COUNT(*) AS total'))
+            ->select('cve_mun', 'distrito_local', DB::raw('COUNT(*) AS total'))
             ->whereNull('deleted_at')
             ->whereNotNull('cve_mun')
             ->when($cveMun !== '', fn($q) => $q->where('cve_mun', $cveMun))
@@ -45,8 +46,11 @@ class MetaAvanceController extends Controller
             ->when($distritoFederal !== '', fn($q) => $q->where('distrito_federal', $distritoFederal))
             ->when($referente !== '', fn($q) => $q->whereRaw('TRIM(perfil) = ?', [$referente]))
             ->when($capturistaId, fn($q) => $q->where('capturista_id', $capturistaId))
-            ->groupBy('cve_mun')
-            ->pluck('total', 'cve_mun');
+            ->groupBy('cve_mun', 'distrito_local')
+            ->get()
+            ->mapWithKeys(fn($fila) => [
+                self::scopeKey($fila->cve_mun, $fila->distrito_local) => (int)$fila->total,
+            ]);
 
         $convencidosPorSeccion = DB::table('afiliados')
             ->select('seccion', DB::raw('COUNT(*) AS total'))
@@ -63,25 +67,34 @@ class MetaAvanceController extends Controller
 
         $lonas = DB::table('lonas')
             ->join('secciones', 'secciones.seccion', '=', 'lonas.seccion')
-            ->select('secciones.cve_mun', DB::raw('COUNT(DISTINCT lonas.id) AS total'))
+            ->select(
+                'secciones.cve_mun',
+                'secciones.distrito_local',
+                DB::raw('COUNT(DISTINCT lonas.id) AS total')
+            )
             ->whereNull('lonas.deleted_at')
             ->when($cveMun !== '', fn($q) => $q->where('secciones.cve_mun', $cveMun))
             ->when($distritoLocal !== '', fn($q) => $q->where('secciones.distrito_local', $distritoLocal))
             ->when($distritoFederal !== '', fn($q) => $q->where('secciones.distrito_federal', $distritoFederal))
             ->when($referente !== '', fn($q) => $q->whereRaw('TRIM(lonas.responsable) = ?', [$referente]))
             ->when($capturistaId, fn($q) => $q->where('lonas.capturado_por', $capturistaId))
-            ->groupBy('secciones.cve_mun')
-            ->pluck('total', 'secciones.cve_mun');
+            ->groupBy('secciones.cve_mun', 'secciones.distrito_local')
+            ->get()
+            ->mapWithKeys(fn($fila) => [
+                self::scopeKey($fila->cve_mun, $fila->distrito_local) => (int)$fila->total,
+            ]);
 
         $metas = MetaAvance::query()
             ->where('activa', true)
             ->when($cveMun !== '', fn($q) => $q->where('cve_mun', $cveMun))
+            ->when($distritoLocal !== '', fn($q) => $q->where('distrito_local', $distritoLocal))
             ->orderBy('id')
             ->get()
-            ->groupBy('cve_mun');
+            ->groupBy(fn(MetaAvance $meta) => self::scopeKey($meta->cve_mun, $meta->distrito_local));
 
         $avance = $municipios->map(function ($municipio) use ($convencidos, $lonas, $metas) {
-            $metasMunicipio = $metas->get($municipio->cve_mun, collect());
+            $scopeKey = self::scopeKey($municipio->cve_mun, $municipio->distrito_local);
+            $metasMunicipio = $metas->get($scopeKey, collect());
 
             $metaConvencidos = $metasMunicipio
                 ->where('tipo', MetaAvance::TIPO_CONVENCIDOS)
@@ -93,15 +106,16 @@ class MetaAvanceController extends Controller
                 ->sortByDesc('id')
                 ->first();
 
-            $totalConvencidos = (int)($convencidos[$municipio->cve_mun] ?? 0);
-            $totalLonas = (int)($lonas[$municipio->cve_mun] ?? 0);
+            $totalConvencidos = (int)($convencidos[$scopeKey] ?? 0);
+            $totalLonas = (int)($lonas[$scopeKey] ?? 0);
             $cantidadMetaConvencidos = (int)($metaConvencidos->meta ?? 0);
             $cantidadMetaLonas = (int)($metaLonas->meta ?? 0);
 
             return [
                 'cve_mun' => $municipio->cve_mun,
                 'municipio' => $municipio->municipio,
-                'distritos_locales' => $municipio->distritos_locales,
+                'distrito_local' => (int)$municipio->distrito_local,
+                'distritos_locales' => (string)$municipio->distrito_local,
                 'distritos_federales' => $municipio->distritos_federales,
                 'secciones' => (int)$municipio->total_secciones,
                 'meta_convencidos_id' => $metaConvencidos->id ?? null,
@@ -280,23 +294,36 @@ class MetaAvanceController extends Controller
                 Rule::exists('secciones', 'cve_mun'),
             ],
             'meta_convencidos' => ['required', 'integer', 'min:1'],
-            'meta_lonas' => ['required', 'integer', 'min:1'],
+            'meta_lonas' => ['nullable', 'integer', 'min:0'],
+            'distrito_local' => [
+                'required',
+                'integer',
+                Rule::exists('secciones', 'distrito_local')
+                    ->where(fn($query) => $query->where('cve_mun', $request->input('cve_mun'))),
+            ],
         ]);
 
         DB::transaction(function () use ($data, $request) {
             foreach ([
                 MetaAvance::TIPO_CONVENCIDOS => $data['meta_convencidos'],
-                MetaAvance::TIPO_LONAS => $data['meta_lonas'],
+                MetaAvance::TIPO_LONAS => $data['meta_lonas'] ?? 0,
             ] as $tipo => $cantidad) {
                 $meta = MetaAvance::query()
                     ->where('tipo', $tipo)
                     ->where('cve_mun', $data['cve_mun'])
+                    ->where('distrito_local', $data['distrito_local'])
                     ->latest('id')
                     ->first();
+
+                if ($cantidad <= 0) {
+                    $meta?->delete();
+                    continue;
+                }
 
                 $valores = [
                     'tipo' => $tipo,
                     'cve_mun' => $data['cve_mun'],
+                    'distrito_local' => $data['distrito_local'],
                     'meta' => $cantidad,
                     'fecha_inicio' => self::META_FECHA_INICIO,
                     'fecha_fin' => self::META_FECHA_FIN,
@@ -330,12 +357,19 @@ class MetaAvanceController extends Controller
                 Rule::exists('secciones', 'cve_mun'),
             ],
             'meta' => ['required', 'integer', 'min:0'],
+            'distrito_local' => [
+                'required',
+                'integer',
+                Rule::exists('secciones', 'distrito_local')
+                    ->where(fn($query) => $query->where('cve_mun', $request->input('cve_mun'))),
+            ],
         ]);
 
         $duplicada = MetaAvance::query()
             ->where('id', '!=', $metaAvance->id)
             ->where('tipo', $data['tipo'])
             ->where('cve_mun', $data['cve_mun'])
+            ->where('distrito_local', $data['distrito_local'])
             ->exists();
 
         if ($duplicada) {
@@ -349,6 +383,7 @@ class MetaAvanceController extends Controller
         $metaAvance->update([
             'tipo' => $data['tipo'],
             'cve_mun' => $data['cve_mun'],
+            'distrito_local' => $data['distrito_local'],
             'meta' => $data['meta'],
             'fecha_inicio' => self::META_FECHA_INICIO,
             'fecha_fin' => self::META_FECHA_FIN,
@@ -366,5 +401,10 @@ class MetaAvanceController extends Controller
         $metaAvance->delete();
 
         return back()->with('status', 'Meta eliminada correctamente.');
+    }
+
+    private static function scopeKey(string $cveMun, $distritoLocal): string
+    {
+        return $cveMun.'|'.(string)$distritoLocal;
     }
 }

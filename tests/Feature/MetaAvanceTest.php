@@ -49,7 +49,7 @@ class MetaAvanceTest extends TestCase
             ->assertSeeInOrder(['Meta<br>convencidos', 'Total<br>convencidos'], false)
             ->assertSeeInOrder(['Meta<br>lonas', 'Total<br>lonas'], false)
             ->assertSeeText('Top capturistas por convencidos')
-            ->assertSeeText('Top referentes por convencidos')
+            ->assertSeeText('Referentes por convencidos')
             ->assertSee('Asignar meta');
 
         $this->actingAs($admin)
@@ -65,6 +65,7 @@ class MetaAvanceTest extends TestCase
 
         $this->actingAs($admin)->post(route('avance.metas.store'), [
             'cve_mun' => '001',
+            'distrito_local' => 1,
             'meta_convencidos' => 5,
             'meta_lonas' => 2,
         ])->assertRedirect(route('avance.index'));
@@ -72,11 +73,13 @@ class MetaAvanceTest extends TestCase
         $this->assertDatabaseHas('meta_avances', [
             'tipo' => MetaAvance::TIPO_CONVENCIDOS,
             'cve_mun' => '001',
+            'distrito_local' => 1,
             'meta' => 5,
         ]);
         $this->assertDatabaseHas('meta_avances', [
             'tipo' => MetaAvance::TIPO_LONAS,
             'cve_mun' => '001',
+            'distrito_local' => 1,
             'meta' => 2,
         ]);
     }
@@ -89,9 +92,35 @@ class MetaAvanceTest extends TestCase
         $this->actingAs($coordinator)->get(route('avance.index'))->assertOk();
         $this->actingAs($coordinator)->post(route('avance.metas.store'), [
             'cve_mun' => '001',
+            'distrito_local' => 1,
             'meta_convencidos' => 5,
             'meta_lonas' => 2,
         ])->assertForbidden();
+    }
+
+    public function test_convinced_goal_can_be_saved_without_inventing_a_banner_goal(): void
+    {
+        $admin = User::factory()->create(['must_change_password' => false]);
+        $admin->assignRole('Admin');
+
+        $this->actingAs($admin)->post(route('avance.metas.store'), [
+            'cve_mun' => '001',
+            'distrito_local' => 1,
+            'meta_convencidos' => 180,
+            'meta_lonas' => '',
+        ])->assertRedirect(route('avance.index'));
+
+        $this->assertDatabaseHas('meta_avances', [
+            'tipo' => MetaAvance::TIPO_CONVENCIDOS,
+            'cve_mun' => '001',
+            'distrito_local' => 1,
+            'meta' => 180,
+        ]);
+        $this->assertDatabaseMissing('meta_avances', [
+            'tipo' => MetaAvance::TIPO_LONAS,
+            'cve_mun' => '001',
+            'distrito_local' => 1,
+        ]);
     }
 
     public function test_local_district_filters_historical_totals_lonas_and_rankings(): void
@@ -179,16 +208,55 @@ class MetaAvanceTest extends TestCase
             ],
         ]);
 
+        DB::table('meta_avances')->insert([
+            [
+                'tipo' => MetaAvance::TIPO_CONVENCIDOS,
+                'cve_mun' => '001',
+                'distrito_local' => 1,
+                'meta' => 100,
+                'fecha_inicio' => '2000-01-01',
+                'fecha_fin' => '2099-12-31',
+                'activa' => true,
+            ],
+            [
+                'tipo' => MetaAvance::TIPO_CONVENCIDOS,
+                'cve_mun' => '001',
+                'distrito_local' => 2,
+                'meta' => 200,
+                'fecha_inicio' => '2000-01-01',
+                'fecha_fin' => '2099-12-31',
+                'activa' => true,
+            ],
+        ]);
+
         $response = $this->actingAs($admin)->get(route('avance.index', [
             'distrito_local' => 1,
         ]));
 
         $response->assertOk()->assertSeeText('Distrito local 01');
         $this->assertSame(2, $response->viewData('totales')['total_convencidos']);
+        $this->assertSame(100, $response->viewData('totales')['meta_convencidos']);
         $this->assertSame(1, $response->viewData('totales')['total_lonas']);
         $this->assertSame(2, $response->viewData('convencidosPorSeccion')->get('1'));
         $this->assertSame('Capturista líder', $response->viewData('topCapturistas')->first()->name);
         $this->assertSame(2, (int)$response->viewData('topCapturistas')->first()->total);
         $this->assertSame('Referente líder', $response->viewData('topReferentes')->first()->name);
+    }
+
+    public function test_official_goals_match_the_delivered_workbook_totals(): void
+    {
+        $metas = require database_path('data/official_meta_avances.php');
+
+        $this->assertCount(117, $metas);
+        $this->assertSame(489600, array_sum(array_column($metas, 'meta')));
+        $this->assertCount(117, collect($metas)->unique(fn($meta) => $meta['cve_mun'].'|'.$meta['distrito_local']));
+        $this->assertSame(117, DB::table('meta_avances')->where('tipo', MetaAvance::TIPO_CONVENCIDOS)->count());
+        $this->assertSame(489600, (int)DB::table('meta_avances')->sum('meta'));
+        $this->assertSame(0, DB::table('meta_avances')->where('tipo', MetaAvance::TIPO_LONAS)->count());
+
+        $morelia = collect($metas)->where('municipio', 'Morelia')->sortBy('distrito_local')->values();
+
+        $this->assertSame([10, 11, 16, 17], $morelia->pluck('distrito_local')->all());
+        $this->assertSame([17820, 19440, 12600, 18000], $morelia->pluck('meta')->all());
     }
 }

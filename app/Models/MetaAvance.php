@@ -16,6 +16,7 @@ class MetaAvance extends Model
     protected $fillable = [
         'tipo',
         'cve_mun',
+        'distrito_local',
         'meta',
         'fecha_inicio',
         'fecha_fin',
@@ -25,6 +26,7 @@ class MetaAvance extends Model
 
     protected $casts = [
         'meta' => 'integer',
+        'distrito_local' => 'integer',
         'fecha_inicio' => 'date',
         'fecha_fin' => 'date',
         'activa' => 'boolean',

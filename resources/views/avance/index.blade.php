@@ -235,7 +235,7 @@
         <table class="table district-table">
           <thead>
             <tr>
-              <th>DFn</th>
+              <th>DL / DFn</th>
               <th>Municipio</th>
               <th>Secciones</th>
               <th>Meta<br>convencidos</th>
@@ -249,7 +249,10 @@
           <tbody>
             @forelse($avance as $fila)
               <tr>
-                <td>{{ $fila['distritos_federales'] ?: '—' }}</td>
+                <td>
+                  {{ str_pad($fila['distrito_local'], 2, '0', STR_PAD_LEFT) }} /
+                  {{ $fila['distritos_federales'] ?: '—' }}
+                </td>
                 <td class="municipio-cell">
                   <span>{{ $fila['municipio'] }}</span>
                 </td>
@@ -259,10 +262,11 @@
                     <button
                       type="button"
                       class="btn btn-outline-danger define-meta btn-asignar-meta"
-                      title="Definir metas de {{ $fila['municipio'] }}"
+                      title="Definir metas de {{ $fila['municipio'] }} · DL {{ str_pad($fila['distrito_local'], 2, '0', STR_PAD_LEFT) }}"
                       data-bs-toggle="modal"
                       data-bs-target="#modalMeta"
                       data-cve-mun="{{ $fila['cve_mun'] }}"
+                      data-distrito-local="{{ $fila['distrito_local'] }}"
                       data-meta-convencidos="{{ $fila['meta_convencidos'] }}"
                       data-meta-lonas="{{ $fila['meta_lonas'] }}"
                     >
@@ -384,7 +388,7 @@
               <label class="form-label">Municipio</label>
               <select name="cve_mun" class="form-select">
                 <option value="">Todos</option>
-                @foreach($avance as $fila)
+                @foreach($avance->unique('cve_mun') as $fila)
                   <option value="{{ $fila['cve_mun'] }}" {{ (string)$cveMun === (string)$fila['cve_mun'] ? 'selected' : '' }}>
                     {{ $fila['municipio'] }}
                   </option>
@@ -446,19 +450,23 @@
         <div class="modal-body">
           <div class="row g-3">
             <div class="col-12">
-              <label for="meta_cve_mun" class="form-label">Municipio</label>
-              <select name="cve_mun" id="meta_cve_mun" class="form-select" required>
-                <option value="">Selecciona un municipio</option>
+              <label for="meta_cve_mun" class="form-label">Municipio y distrito local</label>
+              <select name="meta_scope" id="meta_cve_mun" class="form-select" required>
+                <option value="">Selecciona un municipio y distrito</option>
                 @foreach($avance as $fila)
                   <option
-                    value="{{ $fila['cve_mun'] }}"
+                    value="{{ $fila['cve_mun'] }}|{{ $fila['distrito_local'] }}"
+                    data-cve-mun="{{ $fila['cve_mun'] }}"
+                    data-distrito-local="{{ $fila['distrito_local'] }}"
                     data-secciones="{{ $fila['secciones'] }}"
-                    {{ (string)old('cve_mun') === (string)$fila['cve_mun'] ? 'selected' : '' }}
+                    {{ old('cve_mun').'|'.old('distrito_local') === $fila['cve_mun'].'|'.$fila['distrito_local'] ? 'selected' : '' }}
                   >
-                    {{ $fila['municipio'] }}
+                    {{ $fila['municipio'] }} · DL {{ str_pad($fila['distrito_local'], 2, '0', STR_PAD_LEFT) }}
                   </option>
                 @endforeach
               </select>
+              <input type="hidden" name="cve_mun" id="meta_cve_mun_value" value="{{ old('cve_mun') }}">
+              <input type="hidden" name="distrito_local" id="meta_distrito_local" value="{{ old('distrito_local') }}">
             </div>
 
             <div class="col-md-6">
@@ -483,9 +491,9 @@
                 id="meta_lonas"
                 value="{{ old('meta_lonas') }}"
                 class="form-control"
-                min="1"
+                min="0"
                 step="1"
-                required
+                placeholder="Sin meta oficial"
               >
             </div>
 
@@ -639,6 +647,8 @@ document.addEventListener('DOMContentLoaded', function () {
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   const municipio = document.getElementById('meta_cve_mun');
+  const cveMun = document.getElementById('meta_cve_mun_value');
+  const distritoLocal = document.getElementById('meta_distrito_local');
   const convencidos = document.getElementById('meta_convencidos');
   const lonas = document.getElementById('meta_lonas');
 
@@ -647,26 +657,34 @@ document.addEventListener('DOMContentLoaded', function () {
     const secciones = Number(option?.dataset.secciones || 0);
 
     return {
-      convencidos: secciones ? secciones * 5 : '',
-      lonas: secciones || ''
+      convencidos: secciones ? secciones * 180 : '',
+      lonas: ''
     };
   }
 
-  function cargar(cve, metaConvencidos, metaLonas) {
-    municipio.value = cve || '';
+  function actualizarAlcance() {
+    const option = municipio.options[municipio.selectedIndex];
+    cveMun.value = option?.dataset.cveMun || '';
+    distritoLocal.value = option?.dataset.distritoLocal || '';
+  }
+
+  function cargar(cve, distrito, metaConvencidos, metaLonas) {
+    municipio.value = cve && distrito ? cve+'|'+distrito : '';
+    actualizarAlcance();
     const sugeridas = metasSugeridas();
     convencidos.value = Number(metaConvencidos) > 0 ? metaConvencidos : sugeridas.convencidos;
     lonas.value = Number(metaLonas) > 0 ? metaLonas : sugeridas.lonas;
   }
 
   document.querySelectorAll('.btn-nueva-meta').forEach(button => {
-    button.addEventListener('click', () => cargar('', ''));
+    button.addEventListener('click', () => cargar('', '', '', ''));
   });
 
   document.querySelectorAll('.btn-asignar-meta').forEach(button => {
     button.addEventListener('click', () => {
       cargar(
         button.dataset.cveMun,
+        button.dataset.distritoLocal,
         button.dataset.metaConvencidos,
         button.dataset.metaLonas
       );
@@ -674,10 +692,13 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   municipio?.addEventListener('change', function () {
+    actualizarAlcance();
     const sugeridas = metasSugeridas();
     convencidos.value = sugeridas.convencidos;
     lonas.value = sugeridas.lonas;
   });
+
+  actualizarAlcance();
 
   @if($errors->any())
     bootstrap.Modal.getOrCreateInstance(
