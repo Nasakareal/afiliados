@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Actividad;
 use App\Models\Comunicado;
-use App\Support\LocalDistrictAccess;
 use Carbon\Carbon;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -14,12 +14,14 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
-        if ($request->user()->hasRole('Lonas')) {
+        $user = $request->user();
+
+        if ($user->hasRole('Lonas')) {
             return redirect()->route('lonas.index');
         }
 
         $afiliados = DB::table('afiliados');
-        LocalDistrictAccess::scope($afiliados);
+        $this->aplicarAcceso($afiliados, $user);
 
         $total = (clone $afiliados)->count();
 
@@ -56,7 +58,7 @@ class DashboardController extends Controller
             )
             ->where('created_at', '>=', $desde->copy()->startOfDay());
 
-        LocalDistrictAccess::scope($raw);
+        $this->aplicarAcceso($raw, $user);
 
         $raw = $raw
             ->groupBy('d')
@@ -86,7 +88,7 @@ class DashboardController extends Controller
                 DB::raw('COUNT(*) as total')
             );
 
-        LocalDistrictAccess::scope($porMunicipio);
+        $this->aplicarAcceso($porMunicipio, $user);
 
         $porMunicipio = $porMunicipio
             ->groupBy('municipio')
@@ -101,7 +103,7 @@ class DashboardController extends Controller
             )
             ->whereNotNull('seccion');
 
-        LocalDistrictAccess::scope($porSeccion);
+        $this->aplicarAcceso($porSeccion, $user);
 
         $porSeccion = $porSeccion
             ->groupBy('seccion')
@@ -141,5 +143,14 @@ class DashboardController extends Controller
             'actividades',
             'comunicadosRecientes'
         ));
+    }
+
+    private function aplicarAcceso(Builder $query, $user): void
+    {
+        if ($user->hasAnyRole(['Admin', 'SuperAdmin'])) {
+            return;
+        }
+
+        $query->where('user_id', $user->id);
     }
 }
