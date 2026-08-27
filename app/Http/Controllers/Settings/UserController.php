@@ -12,19 +12,70 @@ use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $distritoAsignado = LocalDistrictAccess::assigned(auth()->user());
-        $query = User::with('roles')
-            ->when($distritoAsignado !== null, fn($q) => $q->where('distrito_local', $distritoAsignado));
+        $distritoAsignado = LocalDistrictAccess::assigned($request->user());
+        $esSuperAdmin = $request->user()->hasRole('SuperAdmin');
 
-        if (!auth()->user()->hasRole('SuperAdmin')) {
-            $query->whereDoesntHave('roles', fn($q) => $q->where('name', 'SuperAdmin'));
-        }
+        $busqueda = trim((string) $request->input('buscar'));
+        $rolSeleccionado = $request->input('rol');
+        $distritoSeleccionado = $request->input('distrito_local');
 
-        $usuarios = $query->paginate(15);
+        $roles = Role::query()
+            ->when(!$esSuperAdmin, fn($query) => $query->where('name', '!=', 'SuperAdmin'))
+            ->orderBy('name')
+            ->get();
 
-        return view('settings.usuarios.index', compact('usuarios'));
+        $query = User::query()
+            ->with('roles')
+            ->when(
+                $distritoAsignado !== null,
+                fn($query) => $query->where('distrito_local', $distritoAsignado)
+            )
+            ->when(
+                !$esSuperAdmin,
+                fn($query) => $query->whereDoesntHave(
+                    'roles',
+                    fn($rolesQuery) => $rolesQuery->where('name', 'SuperAdmin')
+                )
+            )
+            ->when($busqueda !== '', function ($query) use ($busqueda) {
+                $query->where(function ($subquery) use ($busqueda) {
+                    $subquery
+                        ->where('name', 'like', "%{$busqueda}%")
+                        ->orWhere('email', 'like', "%{$busqueda}%");
+                });
+            })
+            ->when($rolSeleccionado, function ($query) use ($rolSeleccionado, $esSuperAdmin) {
+                if ($rolSeleccionado === 'SuperAdmin' && !$esSuperAdmin) {
+                    return;
+                }
+
+                $query->whereHas(
+                    'roles',
+                    fn($rolesQuery) => $rolesQuery->where('name', $rolSeleccionado)
+                );
+            })
+            ->when(
+                $distritoAsignado === null && $distritoSeleccionado !== null && $distritoSeleccionado !== '',
+                fn($query) => $query->where('distrito_local', $distritoSeleccionado)
+            )
+            ->orderBy('name');
+
+        $usuarios = $query
+            ->paginate(15)
+            ->withQueryString();
+
+        $distritosLocales = $this->distritosLocales();
+
+        return view('settings.usuarios.index', compact(
+            'usuarios',
+            'roles',
+            'distritosLocales',
+            'busqueda',
+            'rolSeleccionado',
+            'distritoSeleccionado'
+        ));
     }
 
     public function create()

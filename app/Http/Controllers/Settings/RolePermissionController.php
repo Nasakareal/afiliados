@@ -43,7 +43,6 @@ class RolePermissionController extends Controller
 
         $role->syncPermissions($valid);
 
-        return redirect()->route('settings.roles.permisos.show', $role->id)
-            ->with('status','Permisos actualizados correctamente.');
+        return redirect()->route('settings.roles.index')->with('status','Permisos actualizados correctamente.');
     }
 }

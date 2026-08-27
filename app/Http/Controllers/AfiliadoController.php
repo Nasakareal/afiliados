@@ -12,6 +12,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Validation\ValidationException;
 
 class AfiliadoController extends Controller
 {
@@ -139,55 +140,71 @@ class AfiliadoController extends Controller
         $municipios = $this->cargarMunicipiosDesdeGeo();
 
         $secciones = collect();
-        if ($municipios->count() > 0) {
+
+        if ($municipios->isNotEmpty()) {
             $cve = $municipios->first()->cve_mun;
-            $secciones = DB::table('secciones')
+
+            $query = DB::table('secciones')
                 ->where('cve_mun', $cve);
-            LocalDistrictAccess::scope($secciones);
-            $secciones = $secciones
+
+            LocalDistrictAccess::scope($query);
+
+            $secciones = $query
                 ->orderBy('seccion')
                 ->pluck('seccion');
         }
 
-        $rules    = $this->rulesStore();
+        $rules = $this->rulesStore();
         $required = $this->requiredMap($rules);
         $fullNameField = $this->fullNameField();
+        $esDistritoLocal = $this->isDistritoLocal();
 
-        return view('afiliados.create', compact('municipios','secciones','required','fullNameField'));
+        return view('afiliados.create', compact(
+            'municipios',
+            'secciones',
+            'required',
+            'fullNameField',
+            'esDistritoLocal'
+        ));
     }
 
     public function store(Request $request)
     {
         $full = $this->fullNameField();
+
         $this->normalizeElectoralFields($request);
 
-        // Normaliza nombre (sin acentos, MAYÚSCULAS y sin espacios dobles)
-        $raw  = $this->squish($request->input($full, ''));
+        $raw = $this->squish($request->input($full, ''));
         $name = Str::upper(Str::ascii($raw));
+
         $request->merge([$full => $name]);
 
-        $rules = $this->rulesStore();
-        $data  = $request->validate($rules, $this->validationMessages());
-        if (!LocalDistrictAccess::sectionIsAllowed((string)$data['seccion'])) {
-            abort(403, 'No tienes acceso a esa sección.');
-        }
-        $data = LocalDistrictAccess::force($data);
+        $data = $request->validate(
+            $this->rulesStore(),
+            $this->validationMessages()
+        );
 
-        if (($data['tipo_vinculo'] ?? null) !== 'mov') {
+        $data = $this->applySectionData($data);
+
+        if (
+            array_key_exists('tipo_vinculo', $data) &&
+            $data['tipo_vinculo'] !== 'mov'
+        ) {
             $data['numero_mov'] = null;
         }
 
-        // Default si no mandan fecha
         if (empty($data['fecha_convencimiento'])) {
             $data['fecha_convencimiento'] = now();
         }
 
+        $data['estatus'] = $data['estatus'] ?? 'pendiente';
         $data['capturista_id'] = Auth::id();
 
         $afiliado = Afiliado::create($data);
 
-        return redirect()->route('afiliados.show',$afiliado->id)
-            ->with('status','Afiliado creado correctamente.');
+        return redirect()
+            ->route('afiliados.show', $afiliado->id)
+            ->with('status', 'Afiliado creado correctamente.');
     }
 
     public function show(Afiliado $afiliado)
@@ -211,49 +228,76 @@ class AfiliadoController extends Controller
         $municipios = $this->cargarMunicipiosDesdeGeo();
 
         $selCve = $afiliado->cve_mun;
+
         if (!$selCve) {
-            $hit = $municipios->firstWhere('municipio', $afiliado->municipio);
-            $selCve = $hit->cve_mun ?? null;
+            $municipio = $municipios->firstWhere(
+                'municipio',
+                $afiliado->municipio
+            );
+
+            $selCve = $municipio->cve_mun ?? null;
         }
 
-        $secciones = DB::table('secciones')
-            ->when($selCve, fn($q)=>$q->where('cve_mun',$selCve),
-                           fn($q)=>$q->where('municipio',$afiliado->municipio));
-        LocalDistrictAccess::scope($secciones);
-        $secciones = $secciones
+        $query = DB::table('secciones')
+            ->when(
+                $selCve,
+                fn($query) => $query->where('cve_mun', $selCve),
+                fn($query) => $query->where('municipio', $afiliado->municipio)
+            );
+
+        LocalDistrictAccess::scope($query);
+
+        $secciones = $query
             ->orderBy('seccion')
             ->pluck('seccion');
 
-        // Para asteriscos/required en la vista:
-        $rules    = $this->rulesUpdate($afiliado);
+        $rules = $this->rulesUpdate($afiliado);
         $required = $this->requiredMap($rules);
         $fullNameField = $this->fullNameField();
+        $esDistritoLocal = $this->isDistritoLocal();
 
-        return view('afiliados.edit', compact('afiliado','municipios','secciones','required','fullNameField'));
+        return view('afiliados.edit', compact(
+            'afiliado',
+            'municipios',
+            'secciones',
+            'required',
+            'fullNameField',
+            'esDistritoLocal'
+        ));
     }
 
     public function update(Request $request, Afiliado $afiliado)
     {
         $full = $this->fullNameField();
+
         $this->normalizeElectoralFields($request);
 
-        // Normaliza nombre (sin acentos, MAYÚSCULAS y sin espacios dobles)
-        $raw  = $this->squish($request->input($full, $afiliado->{$full} ?? ''));
+        $raw = $this->squish(
+            $request->input($full, $afiliado->{$full} ?? '')
+        );
+
         $name = Str::upper(Str::ascii($raw));
+
         $request->merge([$full => $name]);
 
-        $rules = $this->rulesUpdate($afiliado);
-        $data  = $request->validate($rules, $this->validationMessages());
-        if (!LocalDistrictAccess::sectionIsAllowed((string)$data['seccion'])) {
-            abort(403, 'No tienes acceso a esa sección.');
-        }
-        $data = LocalDistrictAccess::force($data);
+        $data = $request->validate(
+            $this->rulesUpdate($afiliado),
+            $this->validationMessages()
+        );
 
-        if (($data['tipo_vinculo'] ?? null) !== 'mov') {
+        $data = $this->applySectionData($data);
+
+        if (
+            array_key_exists('tipo_vinculo', $data) &&
+            $data['tipo_vinculo'] !== 'mov'
+        ) {
             $data['numero_mov'] = null;
         }
 
-        if (empty($data['fecha_convencimiento'])) {
+        if (
+            array_key_exists('fecha_convencimiento', $data) &&
+            empty($data['fecha_convencimiento'])
+        ) {
             $data['fecha_convencimiento'] = now();
         }
 
@@ -288,67 +332,107 @@ class AfiliadoController extends Controller
         return Schema::hasColumn('afiliados', 'nombre_completo') ? 'nombre_completo' : 'nombre';
     }
 
-    /** Reglas para STORE (creación) */
     private function rulesStore(): array
     {
         $full = $this->fullNameField();
 
+        if ($this->isDistritoLocal()) {
+            return $this->districtLocalRules($full);
+        }
+
         return [
-            $full              => ['required','string','max:120', Rule::unique('afiliados', $full)],
-
-            // NO obligatorios
-            'edad'             => ['nullable','integer','min:0','max:120'],
-            'sexo'             => ['nullable', Rule::in(['M','F','Otro'])],
-            'email'            => ['nullable','email','max:150'],
-            'distrito_federal' => ['nullable','integer'],
-            'distrito_local'   => ['nullable','integer'],
-            'localidad'        => ['nullable','string','max:150'],
-            'colonia'          => ['nullable','string','max:150'],
-            'telefono'         => ['nullable','string','max:30'],
-            'clave_elector'    => ['nullable','string','max:30', Rule::unique('afiliados', 'clave_elector')],
-            'tipo_vinculo'     => ['nullable','string', Rule::in(array_keys(Afiliado::TIPOS_VINCULO))],
-            'numero_mov'       => ['nullable','string','max:50'],
-
-            // Obligatorios (según tu último store)
-            'municipio'        => ['required','string','max:120'],
-            'cve_mun'          => ['required','string','size:3'],
-            'seccion'          => ['required','string','max:6'],
-            'perfil'          => ['required','string','max:120'],
-            'estatus'          => ['required', Rule::in(['pendiente','validado','descartado'])],
-
-            'fecha_convencimiento' => ['nullable','date'],
+            $full => [
+                'required',
+                'string',
+                'max:120',
+                Rule::unique('afiliados', $full),
+            ],
+            'edad' => ['nullable', 'integer', 'min:0', 'max:120'],
+            'sexo' => ['nullable', Rule::in(['M', 'F', 'Otro'])],
+            'email' => ['nullable', 'email', 'max:150'],
+            'telefono' => ['nullable', 'string', 'max:30'],
+            'clave_elector' => [
+                'nullable',
+                'string',
+                'max:30',
+                Rule::unique('afiliados', 'clave_elector'),
+            ],
+            'tipo_vinculo' => [
+                'nullable',
+                'string',
+                Rule::in(array_keys(Afiliado::TIPOS_VINCULO)),
+            ],
+            'numero_mov' => ['nullable', 'string', 'max:50'],
+            'municipio' => ['required', 'string', 'max:120'],
+            'cve_mun' => ['required', 'string', 'size:3'],
+            'seccion' => ['required', 'string', 'max:6'],
+            'distrito_federal' => ['nullable', 'integer'],
+            'distrito_local' => ['nullable', 'integer'],
+            'perfil' => ['required', 'string', 'max:120'],
+            'localidad' => ['nullable', 'string', 'max:150'],
+            'colonia' => ['nullable', 'string', 'max:150'],
+            'calle' => ['nullable', 'string', 'max:150'],
+            'numero_ext' => ['nullable', 'string', 'max:20'],
+            'numero_int' => ['nullable', 'string', 'max:20'],
+            'cp' => ['nullable', 'string', 'max:10'],
+            'estatus' => [
+                'required',
+                Rule::in(['pendiente', 'validado', 'descartado']),
+            ],
+            'fecha_convencimiento' => ['nullable', 'date'],
         ];
     }
 
-    /** Reglas para UPDATE (edición) */
     private function rulesUpdate(Afiliado $afiliado): array
     {
         $full = $this->fullNameField();
 
+        if ($this->isDistritoLocal()) {
+            return $this->districtLocalRules($full);
+        }
+
         return [
-            $full              => ['required','string','max:120', Rule::unique('afiliados', $full)->ignore($afiliado->id, 'id')],
-
-            // NO obligatorios
-            'edad'             => ['nullable','integer','min:0','max:120'],
-            'sexo'             => ['nullable', Rule::in(['M','F','Otro'])],
-            'email'            => ['nullable','email','max:150'],
-            'telefono'         => ['nullable','string','max:30'],
-            'clave_elector'    => ['nullable','string','max:30', Rule::unique('afiliados', 'clave_elector')->ignore($afiliado->id, 'id')],
-            'tipo_vinculo'     => ['nullable','string', Rule::in(array_keys(Afiliado::TIPOS_VINCULO))],
-            'numero_mov'       => ['nullable','string','max:50'],
-            'distrito_federal' => ['nullable','integer'],
-            'distrito_local'   => ['nullable','integer'],
-            'localidad'        => ['nullable','string','max:150'],
-            'colonia'          => ['nullable','string','max:150'],
-
-            // Obligatorios (igual que store)
-            'municipio'        => ['required','string','max:120'],
-            'cve_mun'          => ['required','string','size:3'],
-            'seccion'          => ['required','string','max:6'],
-            'perfil'           => ['required','string','max:120'],
-            'estatus'          => ['required', Rule::in(['pendiente','validado','descartado'])],
-
-            'fecha_convencimiento' => ['nullable','date'],
+            $full => [
+                'required',
+                'string',
+                'max:120',
+                Rule::unique('afiliados', $full)
+                    ->ignore($afiliado->id, 'id'),
+            ],
+            'edad' => ['nullable', 'integer', 'min:0', 'max:120'],
+            'sexo' => ['nullable', Rule::in(['M', 'F', 'Otro'])],
+            'email' => ['nullable', 'email', 'max:150'],
+            'telefono' => ['nullable', 'string', 'max:30'],
+            'clave_elector' => [
+                'nullable',
+                'string',
+                'max:30',
+                Rule::unique('afiliados', 'clave_elector')
+                    ->ignore($afiliado->id, 'id'),
+            ],
+            'tipo_vinculo' => [
+                'nullable',
+                'string',
+                Rule::in(array_keys(Afiliado::TIPOS_VINCULO)),
+            ],
+            'numero_mov' => ['nullable', 'string', 'max:50'],
+            'municipio' => ['required', 'string', 'max:120'],
+            'cve_mun' => ['required', 'string', 'size:3'],
+            'seccion' => ['required', 'string', 'max:6'],
+            'distrito_federal' => ['nullable', 'integer'],
+            'distrito_local' => ['nullable', 'integer'],
+            'perfil' => ['required', 'string', 'max:120'],
+            'localidad' => ['nullable', 'string', 'max:150'],
+            'colonia' => ['nullable', 'string', 'max:150'],
+            'calle' => ['nullable', 'string', 'max:150'],
+            'numero_ext' => ['nullable', 'string', 'max:20'],
+            'numero_int' => ['nullable', 'string', 'max:20'],
+            'cp' => ['nullable', 'string', 'max:10'],
+            'estatus' => [
+                'required',
+                Rule::in(['pendiente', 'validado', 'descartado']),
+            ],
+            'fecha_convencimiento' => ['nullable', 'date'],
         ];
     }
 
@@ -628,5 +712,119 @@ class AfiliadoController extends Controller
             return Str::squish($value);
         }
         return preg_replace('/\s+/u', ' ', trim((string)$value));
+    }
+
+    private function isDistritoLocal(): bool
+    {
+        return Auth::user()?->hasRole('Distrito Local') ?? false;
+    }
+
+    private function districtLocalRules(string $full): array
+    {
+        return [
+            $full => ['required', 'string', 'max:120'],
+            'sexo' => [
+                'required',
+                Rule::in(['M', 'F', 'Otro']),
+            ],
+            'telefono' => [
+                'required',
+                'string',
+                'max:30',
+            ],
+            'municipio' => [
+                'required',
+                'string',
+                'max:120',
+            ],
+            'cve_mun' => [
+                'required',
+                'string',
+                'size:3',
+            ],
+            'seccion' => [
+                'required',
+                'string',
+                'max:6',
+            ],
+            'distrito_local' => [
+                'nullable',
+                'integer',
+            ],
+            'distrito_federal' => [
+                'nullable',
+                'integer',
+            ],
+            'perfil' => [
+                'nullable',
+                'string',
+                'max:120',
+            ],
+            'localidad' => [
+                'nullable',
+                'string',
+                'max:150',
+            ],
+            'colonia' => [
+                'nullable',
+                'string',
+                'max:150',
+            ],
+            'calle' => [
+                'nullable',
+                'string',
+                'max:150',
+            ],
+            'numero_ext' => [
+                'nullable',
+                'string',
+                'max:20',
+            ],
+            'numero_int' => [
+                'nullable',
+                'string',
+                'max:20',
+            ],
+            'cp' => [
+                'nullable',
+                'string',
+                'max:10',
+            ],
+        ];
+    }
+
+    private function applySectionData(array $data): array
+    {
+        if (
+            !LocalDistrictAccess::sectionIsAllowed(
+                (string) $data['seccion']
+            )
+        ) {
+            abort(403, 'No tienes acceso a esa sección.');
+        }
+
+        $seccion = DB::table('secciones')
+            ->where('seccion', $data['seccion'])
+            ->where('cve_mun', $data['cve_mun'])
+            ->select(
+                'municipio',
+                'cve_mun',
+                'distrito_local',
+                'distrito_federal'
+            )
+            ->first();
+
+        if (!$seccion) {
+            throw ValidationException::withMessages([
+                'seccion' => 'La sección no corresponde al municipio seleccionado.',
+            ]);
+        }
+
+        $data['municipio'] = $seccion->municipio;
+        $data['cve_mun'] = $seccion->cve_mun;
+        $data['distrito_local'] = $seccion->distrito_local;
+        $data['distrito_federal'] = $seccion->distrito_federal;
+
+        return LocalDistrictAccess::force($data);
     }
 }
