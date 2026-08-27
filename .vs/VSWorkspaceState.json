@@ -3,9 +3,8 @@
     "",
     "\\app",
     "\\app\\Http",
-    "\\app\\Http\\Controllers",
-    "\\resources",
-    "\\resources\\views"
+    "\\app\\Http\\Controllers"
   ],
+  "SelectedNode": "\\app\\Http\\Controllers\\MetaAvanceController.php",
   "PreviewInSolutionExplorer": false
 }

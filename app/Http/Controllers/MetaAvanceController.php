@@ -87,57 +87,66 @@ class MetaAvanceController extends Controller
             ->orderBy('municipio')
             ->get();
 
-        $convencidos = DB::table('afiliados')
-            ->select(
-                'cve_mun',
-                'distrito_local',
-                DB::raw('COUNT(*) AS total')
+        $convencidos = DB::table('afiliados as a')
+        ->join('secciones as s', function ($join) {
+            $join->on(
+                DB::raw('CAST(s.seccion AS UNSIGNED)'),
+                '=',
+                DB::raw('CAST(a.seccion AS UNSIGNED)')
+            );
+        })
+        ->select(
+            's.cve_mun',
+            's.distrito_local',
+            DB::raw('COUNT(DISTINCT a.id) AS total')
+        )
+        ->whereNull('a.deleted_at')
+        ->when(
+            $cveMun !== '',
+            fn($query) => $query->where(
+                's.cve_mun',
+                $cveMun
             )
-            ->whereNull('deleted_at')
-            ->whereNotNull('cve_mun')
-            ->when(
-                $cveMun !== '',
-                fn($query) => $query->where(
-                    'cve_mun',
-                    $cveMun
-                )
+        )
+        ->when(
+            $distritoLocal !== '',
+            fn($query) => $query->where(
+                's.distrito_local',
+                $distritoLocal
             )
-            ->when(
-                $distritoLocal !== '',
-                fn($query) => $query->where(
-                    'distrito_local',
-                    $distritoLocal
-                )
+        )
+        ->when(
+            $distritoFederal !== '',
+            fn($query) => $query->where(
+                's.distrito_federal',
+                $distritoFederal
             )
-            ->when(
-                $distritoFederal !== '',
-                fn($query) => $query->where(
-                    'distrito_federal',
-                    $distritoFederal
-                )
+        )
+        ->when(
+            $referente !== '',
+            fn($query) => $query->whereRaw(
+                'TRIM(a.perfil) = ?',
+                [$referente]
             )
-            ->when(
-                $referente !== '',
-                fn($query) => $query->whereRaw(
-                    'TRIM(perfil) = ?',
-                    [$referente]
-                )
+        )
+        ->when(
+            $capturistaId,
+            fn($query) => $query->where(
+                'a.capturista_id',
+                $capturistaId
             )
-            ->when(
-                $capturistaId,
-                fn($query) => $query->where(
-                    'capturista_id',
-                    $capturistaId
-                )
-            )
-            ->groupBy('cve_mun', 'distrito_local')
-            ->get()
-            ->mapWithKeys(fn($fila) => [
-                self::scopeKey(
-                    $fila->cve_mun,
-                    $fila->distrito_local
-                ) => (int) $fila->total,
-            ]);
+        )
+        ->groupBy(
+            's.cve_mun',
+            's.distrito_local'
+        )
+        ->get()
+        ->mapWithKeys(fn($fila) => [
+            self::scopeKey(
+                $fila->cve_mun,
+                $fila->distrito_local
+            ) => (int) $fila->total,
+        ]);
 
         $convencidosPorSeccion = DB::table('afiliados')
             ->select(
@@ -353,9 +362,63 @@ class MetaAvanceController extends Controller
             'meta_convencidos'
         );
 
-        $totalConvencidos = (int) $avance->sum(
-            'total_convencidos'
-        );
+        $totalConvencidosQuery = DB::table('afiliados as a')
+            ->whereNull('a.deleted_at');
+
+        $requiereGeografia =
+            $cveMun !== '' ||
+            $distritoLocal !== '' ||
+            $distritoFederal !== '';
+
+        if ($requiereGeografia) {
+            $totalConvencidosQuery
+                ->join('secciones as s_total', function ($join) {
+                    $join->on(
+                        DB::raw('CAST(s_total.seccion AS UNSIGNED)'),
+                        '=',
+                        DB::raw('CAST(a.seccion AS UNSIGNED)')
+                    );
+                });
+
+            if ($cveMun !== '') {
+                $totalConvencidosQuery->where(
+                    's_total.cve_mun',
+                    $cveMun
+                );
+            }
+
+            if ($distritoLocal !== '') {
+                $totalConvencidosQuery->where(
+                    's_total.distrito_local',
+                    $distritoLocal
+                );
+            }
+
+            if ($distritoFederal !== '') {
+                $totalConvencidosQuery->where(
+                    's_total.distrito_federal',
+                    $distritoFederal
+                );
+            }
+        }
+
+        if ($referente !== '') {
+            $totalConvencidosQuery->whereRaw(
+                'TRIM(a.perfil) = ?',
+                [$referente]
+            );
+        }
+
+        if ($capturistaId) {
+            $totalConvencidosQuery->where(
+                'a.capturista_id',
+                $capturistaId
+            );
+        }
+
+        $totalConvencidos = (int) $totalConvencidosQuery
+            ->distinct()
+            ->count('a.id');
 
         $totalMetaLonas = (int) $avance->sum(
             'meta_lonas'
