@@ -28,7 +28,7 @@
               "RelativeDocumentMoniker": "app\\Http\\Controllers\\DashboardController.php",
               "ToolTip": "C:\\wamp64\\www\\sistemaAfiliados\\app\\Http\\Controllers\\DashboardController.php",
               "RelativeToolTip": "app\\Http\\Controllers\\DashboardController.php",
-              "ViewState": "AgIAAGcAAAAAAAAAAAAkwJwAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAG4AAAAAAAAAAAAmwJQAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002338|",
               "WhenOpened": "2026-08-27T20:07:13.232Z",
               "EditorCaption": ""
@@ -43,8 +43,7 @@
               "RelativeToolTip": "resources\\views\\dashboard.blade.php",
               "ViewState": "AgIAAJMAAAAAAAAAAAAkwMcAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002338|",
-              "WhenOpened": "2026-08-27T20:06:29.246Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-08-27T20:06:29.246Z"
             }
           ]
         }

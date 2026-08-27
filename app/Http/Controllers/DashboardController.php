@@ -151,6 +151,6 @@ class DashboardController extends Controller
             return;
         }
 
-        $query->where('user_id', $user->id);
+        $query->where('capturista_id', $user->id);
     }
 }
