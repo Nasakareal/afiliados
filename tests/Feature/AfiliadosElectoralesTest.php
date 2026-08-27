@@ -3,12 +3,14 @@
 namespace Tests\Feature;
 
 use App\Http\Controllers\AfiliadoController;
+use App\Models\User;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
+use Mockery;
 use Tests\TestCase;
 
 class AfiliadosElectoralesTest extends TestCase
@@ -75,7 +77,22 @@ class AfiliadosElectoralesTest extends TestCase
         });
 
         DB::table('users')->insert(['id' => 1, 'name' => 'Prueba', 'created_at' => now(), 'updated_at' => now()]);
+        DB::table('secciones')->insert([
+            'seccion' => '1234',
+            'municipio' => 'Morelia',
+            'cve_mun' => '053',
+            'distrito_local' => 16,
+            'distrito_federal' => 10,
+        ]);
+
+        $user = Mockery::mock(User::class)->makePartial();
+        $user->setRawAttributes(['id' => 1, 'distrito_local' => null]);
+        $user->shouldReceive('hasRole')->andReturnFalse();
+        $user->shouldReceive('hasAnyRole')->andReturnFalse();
+
         Auth::shouldReceive('id')->andReturn(1);
+        Auth::shouldReceive('user')->andReturn($user);
+        Auth::shouldReceive('userResolver')->andReturn(fn () => $user);
     }
 
     public function test_los_campos_electorales_son_opcionales(): void
@@ -125,6 +142,26 @@ class AfiliadosElectoralesTest extends TestCase
 
         $this->assertDatabaseHas('afiliados', ['nombre' => 'MOVIMIENTO', 'tipo_vinculo' => 'mov', 'numero_mov' => '18']);
         $this->assertDatabaseHas('afiliados', ['nombre' => 'COMITE', 'tipo_vinculo' => 'comite', 'numero_mov' => null]);
+    }
+
+    public function test_la_seccion_completa_automaticamente_la_ubicacion_electoral(): void
+    {
+        $data = $this->baseData([
+            'municipio' => null,
+            'cve_mun' => null,
+            'distrito_local' => null,
+            'distrito_federal' => null,
+        ]);
+
+        $this->controller()->store($this->request('POST', $data));
+
+        $this->assertDatabaseHas('afiliados', [
+            'seccion' => '1234',
+            'municipio' => 'Morelia',
+            'cve_mun' => '053',
+            'distrito_local' => 16,
+            'distrito_federal' => 10,
+        ]);
     }
 
     public function test_la_paginacion_admite_hasta_500_y_usa_25_por_defecto(): void

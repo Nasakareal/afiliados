@@ -561,7 +561,9 @@ document.addEventListener('DOMContentLoaded', function () {
   const distritoFederal = document.getElementById('txtDistritoFederal');
   const endpoint = @json(route('secciones.lookup'));
 
-  const limpiarDistritos = function () {
+  const limpiarUbicacion = function () {
+    municipio.value = '';
+    cveMunicipal.value = '';
     distritoLocal.value = '';
     distritoFederal.value = '';
   };
@@ -576,16 +578,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
   const consultarSeccion = async function () {
     const numeroSeccion = seccion.value.trim();
-    const cve = cveMunicipal.value.trim();
 
-    if (!numeroSeccion || !cve) {
-      limpiarDistritos();
+    if (!numeroSeccion) {
+      limpiarUbicacion();
       return;
     }
 
     const parametros = new URLSearchParams({
-      seccion: numeroSeccion,
-      cve_mun: cve
+      seccion: numeroSeccion
     });
 
     try {
@@ -602,13 +602,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
       const datos = await respuesta.json();
 
+      municipio.value = datos.municipio ?? '';
+      cveMunicipal.value = datos.cve_mun
+        ? String(datos.cve_mun).padStart(3, '0')
+        : '';
       distritoLocal.value = datos.distrito_local ?? '';
       distritoFederal.value = datos.distrito_federal ?? '';
 
       seccion.classList.remove('is-invalid');
       seccion.classList.add('is-valid');
     } catch {
-      limpiarDistritos();
+      limpiarUbicacion();
       seccion.classList.remove('is-valid');
       seccion.classList.add('is-invalid');
     }
@@ -619,7 +623,8 @@ document.addEventListener('DOMContentLoaded', function () {
   municipio.addEventListener('change', function () {
     sincronizarCve();
     seccion.value = '';
-    limpiarDistritos();
+    distritoLocal.value = '';
+    distritoFederal.value = '';
     seccion.classList.remove('is-valid', 'is-invalid');
   });
 

@@ -271,20 +271,12 @@ class AfiliadoController extends Controller
     {
         $municipios = $this->cargarMunicipiosDesdeGeo();
 
-        $secciones = collect();
+        $query = DB::table('secciones');
+        LocalDistrictAccess::scope($query);
 
-        if ($municipios->isNotEmpty()) {
-            $cve = $municipios->first()->cve_mun;
-
-            $query = DB::table('secciones')
-                ->where('cve_mun', $cve);
-
-            LocalDistrictAccess::scope($query);
-
-            $secciones = $query
-                ->orderBy('seccion')
-                ->pluck('seccion');
-        }
+        $secciones = $query
+            ->orderByRaw('CAST(seccion AS UNSIGNED), seccion')
+            ->pluck('seccion');
 
         $rules = $this->rulesStore();
         $required = $this->requiredMap($rules);
@@ -495,8 +487,8 @@ class AfiliadoController extends Controller
                 Rule::in(array_keys(Afiliado::TIPOS_VINCULO)),
             ],
             'numero_mov' => ['nullable', 'string', 'max:50'],
-            'municipio' => ['required', 'string', 'max:120'],
-            'cve_mun' => ['required', 'string', 'size:3'],
+            'municipio' => ['nullable', 'string', 'max:120'],
+            'cve_mun' => ['nullable', 'string', 'size:3'],
             'seccion' => ['required', 'string', 'max:6'],
             'distrito_federal' => ['nullable', 'integer'],
             'distrito_local' => ['nullable', 'integer'],
@@ -548,8 +540,8 @@ class AfiliadoController extends Controller
                 Rule::in(array_keys(Afiliado::TIPOS_VINCULO)),
             ],
             'numero_mov' => ['nullable', 'string', 'max:50'],
-            'municipio' => ['required', 'string', 'max:120'],
-            'cve_mun' => ['required', 'string', 'size:3'],
+            'municipio' => ['nullable', 'string', 'max:120'],
+            'cve_mun' => ['nullable', 'string', 'size:3'],
             'seccion' => ['required', 'string', 'max:6'],
             'distrito_federal' => ['nullable', 'integer'],
             'distrito_local' => ['nullable', 'integer'],
@@ -865,12 +857,12 @@ class AfiliadoController extends Controller
                 'max:30',
             ],
             'municipio' => [
-                'required',
+                'nullable',
                 'string',
                 'max:120',
             ],
             'cve_mun' => [
-                'required',
+                'nullable',
                 'string',
                 'size:3',
             ],
@@ -935,9 +927,12 @@ class AfiliadoController extends Controller
             abort(403, 'No tienes acceso a esa sección.');
         }
 
-        $seccion = DB::table('secciones')
-            ->where('seccion', $data['seccion'])
-            ->where('cve_mun', $data['cve_mun'])
+        $query = DB::table('secciones')
+            ->where('seccion', $data['seccion']);
+
+        LocalDistrictAccess::scope($query);
+
+        $seccion = $query
             ->select(
                 'municipio',
                 'cve_mun',
@@ -948,7 +943,7 @@ class AfiliadoController extends Controller
 
         if (!$seccion) {
             throw ValidationException::withMessages([
-                'seccion' => 'La sección no corresponde al municipio seleccionado.',
+                'seccion' => 'La sección capturada no existe en el catálogo.',
             ]);
         }
 
