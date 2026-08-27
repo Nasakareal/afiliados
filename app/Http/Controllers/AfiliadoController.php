@@ -512,7 +512,7 @@ class AfiliadoController extends Controller
         $full = $this->fullNameField();
 
         if ($this->isDistritoLocal()) {
-            return $this->districtLocalRules($full);
+            return $this->districtLocalRules($full, $afiliado);
         }
 
         return [
@@ -843,10 +843,22 @@ class AfiliadoController extends Controller
         return Auth::user()?->hasRole('Distrito Local') ?? false;
     }
 
-    private function districtLocalRules(string $full): array
-    {
+    private function districtLocalRules(string $full, ?Afiliado $afiliado = null): array {
+        $claveElectorUnique = Rule::unique(
+            'afiliados',
+            'clave_elector'
+        );
+
+        if ($afiliado !== null) {
+            $claveElectorUnique->ignore($afiliado->id, 'id');
+        }
+
         return [
-            $full => ['required', 'string', 'max:120'],
+            $full => [
+                'required',
+                'string',
+                'max:120',
+            ],
             'sexo' => [
                 'required',
                 Rule::in(['M', 'F', 'Otro']),
@@ -855,6 +867,12 @@ class AfiliadoController extends Controller
                 'required',
                 'string',
                 'max:30',
+            ],
+            'clave_elector' => [
+                'nullable',
+                'string',
+                'max:30',
+                $claveElectorUnique,
             ],
             'municipio' => [
                 'nullable',

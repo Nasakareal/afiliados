@@ -49,7 +49,7 @@
         @csrf
 
         <div class="row g-3">
-          <div class="{{ $esDistritoLocal ? 'col-md-6' : 'col-md-6' }}">
+          <div class="col-md-6">
             <label class="form-label {{ $req($fullNameField) ? 'required' : '' }}">
               Nombre completo
             </label>
@@ -157,9 +157,29 @@
                 <div class="invalid-feedback">{{ $message }}</div>
               @enderror
             </div>
-
-            @include('afiliados._campos_electorales')
           @endunless
+
+          @if($esDistritoLocal)
+            <div class="col-md-4">
+              <label class="form-label">
+                Clave de elector
+              </label>
+
+              <input
+                type="text"
+                name="clave_elector"
+                value="{{ old('clave_elector') }}"
+                maxlength="30"
+                class="form-control text-uppercase @error('clave_elector') is-invalid @enderror"
+              >
+
+              @error('clave_elector')
+                <div class="invalid-feedback">{{ $message }}</div>
+              @enderror
+            </div>
+          @else
+            @include('afiliados._campos_electorales')
+          @endif
 
           <div class="col-12 mt-4">
             <h5 class="mb-0">Ubicación electoral</h5>
