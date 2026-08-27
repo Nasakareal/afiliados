@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Afiliado;
 use App\Models\Actividad;
 use App\Models\Comunicado;
 use App\Support\LocalDistrictAccess;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
@@ -19,70 +18,128 @@ class DashboardController extends Controller
             return redirect()->route('lonas.index');
         }
 
-        // ---- KPIs principales ----
-        $total      = Afiliado::count();
-        $validado   = Afiliado::where('estatus','validado')->count();
-        $pendiente  = Afiliado::where('estatus','pendiente')->count();
-        $descartado = Afiliado::where('estatus','descartado')->count();
-        $hoy        = Afiliado::whereDate('created_at', Carbon::today())->count();
-        $stats = compact('total','validado','pendiente','descartado','hoy');
+        $afiliados = DB::table('afiliados');
+        LocalDistrictAccess::scope($afiliados);
 
-        // ---- Serie últimos 7 días (incluye ceros) ----
+        $total = (clone $afiliados)->count();
+
+        $validado = (clone $afiliados)
+            ->where('estatus', 'validado')
+            ->count();
+
+        $pendiente = (clone $afiliados)
+            ->where('estatus', 'pendiente')
+            ->count();
+
+        $descartado = (clone $afiliados)
+            ->where('estatus', 'descartado')
+            ->count();
+
+        $hoy = (clone $afiliados)
+            ->whereDate('created_at', Carbon::today())
+            ->count();
+
+        $stats = compact(
+            'total',
+            'validado',
+            'pendiente',
+            'descartado',
+            'hoy'
+        );
+
         $desde = Carbon::today()->subDays(6);
+
         $raw = DB::table('afiliados')
-            ->select(DB::raw('DATE(created_at) as d'), DB::raw('COUNT(*) as c'))
+            ->select(
+                DB::raw('DATE(created_at) as d'),
+                DB::raw('COUNT(*) as c')
+            )
             ->where('created_at', '>=', $desde->copy()->startOfDay());
+
         LocalDistrictAccess::scope($raw);
+
         $raw = $raw
-            ->groupBy('d')->orderBy('d')->get();
+            ->groupBy('d')
+            ->orderBy('d')
+            ->get();
 
         $map = [];
-        foreach ($raw as $r) $map[$r->d] = (int)$r->c;
+
+        foreach ($raw as $registro) {
+            $map[$registro->d] = (int) $registro->c;
+        }
 
         $labels7 = [];
         $series7 = [];
+
         for ($i = 6; $i >= 0; $i--) {
-            $day = Carbon::today()->subDays($i);
-            $key = $day->toDateString();
-            $labels7[] = $day->format('d/m');
-            $series7[] = $map[$key] ?? 0;
+            $dia = Carbon::today()->subDays($i);
+            $fecha = $dia->toDateString();
+
+            $labels7[] = $dia->format('d/m');
+            $series7[] = $map[$fecha] ?? 0;
         }
 
-        // ---- Top municipios y secciones ----
         $porMunicipio = DB::table('afiliados')
-            ->select('municipio', DB::raw('COUNT(*) as total'));
+            ->select(
+                'municipio',
+                DB::raw('COUNT(*) as total')
+            );
+
         LocalDistrictAccess::scope($porMunicipio);
+
         $porMunicipio = $porMunicipio
-            ->groupBy('municipio')->orderByDesc('total')->limit(10)->get();
+            ->groupBy('municipio')
+            ->orderByDesc('total')
+            ->limit(10)
+            ->get();
 
         $porSeccion = DB::table('afiliados')
-            ->select('seccion', DB::raw('COUNT(*) as total'))
+            ->select(
+                'seccion',
+                DB::raw('COUNT(*) as total')
+            )
             ->whereNotNull('seccion');
+
         LocalDistrictAccess::scope($porSeccion);
+
         $porSeccion = $porSeccion
-            ->groupBy('seccion')->orderByDesc('total')->limit(10)->get();
+            ->groupBy('seccion')
+            ->orderByDesc('total')
+            ->limit(10)
+            ->get();
 
-        // ---- Próximas actividades (7 días) ----
+        $ahora = Carbon::now();
+
         $actividades = Actividad::query()
-            ->where('inicio', '>=', Carbon::now())
-            ->where('inicio', '<=', Carbon::now()->addDays(7))
-            ->orderBy('inicio')->limit(8)->get();
+            ->where('inicio', '>=', $ahora)
+            ->where('inicio', '<=', $ahora->copy()->addDays(7))
+            ->orderBy('inicio')
+            ->limit(8)
+            ->get();
 
-        // ---- Comunicados recientes (marcando si YO ya los leí) ----
         $userId = Auth::id();
-        $comunicadosRecientes = Comunicado::orderByDesc('created_at')
+
+        $comunicadosRecientes = Comunicado::query()
+            ->orderByDesc('created_at')
             ->withCount([
-                'lectores as leido_por_mi' => function ($q) use ($userId) {
-                    $q->where('user_id', $userId)->whereNotNull('leido_at');
-                }
+                'lectores as leido_por_mi' => function ($query) use ($userId) {
+                    $query
+                        ->where('user_id', $userId)
+                        ->whereNotNull('leido_at');
+                },
             ])
             ->limit(8)
             ->get();
 
         return view('dashboard', compact(
-            'stats','labels7','series7',
-            'porMunicipio','porSeccion',
-            'actividades','comunicadosRecientes'
+            'stats',
+            'labels7',
+            'series7',
+            'porMunicipio',
+            'porSeccion',
+            'actividades',
+            'comunicadosRecientes'
         ));
     }
 }
