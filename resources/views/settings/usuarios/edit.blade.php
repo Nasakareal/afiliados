@@ -46,17 +46,18 @@
                 @error('role')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
             <div class="col-md-12">
-              <label class="form-label">Distrito local asignado</label>
-              <select name="distrito_local" class="form-select @error('distrito_local') is-invalid @enderror">
-                <option value="">Sin restricción (puede ver todos)</option>
+              @php($distritosSeleccionados = (array) old('distritos_locales', $user->localDistrictNumbers()))
+              <label class="form-label">Distritos locales asignados</label>
+              <select name="distritos_locales[]" multiple size="8" class="form-select @error('distritos_locales') is-invalid @enderror @error('distritos_locales.*') is-invalid @enderror">
                 @foreach($distritosLocales as $distrito)
-                  <option value="{{ $distrito }}" {{ (string) old('distrito_local', $user->distrito_local) === (string) $distrito ? 'selected' : '' }}>
+                  <option value="{{ $distrito }}" {{ in_array((string) $distrito, array_map('strval', $distritosSeleccionados), true) ? 'selected' : '' }}>
                     Distrito local {{ str_pad($distrito, 2, '0', STR_PAD_LEFT) }}
                   </option>
                 @endforeach
               </select>
-              <div class="form-text">Si asignas uno, el usuario solo podrá consultar información de ese distrito en todos los módulos.</div>
-              @error('distrito_local')<div class="invalid-feedback">{{ $message }}</div>@enderror
+              <div class="form-text">Usa Ctrl (Windows) o Cmd (Mac) para seleccionar varios. Sin selección, el usuario puede ver todos.</div>
+              @error('distritos_locales')<div class="invalid-feedback">{{ $message }}</div>@enderror
+              @error('distritos_locales.*')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
         </div>
 

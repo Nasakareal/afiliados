@@ -20,6 +20,7 @@ class MapaController extends Controller
     public function index(Request $request)
     {
         $distritoLocalAsignado = LocalDistrictAccess::assigned($request->user());
+        $distritosLocalesAsignados = LocalDistrictAccess::districts($request->user());
         $estatus = $request->query('estatus', 'validado');
         $allowed = ['validado','pendiente','descartado','todos'];
         if (!in_array($estatus, $allowed, true)) $estatus = 'validado';
@@ -102,6 +103,7 @@ class MapaController extends Controller
             'statsNombre'     => $statsNombre,
             'municipiosCVE'   => $municipiosCVE,
             'distritoLocalAsignado' => $distritoLocalAsignado,
+            'distritosLocalesAsignados' => $distritosLocalesAsignados,
         ]);
     }
 

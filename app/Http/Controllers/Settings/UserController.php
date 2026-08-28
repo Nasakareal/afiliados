@@ -14,7 +14,7 @@ class UserController extends Controller
 {
     public function index(Request $request)
     {
-        $distritoAsignado = LocalDistrictAccess::assigned($request->user());
+        $distritosAsignados = LocalDistrictAccess::districts($request->user());
         $esSuperAdmin = $request->user()->hasRole('SuperAdmin');
 
         $busqueda = trim((string) $request->input('buscar'));
@@ -27,10 +27,15 @@ class UserController extends Controller
             ->get();
 
         $query = User::query()
-            ->with('roles')
+            ->with(['roles', 'localDistrictAssignments'])
             ->when(
-                $distritoAsignado !== null,
-                fn($query) => $query->where('distrito_local', $distritoAsignado)
+                $distritosAsignados !== [],
+                fn($query) => $query->where(function ($accessQuery) use ($distritosAsignados) {
+                    $accessQuery->whereHas(
+                        'localDistrictAssignments',
+                        fn($districtQuery) => $districtQuery->whereIn('distrito_local', $distritosAsignados)
+                    )->orWhereIn('users.distrito_local', $distritosAsignados);
+                })
             )
             ->when(
                 !$esSuperAdmin,
@@ -57,8 +62,13 @@ class UserController extends Controller
                 );
             })
             ->when(
-                $distritoAsignado === null && $distritoSeleccionado !== null && $distritoSeleccionado !== '',
-                fn($query) => $query->where('distrito_local', $distritoSeleccionado)
+                $distritosAsignados === [] && $distritoSeleccionado !== null && $distritoSeleccionado !== '',
+                fn($query) => $query->where(function ($filterQuery) use ($distritoSeleccionado) {
+                    $filterQuery->whereHas(
+                        'localDistrictAssignments',
+                        fn($districtQuery) => $districtQuery->where('distrito_local', $distritoSeleccionado)
+                    )->orWhere('users.distrito_local', $distritoSeleccionado);
+                })
             )
             ->orderBy('name');
 
@@ -96,13 +106,16 @@ class UserController extends Controller
             'email'    => 'required|email|unique:users,email',
             'password' => 'required|min:8|confirmed',
             'role'     => 'required|string',
-            'distrito_local' => [
+            'distrito_local' => ['nullable', 'integer', Rule::exists('secciones', 'distrito_local')],
+            'distritos_locales' => ['nullable', 'array'],
+            'distritos_locales.*' => [
                 'nullable',
                 'integer',
+                'distinct',
                 Rule::exists('secciones', 'distrito_local'),
             ],
         ]);
-        $validated = LocalDistrictAccess::force($validated, $request->user());
+        $districts = $this->validatedDistricts($validated, $request);
 
         $role = $this->sanitizeRole($validated['role'] ?? null);
 
@@ -110,12 +123,13 @@ class UserController extends Controller
             'name'     => $validated['name'],
             'email'    => $validated['email'],
             'password' => bcrypt($validated['password']),
-            'distrito_local' => $validated['distrito_local'] ?? null,
+            'distrito_local' => $districts[0] ?? null,
         ]);
         $usuario->forceFill([
             'must_change_password' => false,
             'password_changed_at' => now(),
         ])->save();
+        $this->syncDistricts($usuario, $districts);
 
         if (!empty($role)) {
             $usuario->syncRoles([$role]);
@@ -157,13 +171,16 @@ class UserController extends Controller
             'email'    => 'required|email|unique:users,email,' . $user->id,
             'password' => 'nullable|min:8|confirmed',
             'role'     => 'required|string',
-            'distrito_local' => [
+            'distrito_local' => ['nullable', 'integer', Rule::exists('secciones', 'distrito_local')],
+            'distritos_locales' => ['nullable', 'array'],
+            'distritos_locales.*' => [
                 'nullable',
                 'integer',
+                'distinct',
                 Rule::exists('secciones', 'distrito_local'),
             ],
         ]);
-        $validated = LocalDistrictAccess::force($validated, $request->user());
+        $districts = $this->validatedDistricts($validated, $request);
 
         $newRole = $this->sanitizeRole($validated['role'] ?? null);
         $oldIsSuper = $user->hasRole('SuperAdmin');
@@ -180,13 +197,14 @@ class UserController extends Controller
 
         $user->name  = $validated['name'];
         $user->email = $validated['email'];
-        $user->distrito_local = $validated['distrito_local'] ?? null;
+        $user->distrito_local = $districts[0] ?? null;
         if (!empty($validated['password'])) {
             $user->password = bcrypt($validated['password']);
             $user->must_change_password = false;
             $user->password_changed_at = now();
         }
         $user->save();
+        $this->syncDistricts($user, $districts);
         DB::table('actividades')
             ->where('creado_por', $user->id)
             ->update(['distrito_local' => $user->distrito_local]);
@@ -226,9 +244,10 @@ class UserController extends Controller
 
     private function guardDistrict(User $user): void
     {
-        $assigned = LocalDistrictAccess::assigned(auth()->user());
+        $assigned = LocalDistrictAccess::districts(auth()->user());
+        $target = LocalDistrictAccess::districts($user);
 
-        if ($assigned !== null && (int)$user->distrito_local !== $assigned) {
+        if ($assigned && (!$target || array_diff($target, $assigned))) {
             abort(403, 'No tienes acceso a usuarios de otro distrito local.');
         }
     }
@@ -253,5 +272,42 @@ class UserController extends Controller
         LocalDistrictAccess::scope($query);
 
         return $query->pluck('distrito_local');
+    }
+
+    private function validatedDistricts(array $validated, Request $request): array
+    {
+        $submitted = $validated['distritos_locales'] ?? (
+            isset($validated['distrito_local']) ? [$validated['distrito_local']] : []
+        );
+        $districts = collect($submitted)
+            ->filter(fn($district) => $district !== null && $district !== '')
+            ->map(fn($district) => (int) $district)
+            ->unique()
+            ->sort()
+            ->values()
+            ->all();
+
+        $allowed = LocalDistrictAccess::districts($request->user());
+        if ($allowed) {
+            if (!$districts) {
+                return $allowed;
+            }
+            if (array_diff($districts, $allowed)) {
+                abort(403, 'No puedes asignar distritos locales fuera de tu alcance.');
+            }
+        }
+
+        return $districts;
+    }
+
+    private function syncDistricts(User $user, array $districts): void
+    {
+        $user->localDistrictAssignments()->delete();
+        if ($districts) {
+            $user->localDistrictAssignments()->createMany(
+                array_map(fn($district) => ['distrito_local' => $district], $districts)
+            );
+        }
+        $user->unsetRelation('localDistrictAssignments');
     }
 }

@@ -141,10 +141,12 @@
                 </td>
 
                 <td>
-                  @if($u->distrito_local)
-                    <span class="badge bg-secondary">
-                      DL {{ str_pad($u->distrito_local, 2, '0', STR_PAD_LEFT) }}
-                    </span>
+                  @if($u->localDistrictNumbers())
+                    @foreach($u->localDistrictNumbers() as $distrito)
+                      <span class="badge bg-secondary">
+                        DL {{ str_pad($distrito, 2, '0', STR_PAD_LEFT) }}
+                      </span>
+                    @endforeach
                   @else
                     <span class="text-muted">Todos</span>
                   @endif

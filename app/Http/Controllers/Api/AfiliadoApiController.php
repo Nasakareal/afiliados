@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use App\Http\Resources\AfiliadoResource;
 use App\Support\LocalDistrictAccess;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class AfiliadoApiController extends Controller
 {
@@ -53,7 +55,7 @@ class AfiliadoApiController extends Controller
         if (!LocalDistrictAccess::sectionIsAllowed((string)($validated['seccion'] ?? ''), $request->user())) {
             abort(403, 'No tienes acceso a esa sección.');
         }
-        $validated = LocalDistrictAccess::force($validated, $request->user());
+        $validated = $this->applySectionData($validated, $request);
         $validated['capturista_id'] = Auth::id();
         $a = Afiliado::create($validated);
         return (new AfiliadoResource($a))->response()->setStatusCode(201);
@@ -70,7 +72,7 @@ class AfiliadoApiController extends Controller
         if (!LocalDistrictAccess::sectionIsAllowed((string)($validated['seccion'] ?? ''), $request->user())) {
             abort(403, 'No tienes acceso a esa sección.');
         }
-        $validated = LocalDistrictAccess::force($validated, $request->user());
+        $validated = $this->applySectionData($validated, $request);
         $afiliado->update($validated);
         return new AfiliadoResource($afiliado);
     }
@@ -105,7 +107,7 @@ class AfiliadoApiController extends Controller
             'clave_elector'     => ['nullable','string','max:30',$unique],
             'tipo_vinculo'      => ['nullable','string',Rule::in(array_keys(Afiliado::TIPOS_VINCULO))],
             'numero_mov'        => ['nullable','string','max:50'],
-            'municipio'         => ['required','string','max:120'],
+            'municipio'         => ['nullable','string','max:120'],
             'cve_mun'           => ['nullable','string','size:3'],
             'localidad'         => ['nullable','string','max:150'],
             'colonia'           => ['nullable','string','max:150'],
@@ -115,7 +117,7 @@ class AfiliadoApiController extends Controller
             'cp'                => ['nullable','string','max:10'],
             'lat'               => ['nullable','numeric'],
             'lng'               => ['nullable','numeric'],
-            'seccion'           => ['nullable','string','max:6'],
+            'seccion'           => ['required','string','max:6'],
             'distrito_federal'  => ['nullable','integer'],
             'distrito_local'    => ['nullable','integer'],
             'perfil'            => ['nullable','string'],
@@ -132,5 +134,26 @@ class AfiliadoApiController extends Controller
         }
 
         return $data;
+    }
+
+    private function applySectionData(array $data, Request $request): array
+    {
+        $section = DB::table('secciones')
+            ->where('seccion', $data['seccion']);
+        LocalDistrictAccess::scope($section, 'distrito_local', $request->user());
+        $section = $section->select('municipio', 'cve_mun', 'distrito_local', 'distrito_federal')->first();
+
+        if (!$section) {
+            throw ValidationException::withMessages([
+                'seccion' => 'La sección capturada no existe o no pertenece a tus distritos asignados.',
+            ]);
+        }
+
+        $data['municipio'] = $section->municipio;
+        $data['cve_mun'] = $section->cve_mun;
+        $data['distrito_local'] = $section->distrito_local;
+        $data['distrito_federal'] = $section->distrito_federal;
+
+        return LocalDistrictAccess::force($data, $request->user());
     }
 }

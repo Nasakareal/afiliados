@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\MetaAvance;
 use App\Models\User;
+use App\Support\LocalDistrictAccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -24,15 +25,17 @@ class MetaAvanceController extends Controller
 
         $cveMun = trim((string) $request->query('cve_mun'));
 
-        $distritoLocalAsignado = $puedeVerTodo
-            ? null
-            : $usuario->distrito_local;
-
-        $distritoLocalRestringido = $distritoLocalAsignado !== null;
-
+        $distritosLocalesAsignados = LocalDistrictAccess::districts($usuario);
+        $distritoLocalRestringido = $distritosLocalesAsignados !== [];
+        $distritoSolicitado = trim((string) $request->query('distrito_local'));
         $distritoLocal = $distritoLocalRestringido
-            ? (string) $distritoLocalAsignado
-            : trim((string) $request->query('distrito_local'));
+            ? (
+                in_array((int) $distritoSolicitado, $distritosLocalesAsignados, true)
+                    ? (string) (int) $distritoSolicitado
+                    : (string) $distritosLocalesAsignados[0]
+            )
+            : $distritoSolicitado;
+        $distritoLocalAsignado = $distritosLocalesAsignados[0] ?? null;
 
         $distritoFederal = trim(
             (string) $request->query('distrito_federal')
@@ -728,9 +731,9 @@ class MetaAvanceController extends Controller
             ->whereNotNull('distrito_local')
             ->when(
                 $distritoLocalRestringido,
-                fn($query) => $query->where(
+                fn($query) => $query->whereIn(
                     'distrito_local',
-                    $distritoLocalAsignado
+                    $distritosLocalesAsignados
                 )
             )
             ->distinct()
@@ -741,9 +744,9 @@ class MetaAvanceController extends Controller
             ->whereNotNull('distrito_federal')
             ->when(
                 $distritoLocalRestringido,
-                fn($query) => $query->where(
+                fn($query) => $query->whereIn(
                     'distrito_local',
-                    $distritoLocalAsignado
+                    $distritosLocalesAsignados
                 )
             )
             ->distinct()
@@ -815,6 +818,7 @@ class MetaAvanceController extends Controller
             'cveMun',
             'distritoLocal',
             'distritoLocalRestringido',
+            'distritosLocalesAsignados',
             'distritoFederal',
             'referente',
             'capturistaId',
@@ -865,7 +869,9 @@ class MetaAvanceController extends Controller
                     ->first();
 
                 if ($cantidad <= 0) {
-                    $meta?->delete();
+                    if ($meta) {
+                        $meta->delete();
+                    }
                     continue;
                 }
 
@@ -963,25 +969,6 @@ class MetaAvanceController extends Controller
     }
 
     private function authorizeDistrict(Request $request, int $distritoLocal): void {
-        if (
-            $request->user()->hasAnyRole([
-                'Admin',
-                'SuperAdmin',
-            ])
-        ) {
-            return;
-        }
-
-        $asignado = $request->user()->distrito_local;
-
-        if (
-            $asignado !== null &&
-            (int) $asignado !== $distritoLocal
-        ) {
-            abort(
-                403,
-                'No tienes acceso a ese distrito local.'
-            );
-        }
+        LocalDistrictAccess::authorize($distritoLocal, $request->user());
     }
 }

@@ -770,7 +770,7 @@ class AfiliadoController extends Controller
 
     private function cargarMunicipiosDesdeGeo()
     {
-        if (LocalDistrictAccess::assigned() !== null) {
+        if (LocalDistrictAccess::restricted()) {
             $query = DB::table('secciones')
                 ->select('cve_mun', 'municipio')
                 ->distinct()
@@ -840,7 +840,8 @@ class AfiliadoController extends Controller
 
     private function isDistritoLocal(): bool
     {
-        return Auth::user()?->hasRole('Distrito Local') ?? false;
+        $user = Auth::user();
+        return $user ? $user->hasRole('Distrito Local') : false;
     }
 
     private function districtLocalRules(string $full, ?Afiliado $afiliado = null): array {

@@ -17,8 +17,16 @@ class AdminApiController extends Controller
 {
     public function users(Request $request)
     {
-        $query = User::with('roles')->orderBy('name');
-        LocalDistrictAccess::scope($query);
+        $query = User::with(['roles', 'localDistrictAssignments'])->orderBy('name');
+        $assignedDistricts = LocalDistrictAccess::districts($request->user());
+        if ($assignedDistricts) {
+            $query->where(function ($accessQuery) use ($assignedDistricts) {
+                $accessQuery->whereHas(
+                    'localDistrictAssignments',
+                    fn($q) => $q->whereIn('distrito_local', $assignedDistricts)
+                )->orWhereIn('users.distrito_local', $assignedDistricts);
+            });
+        }
         if (!$request->user()->hasRole('SuperAdmin')) {
             $query->whereDoesntHave('roles', fn ($q) => $q->where('name', 'SuperAdmin'));
         }
@@ -40,15 +48,18 @@ class AdminApiController extends Controller
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'role' => ['required', 'string', Rule::exists('roles', 'name')->where('guard_name', 'web')],
             'distrito_local' => ['nullable', 'integer', Rule::exists('secciones', 'distrito_local')],
+            'distritos_locales' => ['nullable', 'array'],
+            'distritos_locales.*' => ['integer', 'distinct', Rule::exists('secciones', 'distrito_local')],
         ]);
-        $data = LocalDistrictAccess::force($data, $request->user());
+        $districts = $this->resolveUserDistricts($data, $request);
         $this->guardRoleAssignment($request, $data['role']);
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
-            'distrito_local' => $data['distrito_local'] ?? null,
+            'distrito_local' => $districts[0] ?? null,
         ]);
+        $this->syncUserDistricts($user, $districts);
         $user->forceFill(['must_change_password' => false, 'password_changed_at' => now()])->save();
         $user->syncRoles([$data['role']]);
 
@@ -64,21 +75,22 @@ class AdminApiController extends Controller
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
             'role' => ['required', 'string', Rule::exists('roles', 'name')->where('guard_name', 'web')],
             'distrito_local' => ['nullable', 'integer', Rule::exists('secciones', 'distrito_local')],
+            'distritos_locales' => ['nullable', 'array'],
+            'distritos_locales.*' => ['integer', 'distinct', Rule::exists('secciones', 'distrito_local')],
         ]);
-        $data = LocalDistrictAccess::force($data, $request->user());
+        $districts = $this->resolveUserDistricts($data, $request, $user);
         $this->guardRoleAssignment($request, $data['role']);
         if ($user->hasRole('SuperAdmin') && $data['role'] !== 'SuperAdmin' && User::role('SuperAdmin')->count() <= 1) {
             return response()->json(['message' => 'No puedes quitar el último SuperAdmin.'], 422);
         }
         $user->fill(['name' => $data['name'], 'email' => $data['email']]);
-        if (array_key_exists('distrito_local', $data)) {
-            $user->distrito_local = $data['distrito_local'];
-        }
+        $user->distrito_local = $districts[0] ?? null;
         if (!empty($data['password'])) {
             $user->password = Hash::make($data['password']);
             $user->password_changed_at = now();
         }
         $user->save();
+        $this->syncUserDistricts($user, $districts);
         \DB::table('actividades')
             ->where('creado_por', $user->id)
             ->update(['distrito_local' => $user->distrito_local]);
@@ -224,13 +236,15 @@ class AdminApiController extends Controller
             'role' => optional($user->roles->first())->name,
             'roles' => $user->roles->pluck('name')->values(),
             'distrito_local' => $user->distrito_local,
+            'distritos_locales' => $user->localDistrictNumbers(),
         ];
     }
 
     private function guardUserAccess(Request $request, User $user): void
     {
-        $assigned = LocalDistrictAccess::assigned($request->user());
-        if ($assigned !== null && (int)$user->distrito_local !== $assigned) abort(403);
+        $assigned = LocalDistrictAccess::districts($request->user());
+        $target = LocalDistrictAccess::districts($user);
+        if ($assigned && (!$target || array_diff($target, $assigned))) abort(403);
         if ($user->hasRole('SuperAdmin') && !$request->user()->hasRole('SuperAdmin')) abort(403);
     }
 
@@ -243,5 +257,41 @@ class AdminApiController extends Controller
     private function guardRoleAssignment(Request $request, string $role): void
     {
         if ($role === 'SuperAdmin' && !$request->user()->hasRole('SuperAdmin')) abort(403);
+    }
+
+    private function resolveUserDistricts(array $data, Request $request, ?User $current = null): array
+    {
+        if (
+            $current &&
+            !array_key_exists('distrito_local', $data) &&
+            !array_key_exists('distritos_locales', $data)
+        ) {
+            return $current->localDistrictNumbers();
+        }
+
+        $submitted = $data['distritos_locales'] ?? (
+            isset($data['distrito_local']) ? [$data['distrito_local']] : []
+        );
+        $districts = collect($submitted)->map(fn($district) => (int) $district)
+            ->unique()->sort()->values()->all();
+        $allowed = LocalDistrictAccess::districts($request->user());
+
+        if ($allowed) {
+            if (!$districts) return $allowed;
+            if (array_diff($districts, $allowed)) abort(403);
+        }
+
+        return $districts;
+    }
+
+    private function syncUserDistricts(User $user, array $districts): void
+    {
+        $user->localDistrictAssignments()->delete();
+        if ($districts) {
+            $user->localDistrictAssignments()->createMany(
+                array_map(fn($district) => ['distrito_local' => $district], $districts)
+            );
+        }
+        $user->unsetRelation('localDistrictAssignments');
     }
 }

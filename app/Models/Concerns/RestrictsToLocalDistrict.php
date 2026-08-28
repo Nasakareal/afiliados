@@ -10,12 +10,12 @@ trait RestrictsToLocalDistrict
     protected static function bootRestrictsToLocalDistrict(): void
     {
         static::addGlobalScope('local_district', function (Builder $builder) {
-            $district = LocalDistrictAccess::assigned();
+            $districts = LocalDistrictAccess::districts();
 
-            if ($district !== null) {
-                $builder->where(
+            if ($districts) {
+                $builder->whereIn(
                     $builder->getModel()->qualifyColumn('distrito_local'),
-                    $district
+                    $districts
                 );
             }
         });

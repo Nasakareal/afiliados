@@ -15,19 +15,19 @@ class Lona extends Model
     protected static function booted(): void
     {
         static::addGlobalScope('local_district', function (Builder $builder) {
-            $district = LocalDistrictAccess::assigned();
-            if ($district === null) {
+            $districts = LocalDistrictAccess::districts();
+            if (!$districts) {
                 return;
             }
 
-            $builder->whereExists(function ($query) use ($builder, $district) {
+            $builder->whereExists(function ($query) use ($builder, $districts) {
                 $query->selectRaw('1')
                     ->from('secciones as lona_district_sections')
                     ->whereColumn(
                         'lona_district_sections.seccion',
                         $builder->getModel()->qualifyColumn('seccion')
                     )
-                    ->where('lona_district_sections.distrito_local', $district);
+                    ->whereIn('lona_district_sections.distrito_local', $districts);
             });
         });
     }

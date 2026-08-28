@@ -58,12 +58,15 @@
   const statsNombre     = @json($statsNombre) || {};
   const municipalityNames = @json($municipiosCVE) || {};
   const assignedLocalDistrict = @json($distritoLocalAsignado);
+  const assignedLocalDistricts = @json($distritosLocalesAsignados);
 
   function localDistrictFeature(feature){
-    if (assignedLocalDistrict === null) return true;
+    if (assignedLocalDistricts.length === 0) return true;
     const props = feature && feature.properties || {};
     const value = props.DISTRITO_L ?? props.Distrito_L ?? props.DISTRITO_LOCAL ?? props.DL;
-    return value !== undefined && value !== null && String(value) === String(assignedLocalDistrict);
+    return value !== undefined && value !== null && assignedLocalDistricts.some(
+      district => String(value) === String(district)
+    );
   }
 
   function normalize(s){

@@ -38,4 +38,27 @@ class User extends Authenticatable
     {
         return $this->hasMany(Lona::class, 'capturado_por');
     }
+
+    public function localDistrictAssignments()
+    {
+        return $this->hasMany(UserLocalDistrict::class)->orderBy('distrito_local');
+    }
+
+    public function localDistrictNumbers(): array
+    {
+        $districts = $this->localDistrictAssignments
+            ->pluck('distrito_local')
+            ->map(fn ($district) => (int) $district)
+            ->unique()
+            ->sort()
+            ->values()
+            ->all();
+
+        // Compatibilidad durante despliegues donde todavía sólo existe la columna anterior.
+        if (!$districts && $this->distrito_local !== null) {
+            return [(int) $this->distrito_local];
+        }
+
+        return $districts;
+    }
 }

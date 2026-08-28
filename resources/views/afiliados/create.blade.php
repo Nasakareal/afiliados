@@ -186,16 +186,15 @@
             <hr class="mt-2">
           </div>
 
-          <div class="col-md-4">
+          <div class="col-md-4 order-md-2">
             <label class="form-label {{ $req('municipio') ? 'required' : '' }}">
               Municipio
             </label>
 
             <select
-              name="municipio"
               id="slMunicipio"
               class="form-select @error('municipio') is-invalid @enderror"
-              {{ $req('municipio') ? 'required' : '' }}
+              disabled
             >
               <option value="">-- Selecciona --</option>
 
@@ -209,13 +208,15 @@
                 </option>
               @endforeach
             </select>
+            <input type="hidden" name="municipio" id="txtMunicipio" value="{{ old('municipio') }}">
+            <div class="form-text">Se completa automáticamente al capturar una sección válida.</div>
 
             @error('municipio')
               <div class="invalid-feedback">{{ $message }}</div>
             @enderror
           </div>
 
-          <div class="col-md-2">
+          <div class="col-md-2 order-md-3">
             <label class="form-label {{ $req('cve_mun') ? 'required' : '' }}">
               CVE municipal
             </label>
@@ -236,7 +237,7 @@
             @enderror
           </div>
 
-          <div class="col-md-2">
+          <div class="col-md-2 order-md-1">
             <label class="form-label {{ $req('seccion') ? 'required' : '' }}">
               Sección
             </label>
@@ -265,7 +266,7 @@
             @enderror
           </div>
 
-          <div class="col-md-2">
+          <div class="col-md-2 order-md-4">
             <label class="form-label">Distrito local</label>
 
             <input
@@ -282,7 +283,7 @@
             @enderror
           </div>
 
-          <div class="col-md-2">
+          <div class="col-md-2 order-md-5">
             <label class="form-label">Distrito federal</label>
 
             <input
@@ -535,6 +536,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   const municipio = document.getElementById('slMunicipio');
+  const municipioValor = document.getElementById('txtMunicipio');
   const cveMunicipal = document.getElementById('txtCveMun');
   const seccion = document.getElementById('txtSeccion');
   const distritoLocal = document.getElementById('txtDistritoLocal');
@@ -543,17 +545,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
   const limpiarUbicacion = function () {
     municipio.value = '';
+    municipioValor.value = '';
     cveMunicipal.value = '';
     distritoLocal.value = '';
     distritoFederal.value = '';
-  };
-
-  const sincronizarCve = function () {
-    const opcion = municipio.options[municipio.selectedIndex];
-
-    cveMunicipal.value = opcion?.dataset?.cve
-      ? String(opcion.dataset.cve).padStart(3, '0')
-      : '';
   };
 
   const consultarSeccion = async function () {
@@ -583,6 +578,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const datos = await respuesta.json();
 
       municipio.value = datos.municipio ?? '';
+      municipioValor.value = datos.municipio ?? '';
       cveMunicipal.value = datos.cve_mun
         ? String(datos.cve_mun).padStart(3, '0')
         : '';
@@ -600,14 +596,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
   let temporizador;
 
-  municipio.addEventListener('change', function () {
-    sincronizarCve();
-    seccion.value = '';
-    distritoLocal.value = '';
-    distritoFederal.value = '';
-    seccion.classList.remove('is-valid', 'is-invalid');
-  });
-
   seccion.addEventListener('input', function () {
     clearTimeout(temporizador);
     temporizador = setTimeout(consultarSeccion, 250);
@@ -615,8 +603,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
   seccion.addEventListener('change', consultarSeccion);
   seccion.addEventListener('blur', consultarSeccion);
-
-  sincronizarCve();
 
   if (seccion.value.trim()) {
     consultarSeccion();

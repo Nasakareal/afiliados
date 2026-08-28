@@ -9,6 +9,7 @@ use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Support\LocalDistrictAccess;
 
 class DashboardController extends Controller
 {
@@ -147,6 +148,11 @@ class DashboardController extends Controller
 
     private function aplicarAcceso(Builder $query, $user): void
     {
+        if (LocalDistrictAccess::restricted($user)) {
+            LocalDistrictAccess::scope($query, 'distrito_local', $user);
+            return;
+        }
+
         if ($user->hasAnyRole(['Admin', 'SuperAdmin'])) {
             return;
         }

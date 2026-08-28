@@ -220,7 +220,7 @@ public function importExcel(Request $request)
         $munIndex = $this->municipioIndex();
 
         $total=0; $insertados=0; $actualizados=0; $omitidos=0; $errores=[];
-        $distritoAsignado = LocalDistrictAccess::assigned($request->user());
+        $distritosAsignados = LocalDistrictAccess::districts($request->user());
 
         for ($i = $startIndex; $i < count($rows); $i++) {
             $r = $rows[$i];
@@ -252,13 +252,17 @@ public function importExcel(Request $request)
             $df = isset($hdr['distrito_federal']) ? $this->toNullableInt($r[$hdr['distrito_federal']] ?? null) : null;
             $dl = isset($hdr['distrito_local'])   ? $this->toNullableInt($r[$hdr['distrito_local']]   ?? null) : null;
 
-            if ($distritoAsignado !== null && $dl !== null && $dl !== $distritoAsignado) {
+            if ($distritosAsignados && $dl !== null && !in_array($dl, $distritosAsignados, true)) {
                 $omitidos++;
                 $errores[] = "Fila ".($i+1).": pertenece al distrito local {$dl}.";
                 continue;
             }
-            if ($distritoAsignado !== null) {
-                $dl = $distritoAsignado;
+            if (count($distritosAsignados) === 1) {
+                $dl = $distritosAsignados[0];
+            } elseif ($distritosAsignados && $dl === null) {
+                $omitidos++;
+                $errores[] = "Fila ".($i+1).": indica el distrito local asignado al usuario.";
+                continue;
             }
 
             $seccion = preg_replace('/[^\p{N}\p{L}\-]+/u', '', (string)$seccion);
@@ -394,7 +398,7 @@ public function importExcel(Request $request)
 
     private function cargarMunicipiosDesdeGeo()
     {
-        if (LocalDistrictAccess::assigned() !== null) {
+        if (LocalDistrictAccess::restricted()) {
             $query = DB::table('secciones')
                 ->select('cve_mun', 'municipio')
                 ->distinct()

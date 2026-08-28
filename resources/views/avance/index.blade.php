@@ -152,7 +152,7 @@
             </option>
           @endforeach
         </select>
-        @if($distritoLocalRestringido)
+        @if($distritoLocalRestringido && count($distritosLocalesAsignados) === 1)
           <input type="hidden" name="distrito_local" value="{{ $distritoLocal }}">
           <span class="form-control form-control-sm bg-light text-nowrap" title="Distrito local asignado">
             DL {{ str_pad($distritoLocal, 2, '0', STR_PAD_LEFT) }}
@@ -160,7 +160,7 @@
         @else
           <label for="quickDistritoLocal" class="visually-hidden">Distrito local</label>
           <select name="distrito_local" id="quickDistritoLocal" class="form-select form-select-sm" title="Cambiar distrito local" onchange="this.form.submit()">
-            <option value="">Todos los locales</option>
+            @unless($distritoLocalRestringido)<option value="">Todos los locales</option>@endunless
             @foreach($distritosLocales as $distrito)
               <option value="{{ $distrito }}" {{ (string)$distritoLocal === (string)$distrito ? 'selected' : '' }}>
                 DL {{ str_pad($distrito, 2, '0', STR_PAD_LEFT) }}
