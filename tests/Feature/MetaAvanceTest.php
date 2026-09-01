@@ -98,6 +98,62 @@ class MetaAvanceTest extends TestCase
         ])->assertForbidden();
     }
 
+    public function test_referent_filter_only_lists_official_names_with_active_records(): void
+    {
+        $admin = User::factory()->create(['must_change_password' => false]);
+        $admin->assignRole('Admin');
+        $capturer = User::factory()->create(['must_change_password' => false]);
+
+        DB::table('afiliados')->insert([
+            [
+                'capturista_id' => $capturer->id,
+                'nombre' => 'Perfil válido',
+                'municipio' => 'Municipio de prueba',
+                'cve_mun' => '001',
+                'seccion' => '0001',
+                'distrito_local' => 1,
+                'distrito_federal' => 3,
+                'perfil' => 'Moises Navarro',
+                'estatus' => 'pendiente',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'capturista_id' => $capturer->id,
+                'nombre' => 'Perfil histórico inválido',
+                'municipio' => 'Municipio de prueba',
+                'cve_mun' => '001',
+                'seccion' => '0001',
+                'distrito_local' => 1,
+                'distrito_federal' => 3,
+                'perfil' => 'A',
+                'estatus' => 'pendiente',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
+
+        DB::table('lonas')->insert([
+            'seccion' => '0001',
+            'direccion' => 'Dirección de prueba',
+            'lat' => 19.7,
+            'lng' => -101.2,
+            'foto_path' => 'lonas/prueba.jpg',
+            'responsable' => '0806',
+            'capturado_por' => $capturer->id,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $response = $this->actingAs($admin)->get(route('avance.index', [
+            'referente' => '0806',
+        ]))->assertOk();
+
+        $this->assertSame('', $response->viewData('referente'));
+        $this->assertSame(['Moises Navarro'], $response->viewData('referentes')->all());
+        $this->assertSame(['Moises Navarro'], $response->viewData('topReferentes')->pluck('name')->all());
+    }
+
     public function test_convinced_goal_can_be_saved_without_inventing_a_banner_goal(): void
     {
         $admin = User::factory()->create(['must_change_password' => false]);
@@ -147,7 +203,7 @@ class MetaAvanceTest extends TestCase
                 'seccion' => '0001',
                 'distrito_local' => 1,
                 'distrito_federal' => 3,
-                'perfil' => 'Referente líder',
+                'perfil' => 'Moises Navarro',
                 'estatus' => 'pendiente',
                 'fecha_convencimiento' => '2025-01-10 10:00:00',
                 'created_at' => '2025-01-10 10:00:00',
@@ -161,7 +217,7 @@ class MetaAvanceTest extends TestCase
                 'seccion' => '0001',
                 'distrito_local' => 1,
                 'distrito_federal' => 3,
-                'perfil' => 'Referente líder',
+                'perfil' => 'Moises Navarro',
                 'estatus' => 'pendiente',
                 'fecha_convencimiento' => '2026-08-11 10:00:00',
                 'created_at' => '2026-08-11 10:00:00',
@@ -175,7 +231,7 @@ class MetaAvanceTest extends TestCase
                 'seccion' => '0002',
                 'distrito_local' => 2,
                 'distrito_federal' => 3,
-                'perfil' => 'Otro referente',
+                'perfil' => 'Andrea Serna',
                 'estatus' => 'pendiente',
                 'fecha_convencimiento' => '2026-08-12 10:00:00',
                 'created_at' => '2026-08-12 10:00:00',
@@ -190,7 +246,7 @@ class MetaAvanceTest extends TestCase
                 'lat' => 19.7,
                 'lng' => -101.2,
                 'foto_path' => 'lonas/uno.jpg',
-                'responsable' => 'Referente líder',
+                'responsable' => 'Moises Navarro',
                 'capturado_por' => $leader->id,
                 'created_at' => '2025-01-10 10:00:00',
                 'updated_at' => '2025-01-10 10:00:00',
@@ -201,7 +257,7 @@ class MetaAvanceTest extends TestCase
                 'lat' => 19.8,
                 'lng' => -101.3,
                 'foto_path' => 'lonas/dos.jpg',
-                'responsable' => 'Otro referente',
+                'responsable' => 'Andrea Serna',
                 'capturado_por' => $other->id,
                 'created_at' => '2026-08-12 10:00:00',
                 'updated_at' => '2026-08-12 10:00:00',
@@ -240,7 +296,7 @@ class MetaAvanceTest extends TestCase
         $this->assertSame(2, $response->viewData('convencidosPorSeccion')->get('1'));
         $this->assertSame('Capturista líder', $response->viewData('topCapturistas')->first()->name);
         $this->assertSame(2, (int)$response->viewData('topCapturistas')->first()->total);
-        $this->assertSame('Referente líder', $response->viewData('topReferentes')->first()->name);
+        $this->assertSame('Moises Navarro', $response->viewData('topReferentes')->first()->name);
     }
 
     public function test_user_assigned_to_a_local_district_cannot_view_or_modify_another_one(): void
@@ -277,7 +333,7 @@ class MetaAvanceTest extends TestCase
                 'seccion' => '0001',
                 'distrito_local' => 1,
                 'distrito_federal' => 3,
-                'perfil' => 'Referente permitido',
+                'perfil' => 'Moises Navarro',
                 'estatus' => 'pendiente',
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -290,7 +346,7 @@ class MetaAvanceTest extends TestCase
                 'seccion' => '0002',
                 'distrito_local' => 2,
                 'distrito_federal' => 4,
-                'perfil' => 'Referente ajeno',
+                'perfil' => 'Andrea Serna',
                 'estatus' => 'pendiente',
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -310,7 +366,7 @@ class MetaAvanceTest extends TestCase
         $this->assertSame([1], $response->viewData('distritosLocales')->map(fn($value) => (int)$value)->all());
         $this->assertSame([1], $response->viewData('avance')->pluck('distrito_local')->unique()->values()->all());
         $this->assertSame(1, $response->viewData('totales')['total_convencidos']);
-        $this->assertSame(['Referente permitido'], $response->viewData('referentes')->values()->all());
+        $this->assertSame(['Moises Navarro'], $response->viewData('referentes')->values()->all());
         $this->assertSame(['Capturista distrito permitido'], $response->viewData('capturistas')->pluck('name')->all());
 
         $this->actingAs($restricted)->post(route('avance.metas.store'), [

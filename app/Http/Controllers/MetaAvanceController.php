@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Support\LocalDistrictAccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class MetaAvanceController extends Controller
@@ -44,6 +45,11 @@ class MetaAvanceController extends Controller
         $referente = trim(
             (string) $request->query('referente')
         );
+        $referentesOficiales = AfiliadoController::REFERENTES;
+
+        if ($referente !== '' && !in_array($referente, $referentesOficiales, true)) {
+            $referente = '';
+        }
 
         $capturistaId = $puedeVerTodo
             ? (
@@ -512,6 +518,7 @@ class MetaAvanceController extends Controller
             ->whereNull('deleted_at')
             ->whereNotNull('perfil')
             ->whereRaw("TRIM(perfil) <> ''")
+            ->whereIn(DB::raw('TRIM(perfil)'), $referentesOficiales)
             ->when(
                 $cveMun !== '',
                 fn($query) => $query->where(
@@ -646,6 +653,7 @@ class MetaAvanceController extends Controller
             ->whereNull('deleted_at')
             ->whereNotNull('perfil')
             ->whereRaw("TRIM(perfil) <> ''")
+            ->whereIn(DB::raw('TRIM(perfil)'), $referentesOficiales)
             ->when(
                 $cveMun !== '',
                 fn($query) => $query->where(
@@ -688,6 +696,10 @@ class MetaAvanceController extends Controller
             ->whereNull('lonas.deleted_at')
             ->whereNotNull('lonas.responsable')
             ->whereRaw("TRIM(lonas.responsable) <> ''")
+            ->whereIn(
+                DB::raw('TRIM(lonas.responsable)'),
+                $referentesOficiales
+            )
             ->when(
                 $cveMun !== '',
                 fn($query) => $query->where(
@@ -717,7 +729,7 @@ class MetaAvanceController extends Controller
                 )
             );
 
-        $referentes = DB::query()
+        $referentesRegistrados = DB::query()
             ->fromSub(
                 $referentesAfiliados->union($referentesLonas),
                 'referentes'
@@ -726,6 +738,19 @@ class MetaAvanceController extends Controller
             ->distinct()
             ->orderBy('referente')
             ->pluck('referente');
+
+        $catalogoReferentes = collect($referentesOficiales)->keyBy(
+            fn($nombre) => Str::lower(Str::ascii(trim($nombre)))
+        );
+
+        $referentes = $referentesRegistrados
+            ->map(fn($nombre) => $catalogoReferentes->get(
+                Str::lower(Str::ascii(trim((string) $nombre)))
+            ))
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values();
 
         $distritosLocales = DB::table('secciones')
             ->whereNotNull('distrito_local')
