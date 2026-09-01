@@ -157,52 +157,74 @@ class MetaAvanceController extends Controller
             ) => (int) $fila->total,
         ]);
 
-        $convencidosPorSeccion = DB::table('afiliados')
+        $convencidosDetalle = DB::table('afiliados as a')
+            ->join('secciones as s_detalle', function ($join) {
+                $join->on(
+                    DB::raw('CAST(s_detalle.seccion AS UNSIGNED)'),
+                    '=',
+                    DB::raw('CAST(a.seccion AS UNSIGNED)')
+                );
+            })
             ->select(
-                'seccion',
-                DB::raw('COUNT(*) AS total')
+                's_detalle.seccion',
+                's_detalle.cve_mun',
+                's_detalle.distrito_local',
+                DB::raw('COUNT(DISTINCT a.id) AS total')
             )
-            ->whereNull('deleted_at')
-            ->whereNotNull('seccion')
+            ->whereNull('a.deleted_at')
+            ->whereNotNull('a.seccion')
             ->when(
                 $cveMun !== '',
                 fn($query) => $query->where(
-                    'cve_mun',
+                    's_detalle.cve_mun',
                     $cveMun
                 )
             )
             ->when(
                 $distritoLocal !== '',
                 fn($query) => $query->where(
-                    'distrito_local',
+                    's_detalle.distrito_local',
                     $distritoLocal
                 )
             )
             ->when(
                 $distritoFederal !== '',
                 fn($query) => $query->where(
-                    'distrito_federal',
+                    's_detalle.distrito_federal',
                     $distritoFederal
                 )
             )
             ->when(
                 $referente !== '',
                 fn($query) => $query->whereRaw(
-                    'TRIM(perfil) = ?',
+                    'TRIM(a.perfil) = ?',
                     [$referente]
                 )
             )
             ->when(
                 $capturistaId,
                 fn($query) => $query->where(
-                    'capturista_id',
+                    'a.capturista_id',
                     $capturistaId
                 )
             )
-            ->groupBy('seccion')
-            ->pluck('total', 'seccion')
-            ->mapWithKeys(fn($total, $seccion) => [
-                (string) (int) $seccion => (int) $total,
+            ->groupBy(
+                's_detalle.seccion',
+                's_detalle.cve_mun',
+                's_detalle.distrito_local'
+            )
+            ->get();
+
+        $convencidosPorSeccion = $convencidosDetalle
+            ->groupBy(fn($fila) => (string) (int) $fila->seccion)
+            ->map(fn($filas) => (int) $filas->sum('total'));
+
+        $convencidosPorAlcanceSeccion = $convencidosDetalle
+            ->mapWithKeys(fn($fila) => [
+                self::scopeKey(
+                    (string) $fila->cve_mun,
+                    $fila->distrito_local
+                ).'|'.(string) (int) $fila->seccion => (int) $fila->total,
             ]);
 
         $lonas = DB::table('lonas')
@@ -837,6 +859,56 @@ class MetaAvanceController extends Controller
                 ];
             });
 
+        $seccionesPorMunicipio = DB::table('secciones')
+            ->select(
+                'seccion',
+                'cve_mun',
+                'municipio',
+                'distrito_local',
+                'distrito_federal'
+            )
+            ->when(
+                $cveMun !== '',
+                fn($query) => $query->where('cve_mun', $cveMun)
+            )
+            ->when(
+                $distritoLocal !== '',
+                fn($query) => $query->where('distrito_local', $distritoLocal)
+            )
+            ->when(
+                $distritoFederal !== '',
+                fn($query) => $query->where('distrito_federal', $distritoFederal)
+            )
+            ->orderByRaw('CAST(seccion AS UNSIGNED), seccion')
+            ->get()
+            ->groupBy(fn($seccion) => self::scopeKey(
+                (string) $seccion->cve_mun,
+                $seccion->distrito_local
+            ))
+            ->map(function ($secciones, $scope) use ($convencidosPorAlcanceSeccion) {
+                return $secciones->map(function ($seccion) use (
+                    $scope,
+                    $convencidosPorAlcanceSeccion
+                ) {
+                    $numeroNormalizado = (string) (int) $seccion->seccion;
+
+                    return [
+                        'seccion' => str_pad(
+                            (string) $seccion->seccion,
+                            4,
+                            '0',
+                            STR_PAD_LEFT
+                        ),
+                        'distrito_federal' => $seccion->distrito_federal,
+                        'total' => (int) (
+                            $convencidosPorAlcanceSeccion[
+                                $scope.'|'.$numeroNormalizado
+                            ] ?? 0
+                        ),
+                    ];
+                })->values();
+            });
+
         return view('avance.index', compact(
             'avance',
             'totales',
@@ -856,6 +928,7 @@ class MetaAvanceController extends Controller
             'distritosFederales',
             'nombreDistritoFederal',
             'municipioPorSeccion',
+            'seccionesPorMunicipio',
             'puedeVerTodo'
         ));
     }

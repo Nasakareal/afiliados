@@ -382,6 +382,64 @@ class MetaAvanceTest extends TestCase
         ]);
     }
 
+    public function test_each_municipality_has_a_green_section_vote_breakdown(): void
+    {
+        DB::table('secciones')->insert([
+            'seccion' => '0002',
+            'cve_mun' => '001',
+            'municipio' => 'Municipio de prueba',
+            'distrito_local' => 1,
+            'distrito_federal' => 3,
+        ]);
+
+        $admin = User::factory()->create(['must_change_password' => false]);
+        $admin->assignRole('Admin');
+        $capturer = User::factory()->create(['must_change_password' => false]);
+
+        DB::table('afiliados')->insert([
+            [
+                'capturista_id' => $capturer->id,
+                'nombre' => 'Voto sección uno A',
+                'municipio' => 'Municipio de prueba',
+                'cve_mun' => '001',
+                'seccion' => '0001',
+                'distrito_local' => 1,
+                'distrito_federal' => 3,
+                'perfil' => 'Moises Navarro',
+                'estatus' => 'pendiente',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'capturista_id' => $capturer->id,
+                'nombre' => 'Voto sección uno B',
+                'municipio' => 'Municipio de prueba',
+                'cve_mun' => '001',
+                'seccion' => '1',
+                'distrito_local' => 1,
+                'distrito_federal' => 3,
+                'perfil' => 'Andrea Serna',
+                'estatus' => 'pendiente',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
+
+        $response = $this->actingAs($admin)
+            ->get(route('avance.index'))
+            ->assertOk()
+            ->assertSee('btn btn-success btn-secciones-municipio', false)
+            ->assertSee('data-scope="001|1"', false)
+            ->assertSee('id="modalSeccionesMunicipio"', false)
+            ->assertSeeText('Votos / convencidos');
+
+        $detalle = $response->viewData('seccionesPorMunicipio')->get('001|1');
+
+        $this->assertCount(2, $detalle);
+        $this->assertSame(2, $detalle->firstWhere('seccion', '0001')['total']);
+        $this->assertSame(0, $detalle->firstWhere('seccion', '0002')['total']);
+    }
+
     public function test_official_goals_match_the_delivered_workbook_totals(): void
     {
         $metas = require database_path('data/official_meta_avances.php');

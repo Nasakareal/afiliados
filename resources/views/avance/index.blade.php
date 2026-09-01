@@ -68,6 +68,8 @@
   }
   .district-table tbody tr:nth-child(even) td:not(.pct-cell) { background:#f7f8f4; }
   .district-table .municipio-cell { font-weight:700; text-align:left; }
+  .district-table .municipio-cell-wrap { align-items:center; display:flex; gap:.4rem; justify-content:space-between; }
+  .district-table .btn-secciones-municipio { font-size:.6rem; padding:.2rem .38rem; white-space:nowrap; }
   .district-table .edit-meta { color:#9b001f; padding:0 .2rem; }
   .district-table .define-meta { font-size:.64rem; padding:.18rem .38rem; white-space:nowrap; }
   .district-table .pct-cell { color:#fff; font-weight:800; min-width:76px; }
@@ -261,7 +263,21 @@
                   {{ $fila['distritos_federales'] ?: '—' }}
                 </td>
                 <td class="municipio-cell">
-                  <span>{{ $fila['municipio'] }}</span>
+                  <div class="municipio-cell-wrap">
+                    <span>{{ $fila['municipio'] }}</span>
+                    <button
+                      type="button"
+                      class="btn btn-success btn-secciones-municipio"
+                      title="Ver votos por sección de {{ $fila['municipio'] }}"
+                      data-bs-toggle="modal"
+                      data-bs-target="#modalSeccionesMunicipio"
+                      data-scope="{{ $fila['cve_mun'] }}|{{ $fila['distrito_local'] }}"
+                      data-municipio="{{ $fila['municipio'] }}"
+                      data-distrito-local="{{ $fila['distrito_local'] }}"
+                    >
+                      <i class="fa-solid fa-list-ol me-1"></i>Ver secciones
+                    </button>
+                  </div>
                 </td>
                 <td>{{ number_format($fila['secciones']) }}</td>
                 <td>
@@ -351,6 +367,38 @@
         @endforelse
       </ol>
     </section>
+  </div>
+</div>
+
+<div class="modal fade" id="modalSeccionesMunicipio" tabindex="-1" aria-labelledby="tituloSeccionesMunicipio" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <div>
+          <h5 class="modal-title" id="tituloSeccionesMunicipio">Votos por sección</h5>
+          <div class="small opacity-75" id="subtituloSeccionesMunicipio"></div>
+        </div>
+        <button class="btn-close btn-close-white" type="button" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body p-0">
+        <table class="table table-striped align-middle mb-0">
+          <thead class="table-light position-sticky top-0">
+            <tr>
+              <th class="ps-4">Sección</th>
+              <th>DFn</th>
+              <th class="text-end pe-4">Votos / convencidos</th>
+            </tr>
+          </thead>
+          <tbody id="tablaSeccionesMunicipio"></tbody>
+          <tfoot>
+            <tr class="table-success fw-bold">
+              <td class="ps-4" colspan="2">Total del municipio</td>
+              <td class="text-end pe-4" id="totalSeccionesMunicipio">0</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -531,6 +579,49 @@ document.addEventListener('DOMContentLoaded', function () {
   ['quickDistritoFederal', 'quickDistritoLocal'].forEach(function (id) {
     document.getElementById(id)?.addEventListener('change', function () {
       this.form.submit();
+    });
+  });
+
+  const seccionesPorMunicipio = @json($seccionesPorMunicipio);
+  const modalSecciones = document.getElementById('modalSeccionesMunicipio');
+
+  modalSecciones?.addEventListener('show.bs.modal', function (event) {
+    const boton = event.relatedTarget;
+    const scope = boton?.dataset.scope || '';
+    const municipio = boton?.dataset.municipio || '';
+    const distritoLocal = boton?.dataset.distritoLocal || '';
+    const secciones = seccionesPorMunicipio[scope] || [];
+    const cuerpo = document.getElementById('tablaSeccionesMunicipio');
+    const total = secciones.reduce((suma, fila) => suma + Number(fila.total || 0), 0);
+
+    document.getElementById('subtituloSeccionesMunicipio').textContent =
+      municipio+' · Distrito local '+String(distritoLocal).padStart(2, '0');
+    document.getElementById('totalSeccionesMunicipio').textContent =
+      total.toLocaleString('es-MX');
+    cuerpo.replaceChildren();
+
+    if (!secciones.length) {
+      const fila = cuerpo.insertRow();
+      const celda = fila.insertCell();
+      celda.colSpan = 3;
+      celda.className = 'py-4 text-center text-muted';
+      celda.textContent = 'No hay secciones para este municipio con los filtros actuales.';
+      return;
+    }
+
+    secciones.forEach(function (detalle) {
+      const fila = cuerpo.insertRow();
+      const seccion = fila.insertCell();
+      const distrito = fila.insertCell();
+      const votos = fila.insertCell();
+
+      seccion.className = 'ps-4 fw-bold';
+      seccion.textContent = detalle.seccion;
+      distrito.textContent = detalle.distrito_federal
+        ? String(detalle.distrito_federal).padStart(2, '0')
+        : '—';
+      votos.className = 'text-end pe-4 fw-bold';
+      votos.textContent = Number(detalle.total || 0).toLocaleString('es-MX');
     });
   });
 });

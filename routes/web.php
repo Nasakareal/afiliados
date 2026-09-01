@@ -55,7 +55,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/secciones/create',        [SeccionController::class,'create'])->name('secciones.create')->middleware('permission:secciones.crear');
     Route::post('/secciones',              [SeccionController::class,'store'])->name('secciones.store')->middleware('permission:secciones.crear');
     Route::post('/secciones/import',       [SeccionController::class,'importExcel'])->name('secciones.import')->middleware('permission:secciones.crear');
-    Route::get('/secciones/lookup',        [SeccionController::class,'lookup'])->name('secciones.lookup')->middleware('permission:secciones.ver');
+    Route::get('/secciones/lookup',        [SeccionController::class,'lookup'])->name('secciones.lookup')->middleware('permission:secciones.ver|afiliados.crear|afiliados.editar');
     Route::get   ('/secciones/{seccion}',        [SeccionController::class,'show'])->whereNumber('seccion')->name('secciones.show')->middleware('permission:secciones.ver');
     Route::get   ('/secciones/{seccion}/edit',   [SeccionController::class,'edit'])->whereNumber('seccion')->name('secciones.edit')->middleware('permission:secciones.editar');
     Route::put   ('/secciones/{seccion}',        [SeccionController::class,'update'])->whereNumber('seccion')->name('secciones.update')->middleware('permission:secciones.editar');
