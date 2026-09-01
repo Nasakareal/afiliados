@@ -18,6 +18,31 @@ class AfiliadoController extends Controller
 {
     public const PER_PAGE_OPTIONS = [25, 50, 100, 200, 300, 500];
 
+    public const REFERENTES = [
+        'Moises Navarro',
+        'Andrea Serna',
+        'Oscar Solis',
+        'Erendira Isauro',
+        'David Alfaro',
+        'Monica Valdez',
+        'Sergio Ramirez',
+        'Emmanuel Uribe',
+        'Marco Polo',
+        'Alejandra Anguiano',
+        'Antonio Itlahuac',
+        'Eranderini',
+        'Alejandro Mendez',
+        'Olivia Guzman',
+        'Alex Moran',
+        'Elias Ibarra',
+        'Salvador Vázquez',
+        'Erandeni',
+        'Sergio Baez',
+        'Yeyo Pimentel',
+        'Fany Arreola',
+        'Nallely Pedraza',
+    ];
+
     public function index(Request $request)
     {
         $usuario = $request->user();
@@ -282,13 +307,15 @@ class AfiliadoController extends Controller
         $required = $this->requiredMap($rules);
         $fullNameField = $this->fullNameField();
         $esDistritoLocal = $this->isDistritoLocal();
+        $referentes = self::REFERENTES;
 
         return view('afiliados.create', compact(
             'municipios',
             'secciones',
             'required',
             'fullNameField',
-            'esDistritoLocal'
+            'esDistritoLocal',
+            'referentes'
         ));
     }
 
@@ -379,6 +406,7 @@ class AfiliadoController extends Controller
         $required = $this->requiredMap($rules);
         $fullNameField = $this->fullNameField();
         $esDistritoLocal = $this->isDistritoLocal();
+        $referentes = self::REFERENTES;
 
         return view('afiliados.edit', compact(
             'afiliado',
@@ -386,7 +414,8 @@ class AfiliadoController extends Controller
             'secciones',
             'required',
             'fullNameField',
-            'esDistritoLocal'
+            'esDistritoLocal',
+            'referentes'
         ));
     }
 
@@ -492,7 +521,7 @@ class AfiliadoController extends Controller
             'seccion' => ['required', 'string', 'max:6'],
             'distrito_federal' => ['nullable', 'integer'],
             'distrito_local' => ['nullable', 'integer'],
-            'perfil' => ['required', 'string', 'max:120'],
+            'perfil' => ['required','string',Rule::in(self::REFERENTES),],
             'localidad' => ['nullable', 'string', 'max:150'],
             'colonia' => ['nullable', 'string', 'max:150'],
             'calle' => ['nullable', 'string', 'max:150'],
@@ -545,7 +574,11 @@ class AfiliadoController extends Controller
             'seccion' => ['required', 'string', 'max:6'],
             'distrito_federal' => ['nullable', 'integer'],
             'distrito_local' => ['nullable', 'integer'],
-            'perfil' => ['required', 'string', 'max:120'],
+            'perfil' => [
+                'required',
+                'string',
+                Rule::in(self::REFERENTES),
+            ],
             'localidad' => ['nullable', 'string', 'max:150'],
             'colonia' => ['nullable', 'string', 'max:150'],
             'calle' => ['nullable', 'string', 'max:150'],
@@ -606,6 +639,8 @@ class AfiliadoController extends Controller
         return [
             'clave_elector.unique' => 'La clave de elector ya pertenece a otro registro.',
             'tipo_vinculo.in' => 'Selecciona únicamente DV, Comité o MOV.',
+            'perfil.required' => 'Selecciona un referente.',
+            'perfil.in' => 'Selecciona un referente válido.',
         ];
     }
 
@@ -899,9 +934,9 @@ class AfiliadoController extends Controller
                 'integer',
             ],
             'perfil' => [
-                'nullable',
+                'required',
                 'string',
-                'max:120',
+                Rule::in(self::REFERENTES),
             ],
             'localidad' => [
                 'nullable',

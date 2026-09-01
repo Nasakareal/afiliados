@@ -421,22 +421,31 @@
           </div>
 
           <div class="col-md-12">
-            <label class="form-label {{ $req('perfil') ? 'required' : '' }}">
-              Referente
-            </label>
+              <label class="form-label {{ $req('perfil') ? 'required' : '' }}">
+                Referente
+              </label>
 
-            <textarea
-              name="perfil"
-              rows="2"
-              maxlength="120"
-              class="form-control @error('perfil') is-invalid @enderror"
-              {{ $req('perfil') ? 'required' : '' }}
-            >{{ old('perfil') }}</textarea>
+              <select
+                name="perfil"
+                class="form-select @error('perfil') is-invalid @enderror"
+                {{ $req('perfil') ? 'required' : '' }}
+              >
+                <option value="">Seleccione un referente...</option>
 
-            @error('perfil')
-              <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
-          </div>
+                @foreach($referentes as $referente)
+                  <option
+                    value="{{ $referente }}"
+                    {{ old('perfil') === $referente ? 'selected' : '' }}
+                  >
+                    {{ $referente }}
+                  </option>
+                @endforeach
+              </select>
+
+              @error('perfil')
+                <div class="invalid-feedback">{{ $message }}</div>
+              @enderror
+            </div>
 
           @unless($esDistritoLocal)
             <div class="col-md-12">
