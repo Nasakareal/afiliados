@@ -1,0 +1,4 @@
+{"type":"FeatureCollection","features":[
+{"type":"Feature","geometry":null,"properties":{"ENTIDAD":16,"DISTRITO_F":5,"DISTRITO_L":1,"MUNICIPIO":107,"SECCION":2380}},
+{"type":"Feature","geometry":null,"properties":{"ENTIDAD":16,"DISTRITO_F":8,"DISTRITO_L":10,"MUNICIPIO":54,"SECCION":955}}
+]}
