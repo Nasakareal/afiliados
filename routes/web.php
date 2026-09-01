@@ -119,6 +119,8 @@ Route::middleware('auth')->group(function () {
 
     // Avance y metas
     Route::get('/avance', [MetaAvanceController::class,'index'])->name('avance.index')->middleware('permission:avance.ver');
+    Route::get('/avance/convencidos', [MetaAvanceController::class,'convencidos'])->name('avance.convencidos')->middleware('permission:avance.ver');
+    Route::get('/avance/export.xlsx', [MetaAvanceController::class,'export'])->name('avance.export.xlsx')->middleware('permission:avance.ver');
     Route::post('/avance/metas', [MetaAvanceController::class,'store'])->name('avance.metas.store')->middleware('permission:avance.metas');
     Route::put('/avance/metas/{metaAvance}', [MetaAvanceController::class,'update'])->name('avance.metas.update')->middleware('permission:avance.metas');
     Route::delete('/avance/metas/{metaAvance}', [MetaAvanceController::class,'destroy'])->name('avance.metas.destroy')->middleware('permission:avance.metas');

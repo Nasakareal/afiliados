@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\MetaAvance;
 use App\Models\User;
+use App\Services\AvanceExcelExporter;
 use App\Support\LocalDistrictAccess;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -17,47 +19,7 @@ class MetaAvanceController extends Controller
 
     public function index(Request $request)
     {
-        $usuario = $request->user();
-
-        $puedeVerTodo = $usuario->hasAnyRole([
-            'Admin',
-            'SuperAdmin',
-        ]);
-
-        $cveMun = trim((string) $request->query('cve_mun'));
-
-        $distritosLocalesAsignados = LocalDistrictAccess::districts($usuario);
-        $distritoLocalRestringido = $distritosLocalesAsignados !== [];
-        $distritoSolicitado = trim((string) $request->query('distrito_local'));
-        $distritoLocal = $distritoLocalRestringido
-            ? (
-                in_array((int) $distritoSolicitado, $distritosLocalesAsignados, true)
-                    ? (string) (int) $distritoSolicitado
-                    : (string) $distritosLocalesAsignados[0]
-            )
-            : $distritoSolicitado;
-        $distritoLocalAsignado = $distritosLocalesAsignados[0] ?? null;
-
-        $distritoFederal = trim(
-            (string) $request->query('distrito_federal')
-        );
-
-        $referente = trim(
-            (string) $request->query('referente')
-        );
-        $referentesOficiales = AfiliadoController::REFERENTES;
-
-        if ($referente !== '' && !in_array($referente, $referentesOficiales, true)) {
-            $referente = '';
-        }
-
-        $capturistaId = $puedeVerTodo
-            ? (
-                $request->filled('capturista_id')
-                    ? (int) $request->query('capturista_id')
-                    : null
-            )
-            : (int) $usuario->id;
+        extract($this->resolveFilters($request));
 
         $municipios = DB::table('secciones')
             ->select(
@@ -933,6 +895,51 @@ class MetaAvanceController extends Controller
         ));
     }
 
+    public function convencidos(Request $request)
+    {
+        $filters = $this->resolveFilters($request);
+        $personas = $this->convencidosQuery($filters)
+            ->orderBy('s_detalle.distrito_local')
+            ->orderBy('s_detalle.distrito_federal')
+            ->orderByRaw('CAST(s_detalle.seccion AS UNSIGNED)')
+            ->orderBy('a.nombre')
+            ->paginate(50)
+            ->withQueryString();
+
+        return view('avance.convencidos', [
+            'personas' => $personas,
+            'filtros' => $this->filterSummary($filters),
+            'backQuery' => $request->query(),
+        ]);
+    }
+
+    public function export(
+        Request $request,
+        AvanceExcelExporter $exporter
+    ) {
+        $filters = $this->resolveFilters($request);
+        $view = $this->index($request);
+        $data = $view->getData();
+
+        $path = $exporter->create(
+            $data['avance'],
+            $data['totales'],
+            $this->convencidosQuery($filters),
+            $this->filterSummary($filters)
+        );
+
+        return response()
+            ->download(
+                $path,
+                'avance_filtrado_'.now()->format('Ymd_His').'.xlsx',
+                [
+                    'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+                ]
+            )
+            ->deleteFileAfterSend(true);
+    }
+
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -1064,6 +1071,128 @@ class MetaAvanceController extends Controller
     private static function scopeKey(string $cveMun, $distritoLocal): string
     {
         return $cveMun.'|'.(string)$distritoLocal;
+    }
+
+    private function resolveFilters(Request $request): array
+    {
+        $usuario = $request->user();
+        $puedeVerTodo = $usuario->hasAnyRole([
+            'Admin',
+            'SuperAdmin',
+        ]);
+        $cveMun = trim((string) $request->query('cve_mun'));
+        $distritosLocalesAsignados = LocalDistrictAccess::districts($usuario);
+        $distritoLocalRestringido = $distritosLocalesAsignados !== [];
+        $distritoSolicitado = trim((string) $request->query('distrito_local'));
+        $distritoLocal = $distritoLocalRestringido
+            ? (
+                in_array((int) $distritoSolicitado, $distritosLocalesAsignados, true)
+                    ? (string) (int) $distritoSolicitado
+                    : (string) $distritosLocalesAsignados[0]
+            )
+            : $distritoSolicitado;
+        $distritoFederal = trim((string) $request->query('distrito_federal'));
+        $referente = trim((string) $request->query('referente'));
+        $referentesOficiales = AfiliadoController::REFERENTES;
+
+        if ($referente !== '' && !in_array($referente, $referentesOficiales, true)) {
+            $referente = '';
+        }
+
+        $capturistaId = $puedeVerTodo
+            ? (
+                $request->filled('capturista_id')
+                    ? (int) $request->query('capturista_id')
+                    : null
+            )
+            : (int) $usuario->id;
+
+        return compact(
+            'usuario',
+            'puedeVerTodo',
+            'cveMun',
+            'distritosLocalesAsignados',
+            'distritoLocalRestringido',
+            'distritoLocal',
+            'distritoFederal',
+            'referente',
+            'referentesOficiales',
+            'capturistaId'
+        );
+    }
+
+    private function convencidosQuery(array $filters): Builder
+    {
+        return DB::table('afiliados as a')
+            ->join('secciones as s_detalle', function ($join) {
+                $join->on(
+                    DB::raw('CAST(s_detalle.seccion AS UNSIGNED)'),
+                    '=',
+                    DB::raw('CAST(a.seccion AS UNSIGNED)')
+                );
+            })
+            ->leftJoin('users as capturistas_detalle', 'capturistas_detalle.id', '=', 'a.capturista_id')
+            ->select([
+                'a.id',
+                'a.nombre',
+                'a.apellido_paterno',
+                'a.apellido_materno',
+                'a.telefono',
+                'a.perfil as referente',
+                'capturistas_detalle.name as capturista',
+                's_detalle.seccion',
+                's_detalle.municipio',
+                's_detalle.cve_mun',
+                's_detalle.distrito_local',
+                's_detalle.distrito_federal',
+                'a.fecha_convencimiento',
+                'a.created_at',
+            ])
+            ->whereNull('a.deleted_at')
+            ->when(
+                $filters['cveMun'] !== '',
+                fn($query) => $query->where('s_detalle.cve_mun', $filters['cveMun'])
+            )
+            ->when(
+                $filters['distritoLocal'] !== '',
+                fn($query) => $query->where('s_detalle.distrito_local', $filters['distritoLocal'])
+            )
+            ->when(
+                $filters['distritoFederal'] !== '',
+                fn($query) => $query->where('s_detalle.distrito_federal', $filters['distritoFederal'])
+            )
+            ->when(
+                $filters['referente'] !== '',
+                fn($query) => $query->whereRaw('TRIM(a.perfil) = ?', [$filters['referente']])
+            )
+            ->when(
+                $filters['capturistaId'],
+                fn($query) => $query->where('a.capturista_id', $filters['capturistaId'])
+            );
+    }
+
+    private function filterSummary(array $filters): array
+    {
+        $municipio = $filters['cveMun'] !== ''
+            ? DB::table('secciones')
+                ->where('cve_mun', $filters['cveMun'])
+                ->value('municipio')
+            : null;
+        $capturista = $filters['capturistaId']
+            ? DB::table('users')->where('id', $filters['capturistaId'])->value('name')
+            : null;
+
+        return [
+            'Distrito local' => $filters['distritoLocal'] !== ''
+                ? str_pad($filters['distritoLocal'], 2, '0', STR_PAD_LEFT)
+                : 'Todos',
+            'Distrito federal' => $filters['distritoFederal'] !== ''
+                ? str_pad($filters['distritoFederal'], 2, '0', STR_PAD_LEFT)
+                : 'Todos',
+            'Municipio' => $municipio ?: 'Todos',
+            'Referente' => $filters['referente'] ?: 'Todos',
+            'Capturista' => $capturista ?: 'Todos',
+        ];
     }
 
     private function authorizeDistrict(Request $request, int $distritoLocal): void {

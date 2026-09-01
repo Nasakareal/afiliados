@@ -177,6 +177,12 @@
       <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalFiltros">
         <i class="fa-solid fa-filter me-1"></i> Filtros
       </button>
+      <a href="{{ route('avance.convencidos', request()->query()) }}" class="btn btn-sm btn-outline-primary">
+        <i class="fa-solid fa-users me-1"></i> Ver personas y distritos
+      </a>
+      <a href="{{ route('avance.export.xlsx', request()->query()) }}" class="btn btn-sm btn-success">
+        <i class="fa-solid fa-file-excel me-1"></i> Descargar Excel
+      </a>
       @can('avance.metas')
         <button class="btn btn-sm btn-granate btn-nueva-meta" data-bs-toggle="modal" data-bs-target="#modalMeta">
           <i class="fa-solid fa-bullseye me-1"></i> Asignar meta

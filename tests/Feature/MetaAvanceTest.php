@@ -7,6 +7,7 @@ use App\Models\User;
 use Database\Seeders\PermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use Tests\TestCase;
 
 class MetaAvanceTest extends TestCase
@@ -438,6 +439,149 @@ class MetaAvanceTest extends TestCase
         $this->assertCount(2, $detalle);
         $this->assertSame(2, $detalle->firstWhere('seccion', '0001')['total']);
         $this->assertSame(0, $detalle->firstWhere('seccion', '0002')['total']);
+    }
+
+    public function test_filtered_progress_can_be_downloaded_with_people_and_districts(): void
+    {
+        DB::table('secciones')->insert([
+            'seccion' => '0002',
+            'cve_mun' => '002',
+            'municipio' => 'Municipio excluido',
+            'distrito_local' => 2,
+            'distrito_federal' => 4,
+        ]);
+
+        $admin = User::factory()->create(['must_change_password' => false]);
+        $admin->assignRole('Admin');
+        $capturer = User::factory()->create(['name' => 'Capturista Excel', 'must_change_password' => false]);
+
+        DB::table('afiliados')->insert([
+            [
+                'capturista_id' => $capturer->id,
+                'nombre' => 'Persona incluida',
+                'apellido_paterno' => 'Distrito Uno',
+                'telefono' => '4430000001',
+                'municipio' => 'Municipio de prueba',
+                'cve_mun' => '001',
+                'seccion' => '0001',
+                'distrito_local' => 1,
+                'distrito_federal' => 3,
+                'perfil' => 'Moises Navarro',
+                'estatus' => 'pendiente',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'capturista_id' => $capturer->id,
+                'nombre' => 'Persona excluida',
+                'apellido_paterno' => null,
+                'telefono' => null,
+                'municipio' => 'Municipio excluido',
+                'cve_mun' => '002',
+                'seccion' => '0002',
+                'distrito_local' => 2,
+                'distrito_federal' => 4,
+                'perfil' => 'Andrea Serna',
+                'estatus' => 'pendiente',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
+
+        $query = [
+            'distrito_local' => 1,
+            'referente' => 'Moises Navarro',
+        ];
+
+        $page = $this->actingAs($admin)->get(route('avance.index', $query));
+        $page->assertOk()
+            ->assertSeeText('Ver personas y distritos')
+            ->assertSeeText('Descargar Excel');
+
+        $detail = $this->actingAs($admin)->get(route('avance.convencidos', $query));
+        $detail->assertOk()
+            ->assertSeeText('Persona incluida Distrito Uno')
+            ->assertSeeText('DL 01')
+            ->assertSeeText('DFn 03')
+            ->assertDontSeeText('Persona excluida');
+
+        $response = $this->actingAs($admin)->get(route('avance.export.xlsx', $query));
+        $response->assertOk()->assertHeader(
+            'content-type',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        );
+
+        $path = $response->baseResponse->getFile()->getPathname();
+        $workbook = IOFactory::load($path);
+
+        $this->assertSame(['Avance', 'Personas convencidas'], $workbook->getSheetNames());
+        $people = $workbook->getSheetByName('Personas convencidas');
+        $this->assertSame('Persona incluida Distrito Uno', $people->getCell('B6')->getValue());
+        $this->assertSame(1, $people->getCell('I6')->getValue());
+        $this->assertSame(3, $people->getCell('J6')->getValue());
+        $this->assertSame('DL 01 / DFn 03', $people->getCell('M6')->getValue());
+        $this->assertNull($people->getCell('B7')->getValue());
+        $this->assertStringContainsString('Referente: Moises Navarro', $people->getCell('A2')->getValue());
+
+        $workbook->disconnectWorksheets();
+    }
+
+    public function test_restricted_user_export_cannot_include_another_local_district(): void
+    {
+        DB::table('secciones')->insert([
+            'seccion' => '0002',
+            'cve_mun' => '002',
+            'municipio' => 'Distrito ajeno',
+            'distrito_local' => 2,
+            'distrito_federal' => 4,
+        ]);
+
+        $restricted = User::factory()->create([
+            'must_change_password' => false,
+            'distrito_local' => 1,
+        ]);
+        $restricted->assignRole('Admin');
+
+        DB::table('afiliados')->insert([
+            [
+                'capturista_id' => $restricted->id,
+                'nombre' => 'Persona permitida en Excel',
+                'municipio' => 'Municipio de prueba',
+                'cve_mun' => '001',
+                'seccion' => '0001',
+                'distrito_local' => 1,
+                'distrito_federal' => 3,
+                'estatus' => 'pendiente',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'capturista_id' => $restricted->id,
+                'nombre' => 'Persona prohibida en Excel',
+                'municipio' => 'Distrito ajeno',
+                'cve_mun' => '002',
+                'seccion' => '0002',
+                'distrito_local' => 2,
+                'distrito_federal' => 4,
+                'estatus' => 'pendiente',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
+
+        $response = $this->actingAs($restricted)->get(route('avance.export.xlsx', [
+            'distrito_local' => 2,
+        ]));
+        $response->assertOk();
+
+        $workbook = IOFactory::load($response->baseResponse->getFile()->getPathname());
+        $people = $workbook->getSheetByName('Personas convencidas');
+
+        $this->assertSame('Persona permitida en Excel', $people->getCell('B6')->getValue());
+        $this->assertNull($people->getCell('B7')->getValue());
+        $this->assertStringContainsString('Distrito local: 01', $people->getCell('A2')->getValue());
+
+        $workbook->disconnectWorksheets();
     }
 
     public function test_official_goals_match_the_delivered_workbook_totals(): void
