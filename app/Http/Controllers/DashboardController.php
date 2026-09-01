@@ -148,12 +148,11 @@ class DashboardController extends Controller
 
     private function aplicarAcceso(Builder $query, $user): void
     {
-        if (LocalDistrictAccess::restricted($user)) {
-            LocalDistrictAccess::scope($query, 'distrito_local', $user);
-            return;
-        }
-
         if ($user->hasAnyRole(['Admin', 'SuperAdmin'])) {
+            if (LocalDistrictAccess::restricted($user)) {
+                LocalDistrictAccess::scope($query, 'distrito_local', $user);
+            }
+
             return;
         }
 
