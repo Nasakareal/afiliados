@@ -13,9 +13,9 @@
 
   .avance-summary {
     display:grid;
-    grid-template-columns:.65fr .75fr repeat(6, 1fr);
+    grid-template-columns:.65fr .75fr 1.1fr repeat(6, 1fr);
     margin-bottom:1.15rem;
-    min-width:920px;
+    min-width:1050px;
   }
   .avance-summary-wrap { border-radius:.35rem; box-shadow:0 8px 22px rgba(22,39,93,.08); overflow-x:auto; }
   .avance-summary-head,
@@ -203,11 +203,15 @@
 
   <div class="avance-summary-wrap">
     <div class="avance-summary">
-      @foreach(['DFn / DL','Secciones','Meta convencidos','Total convencidos','% convencidos','Meta lonas','Total lonas','% lonas'] as $encabezado)
+      @foreach(['DFn / DL','Secciones','Secciones cubiertas','Meta convencidos','Total convencidos','% convencidos','Meta lonas','Total lonas','% lonas'] as $encabezado)
         <div class="avance-summary-head">{{ $encabezado }}</div>
       @endforeach
       <div class="avance-summary-value">{{ $dfTexto }} / {{ $dlTexto }}</div>
       <div class="avance-summary-value">{{ number_format($totales['secciones']) }}</div>
+      <div class="avance-summary-value">
+        {{ number_format($totales['secciones_cubiertas']) }}
+        ({{ number_format($totales['porcentaje_secciones_cubiertas'], 2) }}%)
+      </div>
       <div class="avance-summary-value">{{ number_format($totales['meta_convencidos']) }}</div>
       <div class="avance-summary-value">{{ number_format($totales['total_convencidos']) }}</div>
       <div class="avance-summary-value pct {{ $pctClass($totales['porcentaje_convencidos'], $totales['meta_convencidos']) }}">

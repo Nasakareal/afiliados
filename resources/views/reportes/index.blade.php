@@ -44,7 +44,6 @@
           <select name="estatus" class="form-control form-control-sm">
             @php $est = request('estatus'); @endphp
             <option value="">Afiliado (todos)</option>
-            <option value="pendiente"  {{ $est==='pendiente'  ? 'selected':'' }}>Pendiente</option>
             <option value="validado"   {{ $est==='validado'   ? 'selected':'' }}>Sí</option>
             <option value="descartado" {{ $est==='descartado' ? 'selected':'' }}>No</option>
           </select>

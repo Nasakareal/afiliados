@@ -330,6 +330,12 @@ class MetaAvanceController extends Controller
 
         $totalConvencidos = (int) $convencidos->sum();
 
+        $totalSeccionesCubiertas = $convencidosPorAlcanceSeccion
+            ->filter(fn($total) => (int) $total > 0)
+            ->count();
+
+        $totalSecciones = (int) $avance->sum('secciones');
+
         $totalMetaLonas = (int) $avance->sum(
             'meta_lonas'
         );
@@ -339,7 +345,11 @@ class MetaAvanceController extends Controller
         );
 
         $totales = [
-            'secciones' => (int) $avance->sum('secciones'),
+            'secciones' => $totalSecciones,
+            'secciones_cubiertas' => $totalSeccionesCubiertas,
+            'porcentaje_secciones_cubiertas' => $totalSecciones > 0
+                ? round(($totalSeccionesCubiertas / $totalSecciones) * 100, 2)
+                : 0,
             'meta_convencidos' => $totalMetaConvencidos,
             'total_convencidos' => $totalConvencidos,
             'porcentaje_convencidos' => $totalMetaConvencidos > 0

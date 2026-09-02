@@ -122,11 +122,13 @@ class AfiliadoApiController extends Controller
             'distrito_local'    => ['nullable','integer'],
             'perfil'            => ['nullable','string'],
             'observaciones'     => ['nullable','string'],
-            'estatus'           => ['nullable', Rule::in(['pendiente','validado','descartado'])],
+            'estatus'           => ['required', Rule::in(['validado','descartado'])],
             'fecha_convencimiento' => ['nullable','date'],
         ], [
             'clave_elector.unique' => 'La clave de elector ya pertenece a otro registro.',
             'tipo_vinculo.in' => 'Selecciona únicamente DV, Comité o MOV.',
+            'estatus.required' => 'Indica si la persona está afiliada.',
+            'estatus.in' => 'Selecciona Sí o No en el campo Afiliado.',
         ]);
 
         if (($data['tipo_vinculo'] ?? null) !== 'mov') {

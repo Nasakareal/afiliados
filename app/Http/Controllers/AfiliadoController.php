@@ -349,7 +349,6 @@ class AfiliadoController extends Controller
             $data['fecha_convencimiento'] = now();
         }
 
-        $data['estatus'] = $data['estatus'] ?? 'pendiente';
         $data['capturista_id'] = Auth::id();
 
         $afiliado = Afiliado::create($data);
@@ -531,7 +530,7 @@ class AfiliadoController extends Controller
             'cp' => ['nullable', 'string', 'max:10'],
             'estatus' => [
                 'required',
-                Rule::in(['pendiente', 'validado', 'descartado']),
+                Rule::in(['validado', 'descartado']),
             ],
             'fecha_convencimiento' => ['nullable', 'date'],
         ];
@@ -588,7 +587,7 @@ class AfiliadoController extends Controller
             'cp' => ['nullable', 'string', 'max:10'],
             'estatus' => [
                 'required',
-                Rule::in(['pendiente', 'validado', 'descartado']),
+                Rule::in(['validado', 'descartado']),
             ],
             'fecha_convencimiento' => ['nullable', 'date'],
         ];
@@ -642,6 +641,8 @@ class AfiliadoController extends Controller
             'tipo_vinculo.in' => 'Selecciona únicamente DV, Comité o MOV.',
             'perfil.required' => 'Selecciona un referente.',
             'perfil.in' => 'Selecciona un referente válido.',
+            'estatus.required' => 'Indica si la persona está afiliada.',
+            'estatus.in' => 'Selecciona Sí o No en el campo Afiliado.',
         ];
     }
 
@@ -968,6 +969,10 @@ class AfiliadoController extends Controller
                 'nullable',
                 'string',
                 'max:10',
+            ],
+            'estatus' => [
+                'required',
+                Rule::in(['validado', 'descartado']),
             ],
         ];
     }

@@ -54,7 +54,7 @@ class AfiliadosSeeder extends Seeder
                 'distrito_local'  => $faker->numberBetween(1, 24),
                 'perfil'          => $faker->sentence(6),
                 'observaciones'   => $faker->optional()->sentence(8),
-                'estatus'         => $faker->randomElement(['pendiente','validado','descartado']),
+                'estatus'         => $faker->randomElement(['validado','descartado']),
                 'fecha_convencimiento' => $faker->dateTimeThisDecade(),
                 'created_at'      => now(),
                 'updated_at'      => now(),

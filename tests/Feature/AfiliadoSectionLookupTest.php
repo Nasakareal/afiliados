@@ -75,7 +75,7 @@ class AfiliadoSectionLookupTest extends TestCase
                 'nombre' => 'Persona de prueba',
                 'seccion' => '0405',
                 'perfil' => 'Andrea Serna',
-                'estatus' => 'pendiente',
+                'estatus' => 'validado',
             ])
             ->assertRedirect();
 
@@ -87,6 +87,36 @@ class AfiliadoSectionLookupTest extends TestCase
             'cve_mun' => '027',
             'distrito_local' => 2,
             'distrito_federal' => 7,
+        ]);
+    }
+
+    public function test_registration_requires_an_explicit_affiliation_choice(): void
+    {
+        $capturer = User::factory()->create([
+            'must_change_password' => false,
+            'distrito_local' => 2,
+        ]);
+        $capturer->assignRole('Capturista');
+
+        $this->actingAs($capturer)
+            ->get(route('registro'))
+            ->assertOk()
+            ->assertSeeText('Selecciona Sí o No')
+            ->assertSee('name="estatus"', false)
+            ->assertSee('required', false);
+
+        $this->actingAs($capturer)
+            ->from(route('registro'))
+            ->post(route('afiliados.store'), [
+                'nombre' => 'Persona sin afiliación',
+                'seccion' => '0405',
+                'perfil' => 'Andrea Serna',
+            ])
+            ->assertRedirect(route('registro'))
+            ->assertSessionHasErrors('estatus');
+
+        $this->assertDatabaseMissing('afiliados', [
+            'nombre' => 'PERSONA SIN AFILIACION',
         ]);
     }
 }

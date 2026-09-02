@@ -47,6 +47,7 @@ class MetaAvanceTest extends TestCase
             ->assertSee('avanceDistrictMap')
             ->assertSee('toggleAvanceMunicipalityLabels')
             ->assertSeeText('Nombres de municipios')
+            ->assertSeeText('Secciones cubiertas')
             ->assertSeeInOrder(['Meta<br>convencidos', 'Total<br>convencidos'], false)
             ->assertSeeInOrder(['Meta<br>lonas', 'Total<br>lonas'], false)
             ->assertSeeText('Top capturistas por convencidos')
@@ -98,6 +99,48 @@ class MetaAvanceTest extends TestCase
         $this->assertSame(1, $rows['001|1']['total_convencidos']);
         $this->assertSame(0, $rows['002|2']['total_convencidos']);
         $this->assertSame(['Gladyz Butanda'], $response->viewData('referentes')->all());
+    }
+
+    public function test_dashboard_and_progress_use_the_same_active_convinced_records(): void
+    {
+        DB::table('secciones')->insert([
+            'seccion' => '0002',
+            'cve_mun' => '001',
+            'municipio' => 'Municipio de prueba',
+            'distrito_local' => 1,
+            'distrito_federal' => 3,
+        ]);
+
+        $admin = User::factory()->create(['must_change_password' => false]);
+        $admin->assignRole('Admin');
+
+        foreach (['validado', 'descartado'] as $index => $estatus) {
+            DB::table('afiliados')->insert([
+                'capturista_id' => $admin->id,
+                'nombre' => 'Persona '.($index + 1),
+                'municipio' => 'Municipio de prueba',
+                'cve_mun' => '001',
+                'seccion' => '0001',
+                'distrito_local' => 1,
+                'distrito_federal' => 3,
+                'perfil' => 'Gladyz Butanda',
+                'estatus' => $estatus,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        $dashboard = $this->actingAs($admin)->get(route('dashboard'))->assertOk();
+        $avance = $this->actingAs($admin)->get(route('avance.index'))->assertOk();
+
+        $this->assertSame(2, $dashboard->viewData('stats')['total']);
+        $this->assertSame(2, $avance->viewData('totales')['secciones']);
+        $this->assertSame(1, $avance->viewData('totales')['secciones_cubiertas']);
+        $this->assertSame(50.0, $avance->viewData('totales')['porcentaje_secciones_cubiertas']);
+        $this->assertSame(
+            $dashboard->viewData('stats')['total'],
+            $avance->viewData('totales')['total_convencidos']
+        );
     }
 
     public function test_admin_saves_convinced_and_banner_goals_without_date_filters(): void
@@ -156,7 +199,7 @@ class MetaAvanceTest extends TestCase
                 'distrito_local' => 1,
                 'distrito_federal' => 3,
                 'perfil' => 'Moises Navarro',
-                'estatus' => 'pendiente',
+                'estatus' => 'validado',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
@@ -169,7 +212,7 @@ class MetaAvanceTest extends TestCase
                 'distrito_local' => 1,
                 'distrito_federal' => 3,
                 'perfil' => 'A',
-                'estatus' => 'pendiente',
+                'estatus' => 'validado',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
@@ -246,7 +289,7 @@ class MetaAvanceTest extends TestCase
                 'distrito_local' => 1,
                 'distrito_federal' => 3,
                 'perfil' => 'Moises Navarro',
-                'estatus' => 'pendiente',
+                'estatus' => 'validado',
                 'fecha_convencimiento' => '2025-01-10 10:00:00',
                 'created_at' => '2025-01-10 10:00:00',
                 'updated_at' => '2025-01-10 10:00:00',
@@ -260,7 +303,7 @@ class MetaAvanceTest extends TestCase
                 'distrito_local' => 1,
                 'distrito_federal' => 3,
                 'perfil' => 'Moises Navarro',
-                'estatus' => 'pendiente',
+                'estatus' => 'validado',
                 'fecha_convencimiento' => '2026-08-11 10:00:00',
                 'created_at' => '2026-08-11 10:00:00',
                 'updated_at' => '2026-08-11 10:00:00',
@@ -274,7 +317,7 @@ class MetaAvanceTest extends TestCase
                 'distrito_local' => 2,
                 'distrito_federal' => 3,
                 'perfil' => 'Andrea Serna',
-                'estatus' => 'pendiente',
+                'estatus' => 'validado',
                 'fecha_convencimiento' => '2026-08-12 10:00:00',
                 'created_at' => '2026-08-12 10:00:00',
                 'updated_at' => '2026-08-12 10:00:00',
@@ -376,7 +419,7 @@ class MetaAvanceTest extends TestCase
                 'distrito_local' => 1,
                 'distrito_federal' => 3,
                 'perfil' => 'Moises Navarro',
-                'estatus' => 'pendiente',
+                'estatus' => 'validado',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
@@ -389,7 +432,7 @@ class MetaAvanceTest extends TestCase
                 'distrito_local' => 2,
                 'distrito_federal' => 4,
                 'perfil' => 'Andrea Serna',
-                'estatus' => 'pendiente',
+                'estatus' => 'validado',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
@@ -448,7 +491,7 @@ class MetaAvanceTest extends TestCase
                 'distrito_local' => 1,
                 'distrito_federal' => 3,
                 'perfil' => 'Moises Navarro',
-                'estatus' => 'pendiente',
+                'estatus' => 'validado',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
@@ -461,7 +504,7 @@ class MetaAvanceTest extends TestCase
                 'distrito_local' => 1,
                 'distrito_federal' => 3,
                 'perfil' => 'Andrea Serna',
-                'estatus' => 'pendiente',
+                'estatus' => 'validado',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
@@ -508,7 +551,7 @@ class MetaAvanceTest extends TestCase
                 'distrito_local' => 1,
                 'distrito_federal' => 3,
                 'perfil' => 'Moises Navarro',
-                'estatus' => 'pendiente',
+                'estatus' => 'validado',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
@@ -523,7 +566,7 @@ class MetaAvanceTest extends TestCase
                 'distrito_local' => 2,
                 'distrito_federal' => 4,
                 'perfil' => 'Andrea Serna',
-                'estatus' => 'pendiente',
+                'estatus' => 'validado',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
@@ -592,7 +635,7 @@ class MetaAvanceTest extends TestCase
                 'seccion' => '0001',
                 'distrito_local' => 1,
                 'distrito_federal' => 3,
-                'estatus' => 'pendiente',
+                'estatus' => 'validado',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
@@ -604,7 +647,7 @@ class MetaAvanceTest extends TestCase
                 'seccion' => '0002',
                 'distrito_local' => 2,
                 'distrito_federal' => 4,
-                'estatus' => 'pendiente',
+                'estatus' => 'validado',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],

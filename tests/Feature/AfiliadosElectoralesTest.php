@@ -107,6 +107,19 @@ class AfiliadosElectoralesTest extends TestCase
         ]);
     }
 
+    public function test_el_estatus_de_afiliacion_es_obligatorio(): void
+    {
+        $data = $this->baseData();
+        unset($data['estatus']);
+
+        try {
+            $this->controller()->store($this->request('POST', $data));
+            $this->fail('El registro sin estatus de afiliación debió fallar.');
+        } catch (ValidationException $exception) {
+            $this->assertArrayHasKey('estatus', $exception->errors());
+        }
+    }
+
     public function test_la_clave_se_normaliza_y_es_unica(): void
     {
         $this->controller()->store($this->request('POST', $this->baseData([
@@ -195,7 +208,7 @@ class AfiliadosElectoralesTest extends TestCase
             'cve_mun' => '053',
             'seccion' => '1234',
             'perfil' => 'Gladyz Butanda',
-            'estatus' => 'pendiente',
+            'estatus' => 'validado',
         ], $overrides);
     }
 
@@ -211,7 +224,7 @@ class AfiliadosElectoralesTest extends TestCase
                 'cve_mun' => '053',
                 'seccion' => '1234',
                 'perfil' => 'Gladyz Butanda',
-                'estatus' => 'pendiente',
+                'estatus' => 'validado',
                 'created_at' => now(),
                 'updated_at' => now(),
             ];

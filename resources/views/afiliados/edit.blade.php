@@ -55,7 +55,7 @@
 
         $estatusOld = old(
           'estatus',
-          $afiliado->estatus ?? 'pendiente'
+          $afiliado->estatus ?? 'validado'
         );
 
         $fechaConvencimiento = old('fecha_convencimiento');
@@ -516,11 +516,8 @@
                 class="form-select @error('estatus') is-invalid @enderror"
                 {{ $req('estatus') ? 'required' : '' }}
               >
-                <option
-                  value="pendiente"
-                  {{ $estatusOld === 'pendiente' ? 'selected' : '' }}
-                >
-                  Pendiente
+                <option value="" disabled {{ $estatusOld === '' ? 'selected' : '' }}>
+                  Selecciona Sí o No
                 </option>
 
                 <option

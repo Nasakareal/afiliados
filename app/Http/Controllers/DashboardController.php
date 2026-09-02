@@ -21,11 +21,8 @@ class DashboardController extends Controller
             return redirect()->route('lonas.index');
         }
 
-        $estadosVisibles = ['validado', 'descartado'];
-
         $afiliados = DB::table('afiliados')
-            ->whereNull('deleted_at')
-            ->whereIn('estatus', $estadosVisibles);
+            ->whereNull('deleted_at');
         $this->aplicarAcceso($afiliados, $user);
 
         $summary = $afiliados
@@ -49,8 +46,7 @@ class DashboardController extends Controller
                 'municipio',
                 DB::raw('COUNT(*) as total')
             )
-            ->whereNull('deleted_at')
-            ->whereIn('estatus', $estadosVisibles);
+            ->whereNull('deleted_at');
 
         $this->aplicarAcceso($porMunicipio, $user);
 
@@ -66,8 +62,7 @@ class DashboardController extends Controller
                 DB::raw('COUNT(*) as total')
             )
             ->whereNotNull('seccion')
-            ->whereNull('deleted_at')
-            ->whereIn('estatus', $estadosVisibles);
+            ->whereNull('deleted_at');
 
         $this->aplicarAcceso($porSeccion, $user);
 

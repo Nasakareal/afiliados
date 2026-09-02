@@ -135,6 +135,17 @@ class LocalDistrictAccessTest extends TestCase
         $this->getJson('/api/v1/actividades/'.$this->outsideActivityId)->assertNotFound();
     }
 
+    public function test_api_requires_an_explicit_affiliation_choice(): void
+    {
+        Sanctum::actingAs($this->restricted);
+
+        $this->postJson('/api/v1/afiliados', [
+            'nombre' => 'Persona sin afiliación',
+            'seccion' => '0101',
+        ])->assertUnprocessable()
+            ->assertJsonValidationErrors('estatus');
+    }
+
     public function test_restricted_creations_are_forced_to_the_assigned_district(): void
     {
         $this->actingAs($this->restricted)->post(route('actividades.store'), [

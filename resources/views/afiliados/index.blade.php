@@ -82,7 +82,6 @@
         <div class="col-6 col-md-2">
           <select name="estatus" class="form-select form-select-sm">
             <option value="">Afiliado</option>
-            <option value="pendiente" {{ ($estatus ?? '') === 'pendiente' ? 'selected' : '' }}>Pendiente</option>
             <option value="validado" {{ ($estatus ?? '') === 'validado' ? 'selected' : '' }}>Sí</option>
             <option value="descartado" {{ ($estatus ?? '') === 'descartado' ? 'selected' : '' }}>No</option>
           </select>

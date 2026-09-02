@@ -467,7 +467,7 @@
 
             <div class="col-md-3">
               @php
-                $estatusOld = old('estatus', 'pendiente');
+                $estatusOld = old('estatus', '');
               @endphp
 
               <label class="form-label {{ $req('estatus') ? 'required' : '' }}">
@@ -479,11 +479,8 @@
                 class="form-select @error('estatus') is-invalid @enderror"
                 {{ $req('estatus') ? 'required' : '' }}
               >
-                <option
-                  value="pendiente"
-                  {{ $estatusOld === 'pendiente' ? 'selected' : '' }}
-                >
-                  Pendiente
+                <option value="" disabled {{ $estatusOld === '' ? 'selected' : '' }}>
+                  Selecciona Sí o No
                 </option>
 
                 <option

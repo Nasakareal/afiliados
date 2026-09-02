@@ -30,10 +30,9 @@ class DashboardAccessTest extends TestCase
 
         $this->insertAffiliate($capturista->id, 'Propia', '0101', 'validado');
         $this->insertAffiliate($capturista->id, 'No afiliada', '0102', 'descartado');
-        $this->insertAffiliate($capturista->id, 'Pendiente oculta', '0104', 'pendiente');
         $this->insertAffiliate($capturista->id, 'Eliminada', '0103', 'validado', now());
         $this->insertAffiliate($otroCapturista->id, 'Ajena uno', '0101', 'validado');
-        $this->insertAffiliate($otroCapturista->id, 'Ajena dos', '0102', 'pendiente');
+        $this->insertAffiliate($otroCapturista->id, 'Ajena dos', '0102', 'descartado');
 
         $response = $this->actingAs($capturista)
             ->get(route('dashboard'))
