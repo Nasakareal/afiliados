@@ -29,6 +29,7 @@ class DashboardAccessTest extends TestCase
         $otroCapturista->assignRole('Capturista');
 
         $this->insertAffiliate($capturista->id, 'Propia', '0101', 'validado');
+        $this->insertAffiliate($capturista->id, 'Eliminada', '0103', 'validado', now());
         $this->insertAffiliate($otroCapturista->id, 'Ajena uno', '0101', 'validado');
         $this->insertAffiliate($otroCapturista->id, 'Ajena dos', '0102', 'pendiente');
 
@@ -44,7 +45,13 @@ class DashboardAccessTest extends TestCase
         $this->assertSame(1, (int) $response->viewData('porSeccion')->sum('total'));
     }
 
-    private function insertAffiliate(int $capturistaId, string $nombre, string $seccion, string $estatus): void
+    private function insertAffiliate(
+        int $capturistaId,
+        string $nombre,
+        string $seccion,
+        string $estatus,
+        $deletedAt = null
+    ): void
     {
         DB::table('afiliados')->insert([
             'capturista_id' => $capturistaId,
@@ -57,6 +64,7 @@ class DashboardAccessTest extends TestCase
             'estatus' => $estatus,
             'created_at' => now(),
             'updated_at' => now(),
+            'deleted_at' => $deletedAt,
         ]);
     }
 }

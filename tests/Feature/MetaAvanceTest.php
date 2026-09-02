@@ -59,6 +59,47 @@ class MetaAvanceTest extends TestCase
             ->assertSeeText('Distrito 03 Zitácuaro');
     }
 
+    public function test_progress_matches_sections_by_municipality_and_section(): void
+    {
+        DB::table('secciones')->insert([
+            'seccion' => '0001',
+            'cve_mun' => '002',
+            'municipio' => 'Otro municipio',
+            'distrito_local' => 2,
+            'distrito_federal' => 4,
+        ]);
+
+        $admin = User::factory()->create(['must_change_password' => false]);
+        $admin->assignRole('Admin');
+        $capturer = User::factory()->create(['must_change_password' => false]);
+
+        DB::table('afiliados')->insert([
+            'capturista_id' => $capturer->id,
+            'nombre' => 'Persona de municipio uno',
+            'municipio' => 'Municipio de prueba',
+            'cve_mun' => '001',
+            'seccion' => '0001',
+            'distrito_local' => 1,
+            'distrito_federal' => 3,
+            'perfil' => 'Gladyz Butanda',
+            'estatus' => 'validado',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $response = $this->actingAs($admin)
+            ->get(route('avance.index'))
+            ->assertOk();
+
+        $rows = $response->viewData('avance')->keyBy(
+            fn(array $row) => $row['cve_mun'].'|'.$row['distrito_local']
+        );
+
+        $this->assertSame(1, $rows['001|1']['total_convencidos']);
+        $this->assertSame(0, $rows['002|2']['total_convencidos']);
+        $this->assertSame(['Gladyz Butanda'], $response->viewData('referentes')->all());
+    }
+
     public function test_admin_saves_convinced_and_banner_goals_without_date_filters(): void
     {
         $admin = User::factory()->create(['must_change_password' => false]);

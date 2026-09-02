@@ -19,6 +19,7 @@ class AfiliadoController extends Controller
     public const PER_PAGE_OPTIONS = [25, 50, 100, 200, 300, 500];
 
     public const REFERENTES = [
+        'Gladyz Butanda',
         'Moises Navarro',
         'Andrea Serna',
         'Oscar Solis',

@@ -194,7 +194,7 @@ class AfiliadosElectoralesTest extends TestCase
             'municipio' => 'Morelia',
             'cve_mun' => '053',
             'seccion' => '1234',
-            'perfil' => 'REFERENTE',
+            'perfil' => 'Gladyz Butanda',
             'estatus' => 'pendiente',
         ], $overrides);
     }
@@ -210,7 +210,7 @@ class AfiliadosElectoralesTest extends TestCase
                 'municipio' => 'Morelia',
                 'cve_mun' => '053',
                 'seccion' => '1234',
-                'perfil' => 'REFERENTE',
+                'perfil' => 'Gladyz Butanda',
                 'estatus' => 'pendiente',
                 'created_at' => now(),
                 'updated_at' => now(),

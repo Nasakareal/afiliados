@@ -21,26 +21,24 @@ class DashboardController extends Controller
             return redirect()->route('lonas.index');
         }
 
-        $afiliados = DB::table('afiliados');
+        $afiliados = DB::table('afiliados')->whereNull('deleted_at');
         $this->aplicarAcceso($afiliados, $user);
 
-        $total = (clone $afiliados)->count();
+        $summary = $afiliados
+            ->selectRaw('COUNT(*) AS total')
+            ->selectRaw("SUM(CASE WHEN estatus = 'validado' THEN 1 ELSE 0 END) AS validado")
+            ->selectRaw("SUM(CASE WHEN estatus = 'pendiente' THEN 1 ELSE 0 END) AS pendiente")
+            ->selectRaw("SUM(CASE WHEN estatus = 'descartado' THEN 1 ELSE 0 END) AS descartado")
+            ->selectRaw('SUM(CASE WHEN DATE(created_at) = ? THEN 1 ELSE 0 END) AS hoy', [
+                Carbon::today()->toDateString(),
+            ])
+            ->first();
 
-        $validado = (clone $afiliados)
-            ->where('estatus', 'validado')
-            ->count();
-
-        $pendiente = (clone $afiliados)
-            ->where('estatus', 'pendiente')
-            ->count();
-
-        $descartado = (clone $afiliados)
-            ->where('estatus', 'descartado')
-            ->count();
-
-        $hoy = (clone $afiliados)
-            ->whereDate('created_at', Carbon::today())
-            ->count();
+        $total = (int) ($summary->total ?? 0);
+        $validado = (int) ($summary->validado ?? 0);
+        $pendiente = (int) ($summary->pendiente ?? 0);
+        $descartado = (int) ($summary->descartado ?? 0);
+        $hoy = (int) ($summary->hoy ?? 0);
 
         $stats = compact(
             'total',
@@ -57,7 +55,8 @@ class DashboardController extends Controller
                 DB::raw('DATE(created_at) as d'),
                 DB::raw('COUNT(*) as c')
             )
-            ->where('created_at', '>=', $desde->copy()->startOfDay());
+            ->where('created_at', '>=', $desde->copy()->startOfDay())
+            ->whereNull('deleted_at');
 
         $this->aplicarAcceso($raw, $user);
 
@@ -87,7 +86,8 @@ class DashboardController extends Controller
             ->select(
                 'municipio',
                 DB::raw('COUNT(*) as total')
-            );
+            )
+            ->whereNull('deleted_at');
 
         $this->aplicarAcceso($porMunicipio, $user);
 
@@ -102,7 +102,8 @@ class DashboardController extends Controller
                 'seccion',
                 DB::raw('COUNT(*) as total')
             )
-            ->whereNotNull('seccion');
+            ->whereNotNull('seccion')
+            ->whereNull('deleted_at');
 
         $this->aplicarAcceso($porSeccion, $user);
 
