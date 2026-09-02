@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Console\Commands\LoadTablaAparteDemo;
+use App\Support\DemoTablaAparte;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use ReflectionMethod;
@@ -11,6 +12,15 @@ use Tests\TestCase;
 class LoadTablaAparteDemoCommandTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_it_assigns_exactly_ten_percent_as_non_affiliates(): void
+    {
+        $statuses = collect(range(2, 101))
+            ->map(fn($row) => DemoTablaAparte::statusForSourceRow((string) $row));
+
+        $this->assertSame(90, $statuses->filter(fn($status) => $status === 'validado')->count());
+        $this->assertSame(10, $statuses->filter(fn($status) => $status === 'descartado')->count());
+    }
 
     public function test_it_resolves_the_same_section_number_by_municipality(): void
     {

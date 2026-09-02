@@ -29,6 +29,8 @@ class DashboardAccessTest extends TestCase
         $otroCapturista->assignRole('Capturista');
 
         $this->insertAffiliate($capturista->id, 'Propia', '0101', 'validado');
+        $this->insertAffiliate($capturista->id, 'No afiliada', '0102', 'descartado');
+        $this->insertAffiliate($capturista->id, 'Pendiente oculta', '0104', 'pendiente');
         $this->insertAffiliate($capturista->id, 'Eliminada', '0103', 'validado', now());
         $this->insertAffiliate($otroCapturista->id, 'Ajena uno', '0101', 'validado');
         $this->insertAffiliate($otroCapturista->id, 'Ajena dos', '0102', 'pendiente');
@@ -37,12 +39,15 @@ class DashboardAccessTest extends TestCase
             ->get(route('dashboard'))
             ->assertOk();
 
-        $this->assertSame(1, $response->viewData('stats')['total']);
+        $this->assertSame(2, $response->viewData('stats')['total']);
         $this->assertSame(1, $response->viewData('stats')['validado']);
-        $this->assertSame(0, $response->viewData('stats')['pendiente']);
-        $this->assertSame(1, array_sum($response->viewData('series7')));
-        $this->assertSame(1, (int) $response->viewData('porMunicipio')->sum('total'));
-        $this->assertSame(1, (int) $response->viewData('porSeccion')->sum('total'));
+        $this->assertSame(1, $response->viewData('stats')['descartado']);
+        $this->assertArrayNotHasKey('pendiente', $response->viewData('stats'));
+        $response->assertDontSee('Pendientes')
+            ->assertDontSee('Nuevos hoy')
+            ->assertDontSee('Altas últimos 7 días');
+        $this->assertSame(2, (int) $response->viewData('porMunicipio')->sum('total'));
+        $this->assertSame(2, (int) $response->viewData('porSeccion')->sum('total'));
     }
 
     private function insertAffiliate(

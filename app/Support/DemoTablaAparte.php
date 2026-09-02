@@ -10,6 +10,8 @@ final class DemoTablaAparte
     public const MARKER = 'DEMO_TABLAAPARTE_2026-09-02';
     public const REFERENTE = 'Gladyz Butanda';
     public const EXPECTED_ROWS = 110000;
+    public const EXPECTED_AFFILIATES = 99000;
+    public const EXPECTED_NON_AFFILIATES = 11000;
     public const SHA256 = '4f00c4b3fcf5a83d8ebe481b5421035e8f1fc5608685000d9e13f0afd1e92775';
 
     private const HEADERS = [
@@ -73,5 +75,12 @@ final class DemoTablaAparte
         } finally {
             gzclose($handle);
         }
+    }
+
+    public static function statusForSourceRow(string $sourceRow): string
+    {
+        return (int) $sourceRow % 10 === 0
+            ? 'descartado'
+            : 'validado';
     }
 }

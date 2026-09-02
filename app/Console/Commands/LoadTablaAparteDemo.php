@@ -83,7 +83,7 @@ class LoadTablaAparteDemo extends Command
                         'perfil' => DemoTablaAparte::REFERENTE,
                         'observaciones' => 'Carga temporal para demostración del sistema.',
                         'demo_batch' => DemoTablaAparte::MARKER,
-                        'estatus' => 'validado',
+                        'estatus' => DemoTablaAparte::statusForSourceRow($row['source_row']),
                         'fecha_convencimiento' => $now,
                         'created_at' => $now,
                         'updated_at' => $now,
@@ -110,6 +110,19 @@ class LoadTablaAparteDemo extends Command
                     throw new RuntimeException("La carga quedó incompleta: {$stored} de {$rowCount} registros.");
                 }
 
+                $statusCounts = DB::table('afiliados')
+                    ->where('demo_batch', DemoTablaAparte::MARKER)
+                    ->selectRaw("SUM(CASE WHEN estatus = 'validado' THEN 1 ELSE 0 END) AS afiliados")
+                    ->selectRaw("SUM(CASE WHEN estatus = 'descartado' THEN 1 ELSE 0 END) AS no_afiliados")
+                    ->first();
+
+                if (
+                    (int) $statusCounts->afiliados !== DemoTablaAparte::EXPECTED_AFFILIATES ||
+                    (int) $statusCounts->no_afiliados !== DemoTablaAparte::EXPECTED_NON_AFFILIATES
+                ) {
+                    throw new RuntimeException('La distribución 90/10 de la demo no es válida.');
+                }
+
                 DB::table('afiliados')
                     ->where('demo_batch', DemoTablaAparte::MARKER)
                     ->update(['deleted_at' => null]);
@@ -131,7 +144,11 @@ class LoadTablaAparteDemo extends Command
             return self::FAILURE;
         }
 
-        $this->info("Demo cargada: {$inserted} afiliados asignados a ".DemoTablaAparte::REFERENTE.'.');
+        $this->info("Demo cargada: {$inserted} registros asignados a ".DemoTablaAparte::REFERENTE.'.');
+        $this->line(
+            'Distribución: '.DemoTablaAparte::EXPECTED_AFFILIATES.' afiliados y '
+            .DemoTablaAparte::EXPECTED_NON_AFFILIATES.' no afiliados.'
+        );
         $this->line("Capturista: {$capturista->name} <{$capturista->email}>");
 
         return self::SUCCESS;

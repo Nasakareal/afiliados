@@ -7,7 +7,7 @@
 
   {{-- Tarjetas KPI --}}
   <div class="row g-3">
-    <div class="col-md-3">
+    <div class="col-md-4">
       <div class="card shadow-sm border-0">
         <div class="card-body">
           <div class="text-muted small">Convencidos totales</div>
@@ -15,7 +15,7 @@
         </div>
       </div>
     </div>
-    <div class="col-md-2">
+    <div class="col-md-4">
       <div class="card shadow-sm border-0">
         <div class="card-body">
           <div class="text-muted small">Afiliados</div>
@@ -23,15 +23,7 @@
         </div>
       </div>
     </div>
-    <div class="col-md-2">
-      <div class="card shadow-sm border-0">
-        <div class="card-body">
-          <div class="text-muted small">Pendientes</div>
-          <div class="h3 fw-bold text-warning mb-0">{{ number_format($stats['pendiente']) }}</div>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-2">
+    <div class="col-md-4">
       <div class="card shadow-sm border-0">
         <div class="card-body">
           <div class="text-muted small">No afiliados</div>
@@ -39,32 +31,11 @@
         </div>
       </div>
     </div>
-    <div class="col-md-3">
-      <div class="card shadow-sm border-0">
-        <div class="card-body">
-          <div class="text-muted small">Nuevos hoy</div>
-          <div class="display-6 fw-bold">{{ number_format($stats['hoy']) }}</div>
-        </div>
-      </div>
-    </div>
   </div>
 
-  {{-- Gráfico últimos 7 días + Comunicados recientes --}}
+  {{-- Comunicados recientes --}}
   <div class="row g-3 mt-1">
-    <div class="col-lg-8">
-      <div class="card shadow-sm border-0 h-100">
-        <div class="card-header bg-white border-0">
-          <h5 class="card-title mb-0">
-            <i class="fa-solid fa-chart-line me-1"></i> Altas últimos 7 días
-          </h5>
-        </div>
-        <div class="card-body">
-          <canvas id="chart7d" height="96"></canvas>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-lg-4">
+    <div class="col-12">
       <div class="card shadow-sm border-0 h-100">
         <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
           <h6 class="card-title mb-0">
@@ -173,27 +144,4 @@
   </div>
 
 </div>
-@endsection
-
-@section('js')
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', ()=>{
-  const ctx = document.getElementById('chart7d');
-  if (!ctx) return;
-
-  const labels = @json($labels7);
-  const data   = @json($series7);
-
-  new Chart(ctx, {
-    type: 'line',
-    data: { labels, datasets: [{ label: 'Altas', data, tension: .25, fill: false, pointRadius: 3 }] },
-    options: {
-      responsive: true,
-      plugins: { legend: { display: false } },
-      scales: { x: { grid: { display:false } }, y: { beginAtZero: true, ticks: { precision:0 } } }
-    }
-  });
-});
-</script>
 @endsection

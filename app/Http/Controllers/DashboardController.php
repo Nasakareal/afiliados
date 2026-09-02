@@ -21,73 +21,36 @@ class DashboardController extends Controller
             return redirect()->route('lonas.index');
         }
 
-        $afiliados = DB::table('afiliados')->whereNull('deleted_at');
+        $estadosVisibles = ['validado', 'descartado'];
+
+        $afiliados = DB::table('afiliados')
+            ->whereNull('deleted_at')
+            ->whereIn('estatus', $estadosVisibles);
         $this->aplicarAcceso($afiliados, $user);
 
         $summary = $afiliados
             ->selectRaw('COUNT(*) AS total')
             ->selectRaw("SUM(CASE WHEN estatus = 'validado' THEN 1 ELSE 0 END) AS validado")
-            ->selectRaw("SUM(CASE WHEN estatus = 'pendiente' THEN 1 ELSE 0 END) AS pendiente")
             ->selectRaw("SUM(CASE WHEN estatus = 'descartado' THEN 1 ELSE 0 END) AS descartado")
-            ->selectRaw('SUM(CASE WHEN DATE(created_at) = ? THEN 1 ELSE 0 END) AS hoy', [
-                Carbon::today()->toDateString(),
-            ])
             ->first();
 
         $total = (int) ($summary->total ?? 0);
         $validado = (int) ($summary->validado ?? 0);
-        $pendiente = (int) ($summary->pendiente ?? 0);
         $descartado = (int) ($summary->descartado ?? 0);
-        $hoy = (int) ($summary->hoy ?? 0);
 
         $stats = compact(
             'total',
             'validado',
-            'pendiente',
-            'descartado',
-            'hoy'
+            'descartado'
         );
-
-        $desde = Carbon::today()->subDays(6);
-
-        $raw = DB::table('afiliados')
-            ->select(
-                DB::raw('DATE(created_at) as d'),
-                DB::raw('COUNT(*) as c')
-            )
-            ->where('created_at', '>=', $desde->copy()->startOfDay())
-            ->whereNull('deleted_at');
-
-        $this->aplicarAcceso($raw, $user);
-
-        $raw = $raw
-            ->groupBy('d')
-            ->orderBy('d')
-            ->get();
-
-        $map = [];
-
-        foreach ($raw as $registro) {
-            $map[$registro->d] = (int) $registro->c;
-        }
-
-        $labels7 = [];
-        $series7 = [];
-
-        for ($i = 6; $i >= 0; $i--) {
-            $dia = Carbon::today()->subDays($i);
-            $fecha = $dia->toDateString();
-
-            $labels7[] = $dia->format('d/m');
-            $series7[] = $map[$fecha] ?? 0;
-        }
 
         $porMunicipio = DB::table('afiliados')
             ->select(
                 'municipio',
                 DB::raw('COUNT(*) as total')
             )
-            ->whereNull('deleted_at');
+            ->whereNull('deleted_at')
+            ->whereIn('estatus', $estadosVisibles);
 
         $this->aplicarAcceso($porMunicipio, $user);
 
@@ -103,7 +66,8 @@ class DashboardController extends Controller
                 DB::raw('COUNT(*) as total')
             )
             ->whereNotNull('seccion')
-            ->whereNull('deleted_at');
+            ->whereNull('deleted_at')
+            ->whereIn('estatus', $estadosVisibles);
 
         $this->aplicarAcceso($porSeccion, $user);
 
@@ -138,8 +102,6 @@ class DashboardController extends Controller
 
         return view('dashboard', compact(
             'stats',
-            'labels7',
-            'series7',
             'porMunicipio',
             'porSeccion',
             'actividades',
