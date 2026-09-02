@@ -32,6 +32,7 @@
           'F' => 'Mujer',
           'Otro' => 'Otro',
         ];
+        $estatusOld = old('estatus', '');
       @endphp
 
       @if($esDistritoLocal)
@@ -464,12 +465,9 @@
                 <div class="invalid-feedback">{{ $message }}</div>
               @enderror
             </div>
+          @endunless
 
-            <div class="col-md-3">
-              @php
-                $estatusOld = old('estatus', '');
-              @endphp
-
+          <div class="col-md-3">
               <label class="form-label {{ $req('estatus') ? 'required' : '' }}">
                 Afiliado
               </label>
@@ -501,8 +499,9 @@
               @error('estatus')
                 <div class="invalid-feedback">{{ $message }}</div>
               @enderror
-            </div>
+          </div>
 
+          @unless($esDistritoLocal)
             <div class="col-md-4">
               <label class="form-label {{ $req('fecha_convencimiento') ? 'required' : '' }}">
                 Fecha de convencimiento

@@ -146,6 +146,38 @@ class LocalDistrictAccessTest extends TestCase
             ->assertJsonValidationErrors('estatus');
     }
 
+    public function test_restricted_user_can_see_the_required_affiliation_choice(): void
+    {
+        $this->actingAs($this->restricted)
+            ->get(route('afiliados.create'))
+            ->assertOk()
+            ->assertSee('name="estatus"', false)
+            ->assertSee('value="validado"', false)
+            ->assertSee('value="descartado"', false);
+
+        $this->actingAs($this->restricted)
+            ->get(route('afiliados.edit', $this->insideAffiliateId))
+            ->assertOk()
+            ->assertSee('name="estatus"', false);
+
+        $this->actingAs($this->restricted)
+            ->post(route('afiliados.store'), [
+                'nombre' => 'Nueva persona convencida',
+                'sexo' => 'F',
+                'telefono' => '4430000000',
+                'seccion' => '0101',
+                'perfil' => 'Gladyz Butanda',
+                'estatus' => 'validado',
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('afiliados', [
+            'nombre' => 'NUEVA PERSONA CONVENCIDA',
+            'distrito_local' => 1,
+            'estatus' => 'validado',
+        ]);
+    }
+
     public function test_restricted_creations_are_forced_to_the_assigned_district(): void
     {
         $this->actingAs($this->restricted)->post(route('actividades.store'), [
