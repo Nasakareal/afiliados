@@ -16,12 +16,12 @@ class OfficialMetaAvancesSeeder extends Seeder
     {
         $metas = require database_path('data/official_meta_avances.php');
 
-        if (count($metas) !== 117 || array_sum(array_column($metas, 'meta')) !== 489600) {
+        if (count($metas) !== 117 || array_sum(array_column($metas, 'meta')) !== 326400) {
             throw new RuntimeException('El catálogo de metas oficiales está incompleto o fue alterado.');
         }
 
         foreach ($metas as $meta) {
-            if ($meta['meta_diaria'] !== $meta['secciones'] * 3 || $meta['meta'] !== $meta['secciones'] * 180) {
+            if ($meta['meta_diaria'] !== $meta['secciones'] * 2 || $meta['meta'] !== $meta['secciones'] * 120) {
                 throw new RuntimeException("La meta oficial de {$meta['municipio']} no coincide con sus secciones.");
             }
         }
@@ -41,8 +41,10 @@ class OfficialMetaAvancesSeeder extends Seeder
         ], $metas);
 
         DB::transaction(function () use ($filas) {
-            // Sustituye las metas de prueba completas; el archivo oficial no define metas de lonas.
-            DB::table('meta_avances')->delete();
+            // Sustituye únicamente las metas de convencidos; el archivo oficial no define metas de lonas.
+            DB::table('meta_avances')
+                ->where('tipo', MetaAvance::TIPO_CONVENCIDOS)
+                ->delete();
 
             foreach (array_chunk($filas, 100) as $lote) {
                 DB::table('meta_avances')->insert($lote);

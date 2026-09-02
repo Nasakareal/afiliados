@@ -589,15 +589,15 @@ class MetaAvanceTest extends TestCase
         $metas = require database_path('data/official_meta_avances.php');
 
         $this->assertCount(117, $metas);
-        $this->assertSame(489600, array_sum(array_column($metas, 'meta')));
+        $this->assertSame(326400, array_sum(array_column($metas, 'meta')));
         $this->assertCount(117, collect($metas)->unique(fn($meta) => $meta['cve_mun'].'|'.$meta['distrito_local']));
         $this->assertSame(117, DB::table('meta_avances')->where('tipo', MetaAvance::TIPO_CONVENCIDOS)->count());
-        $this->assertSame(489600, (int)DB::table('meta_avances')->sum('meta'));
+        $this->assertSame(326400, (int)DB::table('meta_avances')->sum('meta'));
         $this->assertSame(0, DB::table('meta_avances')->where('tipo', MetaAvance::TIPO_LONAS)->count());
 
         $morelia = collect($metas)->where('municipio', 'Morelia')->sortBy('distrito_local')->values();
 
         $this->assertSame([10, 11, 16, 17], $morelia->pluck('distrito_local')->all());
-        $this->assertSame([17820, 19440, 12600, 18000], $morelia->pluck('meta')->all());
+        $this->assertSame([11880, 12960, 8400, 12000], $morelia->pluck('meta')->all());
     }
 }
