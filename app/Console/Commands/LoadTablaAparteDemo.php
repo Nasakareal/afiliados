@@ -59,7 +59,11 @@ class LoadTablaAparteDemo extends Command
 
                 $batch = [];
                 foreach (DemoTablaAparte::rows() as $row) {
-                    $geography = $sectionCatalog[(int) $row['seccion']];
+                    $sectionKey = $this->sectionKey(
+                        $row['cve_mun'],
+                        $row['seccion']
+                    );
+                    $geography = $sectionCatalog[$sectionKey];
                     $batch[] = [
                         'capturista_id' => $capturista->id,
                         'nombre' => $row['nombre'],
@@ -192,30 +196,45 @@ class LoadTablaAparteDemo extends Command
             ->orderBy('id')
             ->get()
             ->each(function ($section) use (&$catalog): void {
-                $key = (int) $section->seccion;
+                $key = $this->sectionKey(
+                    (string) $section->cve_mun,
+                    (string) $section->seccion
+                );
                 $candidate = [
-                    'cve_mun' => (string) $section->cve_mun,
+                    'cve_mun' => str_pad((string) $section->cve_mun, 3, '0', STR_PAD_LEFT),
                     'municipio' => (string) $section->municipio,
                     'seccion' => (string) $section->seccion,
                     'distrito_federal' => (int) $section->distrito_federal,
                     'distrito_local' => (int) $section->distrito_local,
                 ];
 
-                if (isset($catalog[$key]) && $catalog[$key] !== $candidate) {
-                    throw new RuntimeException("La sección {$section->seccion} es ambigua en el catálogo.");
+                // El catálogo histórico puede repetir un número de sección en
+                // municipios distintos. La captura normal lo desambigua con
+                // cve_mun; para duplicados exactos conserva el registro más
+                // antiguo, equivalente al first() usado por el formulario.
+                if (!isset($catalog[$key])) {
+                    $catalog[$key] = $candidate;
                 }
-
-                $catalog[$key] = $candidate;
             });
 
         foreach ($expectedSections as $expected) {
-            $key = (int) $expected['seccion'];
+            $key = $this->sectionKey(
+                (string) $expected['cve_mun'],
+                (string) $expected['seccion']
+            );
             if (!isset($catalog[$key])) {
-                throw new RuntimeException("La sección {$expected['seccion']} no pudo incorporarse al catálogo.");
+                throw new RuntimeException(
+                    "La sección {$expected['seccion']} del municipio {$expected['cve_mun']} no pudo incorporarse al catálogo."
+                );
             }
         }
 
         return $catalog;
+    }
+
+    private function sectionKey(string $cveMun, string $section): string
+    {
+        return str_pad($cveMun, 3, '0', STR_PAD_LEFT).'|'.(string) (int) $section;
     }
 
     private function nullable(string $value): ?string
