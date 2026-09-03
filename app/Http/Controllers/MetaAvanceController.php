@@ -58,16 +58,15 @@ class MetaAvanceController extends Controller
             ->orderBy('municipio')
             ->get();
 
-        $convencidosDetalle = DB::table('afiliados as a')
+        $convencidosDetalle = DB::table('afiliados_resumen as a')
             ->select(
                 'a.seccion',
                 'a.cve_mun',
                 'a.distrito_local',
                 'a.capturista_id',
-                DB::raw('TRIM(a.perfil) AS referente'),
-                DB::raw('COUNT(DISTINCT a.id) AS total')
+                'a.referente',
+                DB::raw('SUM(a.total) AS total')
             )
-            ->whereNull('a.deleted_at')
             ->when(
                 $cveMun !== '',
                 fn($query) => $query->where(
@@ -92,7 +91,7 @@ class MetaAvanceController extends Controller
             ->when(
                 $referente !== '',
                 fn($query) => $query->whereRaw(
-                    'TRIM(a.perfil) = ?',
+                    'a.referente = ?',
                     [$referente]
                 )
             )
@@ -108,7 +107,7 @@ class MetaAvanceController extends Controller
                 'a.cve_mun',
                 'a.distrito_local',
                 'a.capturista_id',
-                DB::raw('TRIM(a.perfil)')
+                'a.referente'
             )
             ->get();
 
@@ -385,30 +384,29 @@ class MetaAvanceController extends Controller
                 ) {
                     $subquery
                         ->selectRaw('1')
-                        ->from('afiliados')
+                        ->from('afiliados_resumen')
                         ->whereColumn(
-                            'afiliados.capturista_id',
+                            'afiliados_resumen.capturista_id',
                             'users.id'
                         )
-                        ->whereNull('afiliados.deleted_at')
                         ->when(
                             $cveMun !== '',
                             fn($query) => $query->where(
-                                'afiliados.cve_mun',
+                                'afiliados_resumen.cve_mun',
                                 $cveMun
                             )
                         )
                         ->when(
                             $distritoLocal !== '',
                             fn($query) => $query->where(
-                                'afiliados.distrito_local',
+                                'afiliados_resumen.distrito_local',
                                 $distritoLocal
                             )
                         )
                         ->when(
                             $distritoFederal !== '',
                             fn($query) => $query->where(
-                                'afiliados.distrito_federal',
+                                'afiliados_resumen.distrito_federal',
                                 $distritoFederal
                             )
                         );

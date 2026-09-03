@@ -21,14 +21,13 @@ class DashboardController extends Controller
             return redirect()->route('lonas.index');
         }
 
-        $afiliados = DB::table('afiliados')
-            ->whereNull('deleted_at');
+        $afiliados = DB::table('afiliados_resumen');
         $this->aplicarAcceso($afiliados, $user);
 
         $summary = $afiliados
-            ->selectRaw('COUNT(*) AS total')
-            ->selectRaw("SUM(CASE WHEN estatus = 'validado' THEN 1 ELSE 0 END) AS validado")
-            ->selectRaw("SUM(CASE WHEN estatus = 'descartado' THEN 1 ELSE 0 END) AS descartado")
+            ->selectRaw('COALESCE(SUM(total), 0) AS total')
+            ->selectRaw("COALESCE(SUM(CASE WHEN estatus = 'validado' THEN total ELSE 0 END), 0) AS validado")
+            ->selectRaw("COALESCE(SUM(CASE WHEN estatus = 'descartado' THEN total ELSE 0 END), 0) AS descartado")
             ->first();
 
         $total = (int) ($summary->total ?? 0);
@@ -41,12 +40,11 @@ class DashboardController extends Controller
             'descartado'
         );
 
-        $porMunicipio = DB::table('afiliados')
+        $porMunicipio = DB::table('afiliados_resumen')
             ->select(
                 'municipio',
-                DB::raw('COUNT(*) as total')
-            )
-            ->whereNull('deleted_at');
+                DB::raw('SUM(total) as total')
+            );
 
         $this->aplicarAcceso($porMunicipio, $user);
 
@@ -56,13 +54,12 @@ class DashboardController extends Controller
             ->limit(10)
             ->get();
 
-        $porSeccion = DB::table('afiliados')
+        $porSeccion = DB::table('afiliados_resumen')
             ->select(
                 'seccion',
-                DB::raw('COUNT(*) as total')
+                DB::raw('SUM(total) as total')
             )
-            ->whereNotNull('seccion')
-            ->whereNull('deleted_at');
+            ->where('seccion', '<>', '');
 
         $this->aplicarAcceso($porSeccion, $user);
 
