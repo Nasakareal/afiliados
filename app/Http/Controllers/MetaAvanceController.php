@@ -660,7 +660,7 @@ class MetaAvanceController extends Controller
                 })->values();
             });
 
-        return view('avance.index', compact(
+        $data = compact(
             'avance',
             'totales',
             'cveMun',
@@ -681,7 +681,13 @@ class MetaAvanceController extends Controller
             'municipioPorSeccion',
             'seccionesPorMunicipio',
             'puedeVerTodo'
-        ));
+        );
+
+        if ($request->expectsJson()) {
+            return response()->json($data);
+        }
+
+        return view('avance.index', $data);
     }
 
     public function convencidos(Request $request)
@@ -694,6 +700,10 @@ class MetaAvanceController extends Controller
             ->orderBy('a.nombre')
             ->paginate(50)
             ->withQueryString();
+
+        if ($request->expectsJson()) {
+            return response()->json($personas);
+        }
 
         return view('avance.convencidos', [
             'personas' => $personas,
@@ -784,6 +794,13 @@ class MetaAvanceController extends Controller
             }
         });
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'ok' => true,
+                'message' => 'Meta guardada correctamente.',
+            ]);
+        }
+
         return redirect()
             ->route('avance.index')
             ->with('status', 'Meta guardada correctamente.');
@@ -846,6 +863,13 @@ class MetaAvanceController extends Controller
             'asignado_por' => $request->user()->id,
         ]);
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'ok' => true,
+                'message' => 'Meta actualizada correctamente.',
+            ]);
+        }
+
         return back()->with('status', 'Meta actualizada correctamente.');
     }
 
@@ -853,6 +877,13 @@ class MetaAvanceController extends Controller
     {
         $this->authorizeDistrict($request, (int)$metaAvance->distrito_local);
         $metaAvance->delete();
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'ok' => true,
+                'message' => 'Meta eliminada correctamente.',
+            ]);
+        }
 
         return back()->with('status', 'Meta eliminada correctamente.');
     }

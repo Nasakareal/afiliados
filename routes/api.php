@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\ReporteApiController;
 use App\Http\Controllers\Api\DeviceApiController;
 use App\Http\Controllers\Api\AdminApiController;
 use App\Http\Controllers\Api\FeedApiController;
+use App\Http\Controllers\MetaAvanceController;
 
 Route::prefix('v1')->group(function () {
     Route::post('/auth/login', [AuthApiController::class, 'login'])->name('api.auth.login');
@@ -49,6 +50,17 @@ Route::prefix('v1')->group(function () {
         Route::get('/reportes/afiliados', [ReporteApiController::class, 'afiliados'])->name('api.reportes.afiliados')->middleware('permission:reportes.ver');
         Route::get('/reportes/secciones', [ReporteApiController::class, 'secciones'])->name('api.reportes.secciones')->middleware('permission:reportes.ver');
         Route::get('/reportes/capturistas', [ReporteApiController::class, 'capturistas'])->name('api.reportes.capturistas')->middleware('permission:reportes.ver');
+
+        Route::get('/avance', [MetaAvanceController::class, 'index'])
+            ->name('api.avance.index')->middleware('permission:avance.ver');
+        Route::get('/avance/convencidos', [MetaAvanceController::class, 'convencidos'])
+            ->name('api.avance.convencidos')->middleware('permission:avance.ver');
+        Route::post('/avance/metas', [MetaAvanceController::class, 'store'])
+            ->name('api.avance.metas.store')->middleware('permission:avance.metas');
+        Route::put('/avance/metas/{metaAvance}', [MetaAvanceController::class, 'update'])
+            ->name('api.avance.metas.update')->middleware('permission:avance.metas');
+        Route::delete('/avance/metas/{metaAvance}', [MetaAvanceController::class, 'destroy'])
+            ->name('api.avance.metas.destroy')->middleware('permission:avance.metas');
 
         Route::get('/lonas/mapa', [\App\Http\Controllers\Api\LonaApiController::class, 'mapData'])
             ->name('api.lonas.map')->middleware('permission:lonas.ver');
