@@ -240,6 +240,9 @@
               @can('settings.editar')
               <li><a class="dropdown-item {{ is_active('settings.app.edit') }}" href="{{ route('settings.app.edit') }}"><i class="fa-solid fa-sliders me-1"></i> App</a></li>
               @endcan
+              @role('SuperAdmin')
+              <li><a class="dropdown-item {{ is_active('settings.backups_sql.*') }}" href="{{ route('settings.backups_sql.index') }}"><i class="fa-solid fa-database me-1"></i> Respaldos SQL</a></li>
+              @endrole
             </ul>
           </li>
           @endcan

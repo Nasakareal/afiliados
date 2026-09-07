@@ -13,6 +13,7 @@ use App\Http\Controllers\Settings\RoleController;
 use App\Http\Controllers\Settings\RolePermissionController;
 use App\Http\Controllers\Settings\AppSettingController;
 use App\Http\Controllers\Settings\ComunicadoController;
+use App\Http\Controllers\Settings\SqlBackupController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LonaController;
 use App\Http\Controllers\MetaAvanceController;
@@ -162,5 +163,11 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/app', [AppSettingController::class,'edit'])->name('app.edit')->middleware('permission:settings.editar');
         Route::put('/app', [AppSettingController::class,'update'])->name('app.update')->middleware('permission:settings.editar');
+
+        Route::prefix('backups-sql')->name('backups_sql.')->group(function () {
+            Route::get('/', [SqlBackupController::class, 'index'])->name('index');
+            Route::post('/subir', [SqlBackupController::class, 'upload'])->name('upload');
+            Route::get('/{file}', [SqlBackupController::class, 'download'])->name('download');
+        });
     });
 });
