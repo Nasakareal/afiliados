@@ -3,8 +3,12 @@
   "WorkspaceRootPath": "C:\\wamp64\\www\\sistemaAfiliados\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\wamp64\\www\\sistemaAfiliados\\resources\\views\\referentes_seccionales\\index.blade.php||{3B902123-F8A7-4915-9F01-361F908088D0}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:resources\\views\\referentes_seccionales\\index.blade.php||{3B902123-F8A7-4915-9F01-361F908088D0}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\wamp64\\www\\sistemaAfiliados\\app\\Http\\Controllers\\AvanceMunicipalController.php||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:app\\Http\\Controllers\\AvanceMunicipalController.php||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\wamp64\\www\\sistemaAfiliados\\resources\\views\\avance_municipal\\index.blade.php||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:resources\\views\\avance_municipal\\index.blade.php||{3B902123-F8A7-4915-9F01-361F908088D0}"
     }
   ],
   "DocumentGroupContainers": [
@@ -19,14 +23,27 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "index.blade.php",
-              "DocumentMoniker": "C:\\wamp64\\www\\sistemaAfiliados\\resources\\views\\referentes_seccionales\\index.blade.php",
-              "RelativeDocumentMoniker": "resources\\views\\referentes_seccionales\\index.blade.php",
-              "ToolTip": "C:\\wamp64\\www\\sistemaAfiliados\\resources\\views\\referentes_seccionales\\index.blade.php",
-              "RelativeToolTip": "resources\\views\\referentes_seccionales\\index.blade.php",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Title": "AvanceMunicipalController.php",
+              "DocumentMoniker": "C:\\wamp64\\www\\sistemaAfiliados\\app\\Http\\Controllers\\AvanceMunicipalController.php",
+              "RelativeDocumentMoniker": "app\\Http\\Controllers\\AvanceMunicipalController.php",
+              "ToolTip": "C:\\wamp64\\www\\sistemaAfiliados\\app\\Http\\Controllers\\AvanceMunicipalController.php",
+              "RelativeToolTip": "app\\Http\\Controllers\\AvanceMunicipalController.php",
+              "ViewState": "AgIAAFECAAAAAAAAAADwv4sCAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002338|",
-              "WhenOpened": "2026-09-08T19:05:51.197Z",
+              "WhenOpened": "2026-09-08T19:40:49.683Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "index.blade.php",
+              "DocumentMoniker": "C:\\wamp64\\www\\sistemaAfiliados\\resources\\views\\avance_municipal\\index.blade.php",
+              "RelativeDocumentMoniker": "resources\\views\\avance_municipal\\index.blade.php",
+              "ToolTip": "C:\\wamp64\\www\\sistemaAfiliados\\resources\\views\\avance_municipal\\index.blade.php",
+              "RelativeToolTip": "resources\\views\\avance_municipal\\index.blade.php",
+              "ViewState": "AgIAAD4HAAAAAAAAAADwv3gHAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002338|",
+              "WhenOpened": "2026-09-08T19:37:42.767Z",
               "EditorCaption": ""
             }
           ]

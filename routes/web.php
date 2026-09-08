@@ -20,6 +20,8 @@ use App\Http\Controllers\MetaAvanceController;
 
 use App\Http\Controllers\ReferenteMunicipalController;
 use App\Http\Controllers\ReferenteSeccionalController;
+use App\Http\Controllers\AvanceMunicipalController;
+use App\Http\Controllers\AvanceSeccionalController;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,52 +41,39 @@ if (file_exists(base_path('routes/auth.php'))) {
 
 Route::middleware('auth')->group(function () {
 
+    Route::get('/dashboard', [DashboardController::class,'index'])->name('dashboard');
+
+    //Rutas para capturar los Referentes Municipales
     Route::get('/referentes-municipales', [ReferenteMunicipalController::class, 'index'])->name('referentes_municipales.index')->middleware('permission:referentes_municipales.ver');
     Route::get('/referentes-municipales/create', [ReferenteMunicipalController::class, 'create'])->name('referentes_municipales.create')->middleware('permission:referentes_municipales.crear');
     Route::post('/referentes-municipales', [ReferenteMunicipalController::class, 'store'])->name('referentes_municipales.store')->middleware('permission:referentes_municipales.crear');
     Route::get('/referentes-municipales/{referenteMunicipal}', [ReferenteMunicipalController::class, 'show'])->name('referentes_municipales.show')->middleware('permission:referentes_municipales.ver');
     Route::get('/referentes-municipales/{referenteMunicipal}/edit', [ReferenteMunicipalController::class, 'edit'])->name('referentes_municipales.edit')->middleware('permission:referentes_municipales.editar');
+    Route::put('/referentes-municipales/{referenteMunicipal}', [ReferenteMunicipalController::class, 'update'])->name('referentes_municipales.update')->middleware('permission:referentes_municipales.editar');
+    Route::delete('/referentes-municipales/{referenteMunicipal}', [ReferenteMunicipalController::class, 'destroy'])->name('referentes_municipales.destroy')->middleware('permission:referentes_municipales.borrar');
 
-    Route::put('/referentes-municipales/{referenteMunicipal}', [ReferenteMunicipalController::class, 'update'])
-        ->name('referentes_municipales.update')
-        ->middleware('permission:referentes_municipales.editar');
+    // Avance municipal
+    Route::get('/avance-municipal', [AvanceMunicipalController::class, 'index'])->name('avance_municipal.index')->middleware('permission:avance_municipal.ver');
 
-    Route::delete('/referentes-municipales/{referenteMunicipal}', [ReferenteMunicipalController::class, 'destroy'])
-        ->name('referentes_municipales.destroy')
-        ->middleware('permission:referentes_municipales.borrar');
+    //Rutas para capturar los Referentes Seccionales
+    Route::get('/referentes-seccionales', [ReferenteSeccionalController::class, 'index'])->name('referentes_seccionales.index')->middleware('permission:referentes_seccionales.ver');
+    Route::get('/referentes-seccionales/create', [ReferenteSeccionalController::class, 'create'])->name('referentes_seccionales.create')->middleware('permission:referentes_seccionales.crear');
+    Route::post('/referentes-seccionales', [ReferenteSeccionalController::class, 'store'])->name('referentes_seccionales.store')->middleware('permission:referentes_seccionales.crear');
+    Route::get('/referentes-seccionales/{referenteSeccional}', [ReferenteSeccionalController::class, 'show'])->name('referentes_seccionales.show')->middleware('permission:referentes_seccionales.ver');
+    Route::get('/referentes-seccionales/{referenteSeccional}/edit', [ReferenteSeccionalController::class, 'edit'])->name('referentes_seccionales.edit')->middleware('permission:referentes_seccionales.editar');
+    Route::put('/referentes-seccionales/{referenteSeccional}', [ReferenteSeccionalController::class, 'update'])->name('referentes_seccionales.update')->middleware('permission:referentes_seccionales.editar');
+    Route::delete('/referentes-seccionales/{referenteSeccional}', [ReferenteSeccionalController::class, 'destroy'])->name('referentes_seccionales.destroy')->middleware('permission:referentes_seccionales.borrar');
 
+    // Avance seccional
+    Route::get('/avance-seccional', [AvanceSeccionalController::class, 'index'])->name('avance_seccional.index')->middleware('permission:avance_seccional.ver');
 
-    Route::get('/referentes-seccionales', [ReferenteSeccionalController::class, 'index'])
-        ->name('referentes_seccionales.index')
-        ->middleware('permission:referentes_seccionales.ver');
-
-    Route::get('/referentes-seccionales/create', [ReferenteSeccionalController::class, 'create'])
-        ->name('referentes_seccionales.create')
-        ->middleware('permission:referentes_seccionales.crear');
-
-    Route::post('/referentes-seccionales', [ReferenteSeccionalController::class, 'store'])
-        ->name('referentes_seccionales.store')
-        ->middleware('permission:referentes_seccionales.crear');
-
-    Route::get('/referentes-seccionales/{referenteSeccional}', [ReferenteSeccionalController::class, 'show'])
-        ->name('referentes_seccionales.show')
-        ->middleware('permission:referentes_seccionales.ver');
-
-    Route::get('/referentes-seccionales/{referenteSeccional}/edit', [ReferenteSeccionalController::class, 'edit'])
-        ->name('referentes_seccionales.edit')
-        ->middleware('permission:referentes_seccionales.editar');
-
-    Route::put('/referentes-seccionales/{referenteSeccional}', [ReferenteSeccionalController::class, 'update'])
-        ->name('referentes_seccionales.update')
-        ->middleware('permission:referentes_seccionales.editar');
-
-    Route::delete('/referentes-seccionales/{referenteSeccional}', [ReferenteSeccionalController::class, 'destroy'])
-        ->name('referentes_seccionales.destroy')
-        ->middleware('permission:referentes_seccionales.borrar');
-
-
-
-    Route::get('/dashboard', [DashboardController::class,'index'])->name('dashboard');
+    // Avance general
+    Route::get('/avance', [MetaAvanceController::class, 'index'])->name('avance.index')->middleware('permission:avance.ver');
+    Route::get('/avance/convencidos', [MetaAvanceController::class, 'convencidos'])->name('avance.convencidos')->middleware('permission:avance.ver');
+    Route::get('/avance/export.xlsx', [MetaAvanceController::class, 'export'])->name('avance.export.xlsx')->middleware('permission:avance.ver');
+    Route::post('/avance/metas', [MetaAvanceController::class, 'store'])->name('avance.metas.store')->middleware('permission:avance.metas');
+    Route::put('/avance/metas/{metaAvance}', [MetaAvanceController::class, 'update'])->name('avance.metas.update')->middleware('permission:avance.metas');
+    Route::delete('/avance/metas/{metaAvance}', [MetaAvanceController::class, 'destroy'])->name('avance.metas.destroy')->middleware('permission:avance.metas');
 
     // Afiliados
     Route::get('/afiliados', [AfiliadoController::class,'index'])->name('afiliados.index')->middleware('permission:afiliados.ver');

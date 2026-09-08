@@ -221,36 +221,92 @@
           </li>
           @endcan
 
-          @can('lonas.ver')
-          <li class="nav-item dropdown keep-open">
-            <a class="nav-link dropdown-toggle {{ is_active(['lonas.*']) }}" href="#" data-bs-toggle="dropdown" role="button">
-              <i class="fa-solid fa-panorama me-1"></i> Lonas
-            </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item {{ is_active('lonas.index') }}" href="{{ route('lonas.index') }}"><i class="fa-solid fa-list me-1"></i> Listado</a></li>
-              <li><a class="dropdown-item {{ is_active('lonas.map') }}" href="{{ route('lonas.map') }}"><i class="fa-solid fa-map-location-dot me-1"></i> Mapa</a></li>
-              @can('lonas.crear')
-              <li><a class="dropdown-item {{ is_active('lonas.create') }}" href="{{ route('lonas.create') }}"><i class="fa-solid fa-camera me-1"></i> Capturar</a></li>
-              @endcan
-            </ul>
-          </li>
-          @endcan
+            @can('lonas.ver')
+                      <li class="nav-item dropdown keep-open">
+                        <a class="nav-link dropdown-toggle {{ is_active(['lonas.*']) }}" href="#" data-bs-toggle="dropdown" role="button">
+                          <i class="fa-solid fa-panorama me-1"></i> Lonas
+                        </a>
+                        <ul class="dropdown-menu">
+                          <li><a class="dropdown-item {{ is_active('lonas.index') }}" href="{{ route('lonas.index') }}"><i class="fa-solid fa-list me-1"></i> Listado</a></li>
+                          <li><a class="dropdown-item {{ is_active('lonas.map') }}" href="{{ route('lonas.map') }}"><i class="fa-solid fa-map-location-dot me-1"></i> Mapa</a></li>
+                          @can('lonas.crear')
+                          <li><a class="dropdown-item {{ is_active('lonas.create') }}" href="{{ route('lonas.create') }}"><i class="fa-solid fa-camera me-1"></i> Capturar</a></li>
+                          @endcan
+                        </ul>
+                      </li>
+                      @endcan
 
-          @can('mapa.ver')
-          <li class="nav-item">
-            <a class="nav-link {{ is_active('mapa.index') }}" href="{{ route('mapa.index') }}">
-              <i class="fa-solid fa-map-location-dot me-1"></i> Mapa
-            </a>
-          </li>
-          @endcan
+                      @can('mapa.ver')
+                      <li class="nav-item">
+                        <a class="nav-link {{ is_active('mapa.index') }}" href="{{ route('mapa.index') }}">
+                          <i class="fa-solid fa-map-location-dot me-1"></i> Mapa
+                        </a>
+                      </li>
+                      @endcan
 
-            @can('avance.ver')
-            <li class="nav-item">
-                <a class="nav-link {{ is_active(['avance.*']) }}" href="{{ route('avance.index') }}">
-                <i class="fa-solid fa-chart-line me-1"></i> Avance
+                        @if(
+                auth()->user()->can('avance.ver') ||
+                auth()->user()->can('avance_municipal.ver') ||
+                auth()->user()->can('avance_seccional.ver')
+            )
+            <li class="nav-item dropdown keep-open">
+
+                <a
+                    class="nav-link dropdown-toggle {{ is_active([
+                        'avance.*',
+                        'avance_municipal.*',
+                        'avance_seccional.*'
+                    ]) }}"
+                    href="#"
+                    data-bs-toggle="dropdown"
+                    role="button"
+                >
+                    <i class="fa-solid fa-chart-line me-1"></i>
+                    Avance
                 </a>
+
+                <ul class="dropdown-menu">
+
+                    @can('avance.ver')
+                    <li>
+                        <a
+                            class="dropdown-item {{ is_active('avance.*') }}"
+                            href="{{ route('avance.index') }}"
+                        >
+                            <i class="fa-solid fa-user-check me-2"></i>
+                            Convencidos
+                        </a>
+                    </li>
+                    @endcan
+
+                    @can('avance_municipal.ver')
+                    <li>
+                        <a
+                            class="dropdown-item {{ is_active('avance_municipal.*') }}"
+                            href="{{ route('avance_municipal.index') }}"
+                        >
+                            <i class="fa-solid fa-building-user me-2"></i>
+                            Referentes municipales
+                        </a>
+                    </li>
+                    @endcan
+
+                    @can('avance_seccional.ver')
+                    <li>
+                        <a
+                            class="dropdown-item {{ is_active('avance_seccional.*') }}"
+                            href="{{ route('avance_seccional.index') }}"
+                        >
+                            <i class="fa-solid fa-map-location-dot me-2"></i>
+                            Referentes seccionales
+                        </a>
+                    </li>
+                    @endcan
+
+                </ul>
+
             </li>
-            @endcan
+            @endif
 
           @can('reportes.ver')
           <li class="nav-item dropdown keep-open">
