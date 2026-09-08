@@ -144,13 +144,57 @@
       <div class="offcanvas-body">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0 align-items-lg-center">
 
-          @can('afiliados.ver')
-          <li class="nav-item">
-            <a class="nav-link {{ is_active(['afiliados.*','registro']) }}" href="{{ route('afiliados.index') }}">
-              <i class="fa-solid fa-user-check me-1"></i> Convencidos
-            </a>
-          </li>
-          @endcan
+            @if(
+                auth()->user()->can('afiliados.ver') ||
+                auth()->user()->can('referentes_municipales.ver') ||
+                auth()->user()->can('referentes_seccionales.ver')
+            )
+            <li class="nav-item dropdown keep-open">
+
+                <a class="nav-link dropdown-toggle {{ is_active([
+                    'afiliados.*',
+                    'registro',
+                    'referentes_municipales.*',
+                    'referentes_seccionales.*'
+                ]) }}" href="#" data-bs-toggle="dropdown" role="button">
+                    <i class="fa-solid fa-user-check me-1"></i> Convencidos
+                </a>
+
+                <ul class="dropdown-menu">
+
+                    @can('afiliados.ver')
+                    <li>
+                        <a class="dropdown-item {{ is_active('afiliados.*') }}"
+                           href="{{ route('afiliados.index') }}">
+                            <i class="fa-solid fa-users me-2"></i>
+                            Convencidos
+                        </a>
+                    </li>
+                    @endcan
+
+                    @can('referentes_municipales.ver')
+                    <li>
+                        <a class="dropdown-item {{ is_active('referentes_municipales.*') }}"
+                           href="{{ route('referentes_municipales.index') }}">
+                            <i class="fa-solid fa-building-user me-2"></i>
+                            Referentes municipales
+                        </a>
+                    </li>
+                    @endcan
+
+                    @can('referentes_seccionales.ver')
+                    <li>
+                        <a class="dropdown-item {{ is_active('referentes_seccionales.*') }}"
+                           href="{{ route('referentes_seccionales.index') }}">
+                            <i class="fa-solid fa-map-location-dot me-2"></i>
+                            Referentes seccionales
+                        </a>
+                    </li>
+                    @endcan
+
+                </ul>
+            </li>
+            @endif
 
           @can('secciones.ver')
           <li class="nav-item">

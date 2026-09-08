@@ -3,8 +3,8 @@
     "",
     "\\resources",
     "\\resources\\views",
-    "\\resources\\views\\afiliados"
+    "\\resources\\views\\referentes_seccionales"
   ],
-  "SelectedNode": "\\resources\\views\\afiliados\\create.blade.php",
+  "SelectedNode": "\\resources\\views\\referentes_seccionales\\index.blade.php",
   "PreviewInSolutionExplorer": false
 }
