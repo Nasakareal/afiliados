@@ -25,6 +25,7 @@ class Afiliado extends Model
         'lat','lng',
         'seccion','distrito_federal','distrito_local',
         'perfil','observaciones',
+        'import_batch',
         'estatus','fecha_convencimiento',
     ];
 

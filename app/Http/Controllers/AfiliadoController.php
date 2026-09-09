@@ -36,6 +36,7 @@ class AfiliadoController extends Controller
         'Olivia Guzman',
         'Alex Moran',
         'Elias Ibarra',
+        'Elías Ibarra Torres',
         'Salvador Vázquez',
         'Erandeni',
         'Sergio Baez',
