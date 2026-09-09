@@ -113,7 +113,7 @@ class AvanceSeccionalController extends Controller
 
         $referentes = $referentesQuery
             ->get()
-            ->keyBy(function ($referente) {
+            ->groupBy(function ($referente) {
                 return self::sectionKey(
                     (string) $referente->cve_mun,
                     $referente->seccion
@@ -127,9 +127,15 @@ class AvanceSeccionalController extends Controller
                     $fila->seccion
                 );
 
-                $referente = $referentes->get($key);
+                $referentesSeccion = $referentes
+                    ->get($key, collect())
+                    ->sortBy('posicion')
+                    ->values();
 
-                $tieneReferente = $referente !== null;
+                $referente = $referentesSeccion->first();
+
+                $cantidadReferentes = $referentesSeccion->count();
+                $tieneReferente = $cantidadReferentes > 0;
 
                 return [
                     'cve_mun' => str_pad(
@@ -168,6 +174,15 @@ class AvanceSeccionalController extends Controller
 
                     'tiene_referente' =>
                         $tieneReferente,
+
+                    'cantidad_referentes' =>
+                        $cantidadReferentes,
+
+                    'cupo_completo' =>
+                        $cantidadReferentes >= 2,
+
+                    'referentes' =>
+                        $referentesSeccion,
 
                     'referente_id' =>
                         $referente?->id,

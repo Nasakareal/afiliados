@@ -1214,13 +1214,23 @@
 
                             <td>
 
-                                @if($fila['tiene_referente'])
+                                @if($fila['cupo_completo'])
 
                                     <span class="badge bg-success">
 
                                         <i class="fa-solid fa-check me-1"></i>
 
-                                        Cubierta
+                                        Completa 2/2
+
+                                    </span>
+
+                                @elseif($fila['tiene_referente'])
+
+                                    <span class="badge bg-warning text-dark">
+
+                                        <i class="fa-solid fa-user-plus me-1"></i>
+
+                                        Parcial 1/2
 
                                     </span>
 
@@ -1230,7 +1240,7 @@
 
                                         <i class="fa-solid fa-xmark me-1"></i>
 
-                                        Pendiente
+                                        Pendiente 0/2
 
                                     </span>
 
@@ -1241,31 +1251,58 @@
 
                             <td class="referente-cell">
 
-                                @if($fila['tiene_referente'])
+                                @forelse($fila['referentes'] as $referenteFila)
 
-                                    <span class="referente-name">
-                                        {{ $fila['nombre_completo'] }}
-                                    </span>
+                                    <div class="referente-name mb-1">
+                                        {{ $referenteFila->posicion }}.
+                                        {{ $referenteFila->nombre_completo }}
+                                    </div>
 
-                                @else
+                                @empty
 
                                     <span class="missing-reference">
                                         Sin referente seccional
                                     </span>
 
-                                @endif
+                                @endforelse
 
                             </td>
 
 
                             <td>
 
-                                @if($fila['telefono'])
+                                @forelse($fila['referentes'] as $referenteFila)
 
-                                    @if($urlWhatsApp)
+                                    @php
+                                        $numeroReferente = preg_replace(
+                                            '/\D+/',
+                                            '',
+                                            (string)($referenteFila->telefono ?? '')
+                                        );
+
+                                        if (
+                                            strlen($numeroReferente) === 13 &&
+                                            substr($numeroReferente, 0, 3) === '521'
+                                        ) {
+                                            $numeroReferente = '52'.substr($numeroReferente, 3);
+                                        } elseif (strlen($numeroReferente) === 10) {
+                                            $numeroReferente = '52'.$numeroReferente;
+                                        }
+
+                                        $whatsAppReferente = (
+                                            $referenteFila->whatsapp &&
+                                            $numeroReferente !== ''
+                                        ) ? 'https://wa.me/'.$numeroReferente : null;
+                                    @endphp
+
+                                    <div class="mb-2">
+
+                                    @if($referenteFila->telefono)
+
+                                        @if($whatsAppReferente)
 
                                         <a
-                                            href="{{ $urlWhatsApp }}"
+                                            href="{{ $whatsAppReferente }}"
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             class="text-success text-decoration-none fw-semibold"
@@ -1274,7 +1311,7 @@
 
                                             <i class="fa-brands fa-whatsapp me-1"></i>
 
-                                            {{ $fila['telefono'] }}
+                                            {{ $referenteFila->telefono }}
 
                                         </a>
 
@@ -1284,101 +1321,125 @@
 
                                             <i class="fa-solid fa-phone me-1"></i>
 
-                                            {{ $fila['telefono'] }}
+                                            {{ $referenteFila->telefono }}
 
                                         </span>
 
                                     @endif
 
-                                @else
+                                    @else
 
-                                    —
+                                        —
 
-                                @endif
+                                    @endif
 
 
-                                @if($fila['correo'])
+                                @if($referenteFila->correo)
 
                                     <div class="contact-small mt-1">
 
                                         <i class="fa-solid fa-envelope me-1"></i>
 
-                                        {{ $fila['correo'] }}
+                                        {{ $referenteFila->correo }}
 
                                     </div>
 
                                 @endif
 
-                            </td>
-
-
-                            <td>
-
-                                @if($fila['cargo'])
-
-                                    <div>
-                                        {{ $fila['cargo'] }}
                                     </div>
 
-                                @endif
-
-
-                                @if($fila['organizacion'])
-
-                                    <div class="text-muted small">
-                                        {{ $fila['organizacion'] }}
-                                    </div>
-
-                                @endif
-
-
-                                @if(
-                                    !$fila['cargo'] &&
-                                    !$fila['organizacion']
-                                )
+                                @empty
 
                                     —
 
-                                @endif
+                                @endforelse
 
                             </td>
 
 
                             <td>
 
-                                @if(!$fila['tiene_referente'])
+                                @forelse($fila['referentes'] as $referenteFila)
 
-                                    <span class="badge bg-danger">
-                                        Pendiente
-                                    </span>
+                                    <div class="mb-2">
 
-                                @elseif($fila['activo'])
+                                        @if($referenteFila->cargo)
 
-                                    <span class="badge bg-success">
-                                        Activo
-                                    </span>
+                                            <div>{{ $referenteFila->cargo }}</div>
 
-                                @else
+                                        @endif
 
-                                    <span class="badge bg-secondary">
-                                        Inactivo
-                                    </span>
+                                        @if($referenteFila->organizacion)
 
-                                @endif
+                                            <div class="text-muted small">
+                                                {{ $referenteFila->organizacion }}
+                                            </div>
+
+                                        @endif
+
+                                        @if(
+                                            !$referenteFila->cargo &&
+                                            !$referenteFila->organizacion
+                                        )
+
+                                            —
+
+                                        @endif
+
+                                    </div>
+
+                                @empty
+
+                                    —
+
+                                @endforelse
 
                             </td>
 
 
                             <td>
 
-                                @if($fila['tiene_referente'])
+                                @forelse($fila['referentes'] as $referenteFila)
+
+                                    <div class="mb-1">
+
+                                        @if($referenteFila->activo)
+
+                                            <span class="badge bg-success">
+                                                {{ $referenteFila->posicion }}. Activo
+                                            </span>
+
+                                        @else
+
+                                            <span class="badge bg-secondary">
+                                                {{ $referenteFila->posicion }}. Inactivo
+                                            </span>
+
+                                        @endif
+
+                                    </div>
+
+                                @empty
+
+                                    <span class="badge bg-danger">Pendiente</span>
+
+                                @endforelse
+
+                            </td>
+
+
+                            <td>
+
+                                @foreach($fila['referentes'] as $referenteFila)
+
+                                    <div class="mb-1 text-nowrap">
 
                                     @can('referentes_seccionales.ver')
 
                                         <a
                                             href="{{ route(
                                                 'referentes_seccionales.show',
-                                                $fila['referente_id']
+                                                $referenteFila->id
                                             ) }}"
                                             class="btn btn-sm btn-info"
                                             title="Ver referente"
@@ -1394,7 +1455,7 @@
                                         <a
                                             href="{{ route(
                                                 'referentes_seccionales.edit',
-                                                $fila['referente_id']
+                                                $referenteFila->id
                                             ) }}"
                                             class="btn btn-sm btn-success"
                                             title="Editar referente"
@@ -1404,7 +1465,12 @@
 
                                     @endcan
 
-                                @else
+                                    </div>
+
+                                @endforeach
+
+
+                                @if($fila['cantidad_referentes'] < 2)
 
                                     @can('referentes_seccionales.crear')
 

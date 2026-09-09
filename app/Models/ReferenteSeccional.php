@@ -15,6 +15,7 @@ class ReferenteSeccional extends Model
         'cve_mun',
         'municipio',
         'seccion',
+        'posicion',
         'distrito_local',
         'distrito_federal',
         'nombre_completo',
@@ -32,6 +33,7 @@ class ReferenteSeccional extends Model
     ];
 
     protected $casts = [
+        'posicion' => 'integer',
         'distrito_local' => 'integer',
         'distrito_federal' => 'integer',
         'whatsapp' => 'boolean',

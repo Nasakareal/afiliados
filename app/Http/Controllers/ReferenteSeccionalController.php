@@ -4,15 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\ReferenteSeccional;
 use App\Support\LocalDistrictAccess;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Validation\Rule;
 
 class ReferenteSeccionalController extends Controller
 {
     public const PER_PAGE_OPTIONS = [25, 50, 100, 200, 300, 500];
+    public const REFERENTES_POR_SECCION = 2;
 
     public function index(Request $request)
     {
@@ -108,19 +109,12 @@ class ReferenteSeccionalController extends Controller
         $municipios = $this->cargarMunicipios();
 
         $query = DB::table('secciones')
-            ->whereNotExists(function ($subquery) {
-                $subquery
-                    ->select(DB::raw(1))
-                    ->from('referentes_seccionales as rs')
-                    ->whereColumn(
-                        'rs.cve_mun',
-                        'secciones.cve_mun'
-                    )
-                    ->whereColumn(
-                        'rs.seccion',
-                        'secciones.seccion'
-                    );
-            });
+            ->whereRaw(
+                '(SELECT COUNT(*) FROM referentes_seccionales AS rs '
+                .'WHERE rs.cve_mun = secciones.cve_mun '
+                .'AND rs.seccion = secciones.seccion) < ?',
+                [self::REFERENTES_POR_SECCION]
+            );
 
         LocalDistrictAccess::scope($query);
 
@@ -153,7 +147,7 @@ class ReferenteSeccionalController extends Controller
 
         $data = $this->aplicarDatosSeccion($data);
 
-        $referente = ReferenteSeccional::create($data);
+        $referente = $this->guardarEnPosicionDisponible($data);
 
         return redirect()
             ->route(
@@ -216,24 +210,16 @@ class ReferenteSeccionalController extends Controller
                 'cve_mun',
                 $referenteSeccional->cve_mun
             )
-            ->whereNotExists(function ($subquery) use ($referenteSeccional) {
-                $subquery
-                    ->select(DB::raw(1))
-                    ->from('referentes_seccionales as rs')
-                    ->whereColumn(
-                        'rs.cve_mun',
-                        'secciones.cve_mun'
-                    )
-                    ->whereColumn(
-                        'rs.seccion',
-                        'secciones.seccion'
-                    )
-                    ->where(
-                        'rs.id',
-                        '!=',
-                        $referenteSeccional->id
-                    );
-            });
+            ->whereRaw(
+                '(SELECT COUNT(*) FROM referentes_seccionales AS rs '
+                .'WHERE rs.cve_mun = secciones.cve_mun '
+                .'AND rs.seccion = secciones.seccion '
+                .'AND rs.id <> ?) < ?',
+                [
+                    $referenteSeccional->id,
+                    self::REFERENTES_POR_SECCION,
+                ]
+            );
 
         LocalDistrictAccess::scope($query);
 
@@ -265,13 +251,16 @@ class ReferenteSeccionalController extends Controller
         $this->normalizar($request);
 
         $data = $request->validate(
-            $this->rules($referenteSeccional),
+            $this->rules(),
             $this->messages()
         );
 
         $data = $this->aplicarDatosSeccion($data);
 
-        $referenteSeccional->update($data);
+        $referenteSeccional = $this->guardarEnPosicionDisponible(
+            $data,
+            $referenteSeccional
+        );
 
         return redirect()
             ->route(
@@ -310,22 +299,8 @@ class ReferenteSeccionalController extends Controller
         }
     }
 
-    private function rules(?ReferenteSeccional $actual = null): array
+    private function rules(): array
     {
-        $seccionUnique = Rule::unique(
-            'referentes_seccionales',
-            'seccion'
-        )->where(function ($query) {
-            return $query->where(
-                'cve_mun',
-                request()->input('cve_mun')
-            );
-        });
-
-        if ($actual) {
-            $seccionUnique->ignore($actual->id);
-        }
-
         return [
             'cve_mun' => [
                 'required',
@@ -337,7 +312,6 @@ class ReferenteSeccionalController extends Controller
                 'required',
                 'string',
                 'max:6',
-                $seccionUnique,
             ],
 
             'nombre_completo' => [
@@ -423,9 +397,93 @@ class ReferenteSeccionalController extends Controller
                 'Captura el nombre completo del referente.',
             'correo.email' =>
                 'El correo electrónico no tiene un formato válido.',
-            'seccion.unique' =>
-                'Esta sección ya tiene un referente seccional registrado.',
         ];
+    }
+
+    private function guardarEnPosicionDisponible(
+        array $data,
+        ?ReferenteSeccional $actual = null
+    ): ReferenteSeccional {
+        try {
+            return DB::transaction(function () use ($data, $actual) {
+                DB::table('secciones')
+                ->where('cve_mun', $data['cve_mun'])
+                ->where('seccion', $data['seccion'])
+                ->lockForUpdate()
+                ->first();
+
+                $ocupadas = ReferenteSeccional::query()
+                ->where('cve_mun', $data['cve_mun'])
+                ->where('seccion', $data['seccion'])
+                ->when(
+                    $actual,
+                    fn ($query) => $query->where('id', '!=', $actual->id)
+                )
+                ->lockForUpdate()
+                ->pluck('posicion')
+                ->map(fn ($posicion) => (int) $posicion);
+
+                $mismaSeccion = $actual
+                && $actual->cve_mun === $data['cve_mun']
+                && (string) $actual->seccion === (string) $data['seccion'];
+
+                $posicionActual = $actual
+                ? (int) $actual->posicion
+                : 0;
+
+                if (
+                    $mismaSeccion
+                    && in_array(
+                        $posicionActual,
+                        range(1, self::REFERENTES_POR_SECCION),
+                        true
+                    )
+                    && !$ocupadas->contains($posicionActual)
+                ) {
+                    $posicion = $posicionActual;
+                } else {
+                    $posicion = collect(
+                        range(1, self::REFERENTES_POR_SECCION)
+                    )->first(
+                        fn ($candidata) => !$ocupadas->contains($candidata)
+                    );
+                }
+
+                if ($posicion === null) {
+                    throw $this->seccionCompleta();
+                }
+
+                $data['posicion'] = $posicion;
+
+                if ($actual) {
+                    $actual->update($data);
+
+                    return $actual->refresh();
+                }
+
+                return ReferenteSeccional::create($data);
+            });
+        } catch (QueryException $e) {
+            if (
+                $e->getCode() === '23000'
+                && str_contains(
+                    $e->getMessage(),
+                    'referentes_seccionales_cve_seccion_posicion_unique'
+                )
+            ) {
+                throw $this->seccionCompleta();
+            }
+
+            throw $e;
+        }
+    }
+
+    private function seccionCompleta(): ValidationException
+    {
+        return ValidationException::withMessages([
+            'seccion' =>
+                'Esta sección ya tiene sus 2 referentes seccionales registrados.',
+        ]);
     }
 
     private function normalizar(
