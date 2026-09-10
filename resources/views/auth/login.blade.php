@@ -828,11 +828,6 @@
 
                     <section class="presentation">
 
-                        <div class="presentation-label">
-                            <span></span>
-                            Sistema de afiliados
-                        </div>
-
                         <h1>
                             Personas.
                             <span class="pink">Territorio.</span>

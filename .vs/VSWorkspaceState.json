@@ -3,9 +3,7 @@
     "",
     "\\resources",
     "\\resources\\views",
-    "\\resources\\views\\afiliados",
-    "\\resources\\views\\auth",
-    "\\resources\\views\\layouts"
+    "\\resources\\views\\auth"
   ],
   "SelectedNode": "\\resources\\views\\auth\\login.blade.php",
   "PreviewInSolutionExplorer": false
