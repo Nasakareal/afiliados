@@ -149,17 +149,39 @@ class MetaAvanceController extends Controller
             ->take(5)
             ->values();
 
-        $topReferentes = $convencidosDetalle
-            ->filter(fn($fila) => in_array((string) $fila->referente, $referentesOficiales, true))
-            ->groupBy('referente')
-            ->map(function ($filas, $name) {
-                return (object) [
-                    'name' => (string) $name,
-                    'total' => (int) $filas->sum('total'),
-                ];
-            })
-            ->sort(fn($a, $b) => $b->total <=> $a->total ?: strcmp($a->name, $b->name))
-            ->values();
+        $topReferentes = DB::table('afiliados')
+            ->selectRaw('TRIM(perfil) AS name, COUNT(*) AS total')
+            ->whereNull('deleted_at')
+            ->whereNotNull('perfil')
+            ->whereRaw("TRIM(perfil) <> ''")
+            ->whereIn(DB::raw('TRIM(perfil)'), $referentesOficiales)
+            ->when(
+                $cveMun !== '',
+                fn($query) => $query->where('cve_mun', $cveMun)
+            )
+            ->when(
+                $distritoLocal !== '',
+                fn($query) => $query->where('distrito_local', $distritoLocal)
+            )
+            ->when(
+                $distritoFederal !== '',
+                fn($query) => $query->where('distrito_federal', $distritoFederal)
+            )
+            ->when(
+                $referente !== '',
+                fn($query) => $query->whereRaw(
+                    'TRIM(perfil) = ?',
+                    [$referente]
+                )
+            )
+            ->when(
+                $capturistaId,
+                fn($query) => $query->where('capturista_id', $capturistaId)
+            )
+            ->groupByRaw('TRIM(perfil)')
+            ->orderByDesc('total')
+            ->orderBy('name')
+            ->get();
 
         $lonas = DB::table('lonas')
             ->join(
