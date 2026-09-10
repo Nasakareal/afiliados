@@ -121,16 +121,30 @@
       ? 'Distrito '.$dfTexto.($nombreDistritoFederal ? ' '.$nombreDistritoFederal : '')
       : 'Michoacán';
     if ($distritoLocal !== '') $tituloDistrito .= ' · Distrito local '.$dlTexto;
+
+    $tipoCargaTexto = match($tipoCarga) {
+      'distritales' => 'Distritales',
+      'politicos' => 'Políticos',
+      default => 'Todos',
+    };
   @endphp
 
   <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
     <div>
       <h1 class="h5 fw-bold mb-1 text-uppercase">Avance distrital</h1>
-      <div class="avance-periodo">{{ $tituloDistrito }} · Histórico completo</div>
+      <div class="avance-periodo">{{ $tituloDistrito }} · {{ $tipoCargaTexto }} · Histórico completo</div>
     </div>
     <div class="report-actions d-flex gap-2">
       <form method="GET" action="{{ route('avance.index') }}" id="districtQuickFilter" class="district-quick-filter">
         @if($cveMun !== '')<input type="hidden" name="cve_mun" value="{{ $cveMun }}">@endif
+
+        <label for="quickTipoCarga" class="visually-hidden">Tipo de carga</label>
+        <select name="tipo_carga" id="quickTipoCarga" class="form-select form-select-sm" title="Tipo de carga" onchange="this.form.submit()">
+          <option value="todos" {{ $tipoCarga === 'todos' ? 'selected' : '' }}>Todos</option>
+          <option value="distritales" {{ $tipoCarga === 'distritales' ? 'selected' : '' }}>Distritales</option>
+          <option value="politicos" {{ $tipoCarga === 'politicos' ? 'selected' : '' }}>Políticos</option>
+        </select>
+
         <label for="quickReferente" class="visually-hidden">Referente</label>
         <select name="referente" id="quickReferente" class="form-select form-select-sm" title="Cambiar referente" onchange="this.form.submit()">
             <option value="">Todos los referentes</option>
@@ -425,6 +439,15 @@
 
         <div class="modal-body">
           <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Tipo de carga</label>
+              <select name="tipo_carga" class="form-select">
+                <option value="todos" {{ $tipoCarga === 'todos' ? 'selected' : '' }}>Todos</option>
+                <option value="distritales" {{ $tipoCarga === 'distritales' ? 'selected' : '' }}>Distritales</option>
+                <option value="politicos" {{ $tipoCarga === 'politicos' ? 'selected' : '' }}>Políticos</option>
+              </select>
+            </div>
+
             <div class="col-md-6">
               <label class="form-label">Distrito federal</label>
               <select name="distrito_federal" class="form-select">

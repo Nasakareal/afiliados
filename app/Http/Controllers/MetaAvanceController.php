@@ -17,7 +17,7 @@ class MetaAvanceController extends Controller
     private const META_FECHA_INICIO = '2000-01-01';
     private const META_FECHA_FIN = '2099-12-31';
 
-    public function index(Request $request)
+     public function index(Request $request)
     {
         extract($this->resolveFilters($request));
 
@@ -58,7 +58,7 @@ class MetaAvanceController extends Controller
             ->orderBy('municipio')
             ->get();
 
-        $convencidosDetalle = DB::table('afiliados_resumen as a')
+        $convencidosDetalleQuery = DB::table('afiliados_resumen as a')
             ->select(
                 'a.seccion',
                 'a.cve_mun',
@@ -91,7 +91,7 @@ class MetaAvanceController extends Controller
             ->when(
                 $referente !== '',
                 fn($query) => $query->whereRaw(
-                    'a.referente = ?',
+                    'TRIM(a.referente) = ?',
                     [$referente]
                 )
             )
@@ -101,7 +101,17 @@ class MetaAvanceController extends Controller
                     'a.capturista_id',
                     $capturistaId
                 )
-            )
+            );
+
+        $this->applyTipoCargaFilter(
+            $convencidosDetalleQuery,
+            $tipoCarga,
+            $referentesOficiales,
+            'a.referente',
+            'a.capturista_id'
+        );
+
+        $convencidosDetalle = $convencidosDetalleQuery
             ->groupBy(
                 'a.seccion',
                 'a.cve_mun',
@@ -127,13 +137,19 @@ class MetaAvanceController extends Controller
 
         $convencidosPorAlcanceSeccion = $convencidosConSeccion
             ->groupBy(fn($fila) => self::scopeKey(
-                    (string) $fila->cve_mun,
-                    $fila->distrito_local
-                ).'|'.(string) (int) $fila->seccion)
+                (string) $fila->cve_mun,
+                $fila->distrito_local
+            ).'|'.(string) (int) $fila->seccion)
             ->map(fn($filas) => (int) $filas->sum('total'));
 
         $capturistaNames = User::query()
-            ->whereIn('id', $convencidosDetalle->pluck('capturista_id')->filter()->unique())
+            ->whereIn(
+                'id',
+                $convencidosDetalle
+                    ->pluck('capturista_id')
+                    ->filter()
+                    ->unique()
+            )
             ->pluck('name', 'id');
 
         $topCapturistas = $convencidosDetalle
@@ -141,49 +157,74 @@ class MetaAvanceController extends Controller
             ->map(function ($filas, $id) use ($capturistaNames) {
                 return (object) [
                     'id' => (int) $id,
-                    'name' => (string) ($capturistaNames[$id] ?? 'Sin capturista'),
+                    'name' => (string) (
+                        $capturistaNames[$id] ?? 'Sin capturista'
+                    ),
                     'total' => (int) $filas->sum('total'),
                 ];
             })
-            ->sort(fn($a, $b) => $b->total <=> $a->total ?: strcmp($a->name, $b->name))
+            ->sort(
+                fn($a, $b) =>
+                    $b->total <=> $a->total
+                    ?: strcmp($a->name, $b->name)
+            )
             ->take(5)
             ->values();
 
-        $topReferentes = DB::table('afiliados')
-            ->selectRaw('TRIM(perfil) AS name, COUNT(*) AS total')
-            ->whereNull('deleted_at')
-            ->whereNotNull('perfil')
-            ->whereRaw("TRIM(perfil) <> ''")
-            ->whereIn(DB::raw('TRIM(perfil)'), $referentesOficiales)
+        $topReferentesQuery = DB::table('afiliados as a')
+            ->selectRaw(
+                'TRIM(a.perfil) AS name, COUNT(*) AS total'
+            )
+            ->whereNull('a.deleted_at')
+            ->whereNotNull('a.perfil')
+            ->whereRaw("TRIM(a.perfil) <> ''")
+            ->whereIn(
+                DB::raw('TRIM(a.perfil)'),
+                $referentesOficiales
+            )
             ->when(
                 $cveMun !== '',
-                fn($query) => $query->where('cve_mun', $cveMun)
+                fn($query) => $query->where(
+                    'a.cve_mun',
+                    $cveMun
+                )
             )
             ->when(
                 $distritoLocal !== '',
-                fn($query) => $query->where('distrito_local', $distritoLocal)
+                fn($query) => $query->where(
+                    'a.distrito_local',
+                    $distritoLocal
+                )
             )
             ->when(
                 $distritoFederal !== '',
-                fn($query) => $query->where('distrito_federal', $distritoFederal)
+                fn($query) => $query->where(
+                    'a.distrito_federal',
+                    $distritoFederal
+                )
             )
             ->when(
                 $referente !== '',
                 fn($query) => $query->whereRaw(
-                    'TRIM(perfil) = ?',
+                    'TRIM(a.perfil) = ?',
                     [$referente]
                 )
             )
             ->when(
                 $capturistaId,
-                fn($query) => $query->where('capturista_id', $capturistaId)
-            )
-            ->groupByRaw('TRIM(perfil)')
+                fn($query) => $query->where(
+                    'a.capturista_id',
+                    $capturistaId
+                )
+            );
+
+        $topReferentes = $topReferentesQuery
+            ->groupByRaw('TRIM(a.perfil)')
             ->orderByDesc('total')
             ->orderBy('name')
             ->get();
 
-        $lonas = DB::table('lonas')
+        $lonasQuery = DB::table('lonas')
             ->join(
                 'secciones',
                 'secciones.seccion',
@@ -193,7 +234,9 @@ class MetaAvanceController extends Controller
             ->select(
                 'secciones.cve_mun',
                 'secciones.distrito_local',
-                DB::raw('COUNT(DISTINCT lonas.id) AS total')
+                DB::raw(
+                    'COUNT(DISTINCT lonas.id) AS total'
+                )
             )
             ->whereNull('lonas.deleted_at')
             ->when(
@@ -230,7 +273,17 @@ class MetaAvanceController extends Controller
                     'lonas.capturado_por',
                     $capturistaId
                 )
-            )
+            );
+
+        $this->applyTipoCargaFilter(
+            $lonasQuery,
+            $tipoCarga,
+            $referentesOficiales,
+            'lonas.responsable',
+            'lonas.capturado_por'
+        );
+
+        $lonas = $lonasQuery
             ->groupBy(
                 'secciones.cve_mun',
                 'secciones.distrito_local'
@@ -328,7 +381,10 @@ class MetaAvanceController extends Controller
                     'total_convencidos' => $totalConvencidos,
                     'porcentaje_convencidos' => $cantidadMetaConvencidos > 0
                         ? round(
-                            ($totalConvencidos / $cantidadMetaConvencidos) * 100,
+                            (
+                                $totalConvencidos
+                                / $cantidadMetaConvencidos
+                            ) * 100,
                             2
                         )
                         : 0,
@@ -337,7 +393,10 @@ class MetaAvanceController extends Controller
                     'total_lonas' => $totalLonas,
                     'porcentaje_lonas' => $cantidadMetaLonas > 0
                         ? round(
-                            ($totalLonas / $cantidadMetaLonas) * 100,
+                            (
+                                $totalLonas
+                                / $cantidadMetaLonas
+                            ) * 100,
                             2
                         )
                         : 0,
@@ -352,10 +411,14 @@ class MetaAvanceController extends Controller
         $totalConvencidos = (int) $convencidos->sum();
 
         $totalSeccionesCubiertas = $convencidosPorAlcanceSeccion
-            ->filter(fn($total) => (int) $total > 0)
+            ->filter(
+                fn($total) => (int) $total > 0
+            )
             ->count();
 
-        $totalSecciones = (int) $avance->sum('secciones');
+        $totalSecciones = (int) $avance->sum(
+            'secciones'
+        );
 
         $totalMetaLonas = (int) $avance->sum(
             'meta_lonas'
@@ -369,13 +432,22 @@ class MetaAvanceController extends Controller
             'secciones' => $totalSecciones,
             'secciones_cubiertas' => $totalSeccionesCubiertas,
             'porcentaje_secciones_cubiertas' => $totalSecciones > 0
-                ? round(($totalSeccionesCubiertas / $totalSecciones) * 100, 2)
+                ? round(
+                    (
+                        $totalSeccionesCubiertas
+                        / $totalSecciones
+                    ) * 100,
+                    2
+                )
                 : 0,
             'meta_convencidos' => $totalMetaConvencidos,
             'total_convencidos' => $totalConvencidos,
             'porcentaje_convencidos' => $totalMetaConvencidos > 0
                 ? round(
-                    ($totalConvencidos / $totalMetaConvencidos) * 100,
+                    (
+                        $totalConvencidos
+                        / $totalMetaConvencidos
+                    ) * 100,
                     2
                 )
                 : 0,
@@ -383,7 +455,10 @@ class MetaAvanceController extends Controller
             'total_lonas' => $totalLonas,
             'porcentaje_lonas' => $totalMetaLonas > 0
                 ? round(
-                    ($totalLonas / $totalMetaLonas) * 100,
+                    (
+                        $totalLonas
+                        / $totalMetaLonas
+                    ) * 100,
                     2
                 )
                 : 0,
@@ -392,17 +467,23 @@ class MetaAvanceController extends Controller
         $capturistas = User::query()
             ->when(
                 !$puedeVerTodo,
-                fn($query) => $query->whereKey($usuario->id)
+                fn($query) => $query->whereKey(
+                    $usuario->id
+                )
             )
             ->where(function ($query) use (
                 $cveMun,
                 $distritoLocal,
-                $distritoFederal
+                $distritoFederal,
+                $tipoCarga,
+                $referentesOficiales
             ) {
                 $query->whereExists(function ($subquery) use (
                     $cveMun,
                     $distritoLocal,
-                    $distritoFederal
+                    $distritoFederal,
+                    $tipoCarga,
+                    $referentesOficiales
                 ) {
                     $subquery
                         ->selectRaw('1')
@@ -432,10 +513,21 @@ class MetaAvanceController extends Controller
                                 $distritoFederal
                             )
                         );
-                })->orWhereExists(function ($subquery) use (
+
+                    $this->applyTipoCargaFilter(
+                        $subquery,
+                        $tipoCarga,
+                        $referentesOficiales,
+                        'afiliados_resumen.referente',
+                        'afiliados_resumen.capturista_id'
+                    );
+                })
+                ->orWhereExists(function ($subquery) use (
                     $cveMun,
                     $distritoLocal,
-                    $distritoFederal
+                    $distritoFederal,
+                    $tipoCarga,
+                    $referentesOficiales
                 ) {
                     $subquery
                         ->selectRaw('1')
@@ -450,7 +542,9 @@ class MetaAvanceController extends Controller
                             'lonas.capturado_por',
                             'users.id'
                         )
-                        ->whereNull('lonas.deleted_at')
+                        ->whereNull(
+                            'lonas.deleted_at'
+                        )
                         ->when(
                             $cveMun !== '',
                             fn($query) => $query->where(
@@ -472,14 +566,26 @@ class MetaAvanceController extends Controller
                                 $distritoFederal
                             )
                         );
+
+                    $this->applyTipoCargaFilter(
+                        $subquery,
+                        $tipoCarga,
+                        $referentesOficiales,
+                        'lonas.responsable',
+                        'lonas.capturado_por'
+                    );
                 });
             })
             ->orderBy('name')
-            ->get(['id', 'name']);
+            ->get([
+                'id',
+                'name',
+            ]);
 
-        $referentesAfiliados = $topReferentes->pluck('name');
+        $referentesAfiliados = $topReferentes
+            ->pluck('name');
 
-        $referentesLonas = DB::table('lonas')
+        $referentesLonasQuery = DB::table('lonas')
             ->join(
                 'secciones as secciones_referente',
                 'secciones_referente.seccion',
@@ -491,7 +597,9 @@ class MetaAvanceController extends Controller
             )
             ->whereNull('lonas.deleted_at')
             ->whereNotNull('lonas.responsable')
-            ->whereRaw("TRIM(lonas.responsable) <> ''")
+            ->whereRaw(
+                "TRIM(lonas.responsable) <> ''"
+            )
             ->whereIn(
                 DB::raw('TRIM(lonas.responsable)'),
                 $referentesOficiales
@@ -523,7 +631,9 @@ class MetaAvanceController extends Controller
                     'lonas.capturado_por',
                     $capturistaId
                 )
-            )
+            );
+
+        $referentesLonas = $referentesLonasQuery
             ->distinct()
             ->pluck('referente');
 
@@ -534,14 +644,28 @@ class MetaAvanceController extends Controller
             ->sort()
             ->values();
 
-        $catalogoReferentes = collect($referentesOficiales)->keyBy(
-            fn($nombre) => Str::lower(Str::ascii(trim($nombre)))
+        $catalogoReferentes = collect(
+            $referentesOficiales
+        )->keyBy(
+            fn($nombre) => Str::lower(
+                Str::ascii(
+                    trim($nombre)
+                )
+            )
         );
 
         $referentes = $referentesRegistrados
-            ->map(fn($nombre) => $catalogoReferentes->get(
-                Str::lower(Str::ascii(trim((string) $nombre)))
-            ))
+            ->map(
+                fn($nombre) => $catalogoReferentes->get(
+                    Str::lower(
+                        Str::ascii(
+                            trim(
+                                (string) $nombre
+                            )
+                        )
+                    )
+                )
+            )
             ->filter()
             ->unique()
             ->sort()
@@ -642,45 +766,73 @@ class MetaAvanceController extends Controller
             )
             ->when(
                 $cveMun !== '',
-                fn($query) => $query->where('cve_mun', $cveMun)
+                fn($query) => $query->where(
+                    'cve_mun',
+                    $cveMun
+                )
             )
             ->when(
                 $distritoLocal !== '',
-                fn($query) => $query->where('distrito_local', $distritoLocal)
+                fn($query) => $query->where(
+                    'distrito_local',
+                    $distritoLocal
+                )
             )
             ->when(
                 $distritoFederal !== '',
-                fn($query) => $query->where('distrito_federal', $distritoFederal)
+                fn($query) => $query->where(
+                    'distrito_federal',
+                    $distritoFederal
+                )
             )
-            ->orderByRaw('CAST(seccion AS UNSIGNED), seccion')
+            ->orderByRaw(
+                'CAST(seccion AS UNSIGNED), seccion'
+            )
             ->get()
-            ->groupBy(fn($seccion) => self::scopeKey(
-                (string) $seccion->cve_mun,
-                $seccion->distrito_local
-            ))
-            ->map(function ($secciones, $scope) use ($convencidosPorAlcanceSeccion) {
-                return $secciones->map(function ($seccion) use (
-                    $scope,
+            ->groupBy(
+                fn($seccion) => self::scopeKey(
+                    (string) $seccion->cve_mun,
+                    $seccion->distrito_local
+                )
+            )
+            ->map(
+                function (
+                    $secciones,
+                    $scope
+                ) use (
                     $convencidosPorAlcanceSeccion
                 ) {
-                    $numeroNormalizado = (string) (int) $seccion->seccion;
+                    return $secciones
+                        ->map(
+                            function (
+                                $seccion
+                            ) use (
+                                $scope,
+                                $convencidosPorAlcanceSeccion
+                            ) {
+                                $numeroNormalizado = (string) (int) $seccion->seccion;
 
-                    return [
-                        'seccion' => str_pad(
-                            (string) $seccion->seccion,
-                            4,
-                            '0',
-                            STR_PAD_LEFT
-                        ),
-                        'distrito_federal' => $seccion->distrito_federal,
-                        'total' => (int) (
-                            $convencidosPorAlcanceSeccion[
-                                $scope.'|'.$numeroNormalizado
-                            ] ?? 0
-                        ),
-                    ];
-                })->values();
-            });
+                                return [
+                                    'seccion' => str_pad(
+                                        (string) $seccion->seccion,
+                                        4,
+                                        '0',
+                                        STR_PAD_LEFT
+                                    ),
+                                    'distrito_federal' => $seccion->distrito_federal,
+                                    'total' => (int) (
+                                        $convencidosPorAlcanceSeccion[
+                                            $scope
+                                            .'|'
+                                            .$numeroNormalizado
+                                        ] ?? 0
+                                    ),
+                                ];
+                            }
+                        )
+                        ->values();
+                }
+            );
 
         $data = compact(
             'avance',
@@ -702,14 +854,18 @@ class MetaAvanceController extends Controller
             'nombreDistritoFederal',
             'municipioPorSeccion',
             'seccionesPorMunicipio',
-            'puedeVerTodo'
+            'puedeVerTodo',
+            'tipoCarga'
         );
 
         if ($request->expectsJson()) {
             return response()->json($data);
         }
 
-        return view('avance.index', $data);
+        return view(
+            'avance.index',
+            $data
+        );
     }
 
     public function convencidos(Request $request)
@@ -918,33 +1074,98 @@ class MetaAvanceController extends Controller
     private function resolveFilters(Request $request): array
     {
         $usuario = $request->user();
+
         $puedeVerTodo = $usuario->hasAnyRole([
             'Admin',
             'SuperAdmin',
         ]);
-        $cveMun = trim((string) $request->query('cve_mun'));
-        $distritosLocalesAsignados = LocalDistrictAccess::districts($usuario);
-        $distritoLocalRestringido = $distritosLocalesAsignados !== [];
-        $distritoSolicitado = trim((string) $request->query('distrito_local'));
+
+        $cveMun = trim(
+            (string) $request->query('cve_mun')
+        );
+
+        $distritosLocalesAsignados = LocalDistrictAccess::districts(
+            $usuario
+        );
+
+        $distritoLocalRestringido = (
+            $distritosLocalesAsignados !== []
+        );
+
+        $distritoSolicitado = trim(
+            (string) $request->query(
+                'distrito_local'
+            )
+        );
+
         $distritoLocal = $distritoLocalRestringido
             ? (
-                in_array((int) $distritoSolicitado, $distritosLocalesAsignados, true)
+                in_array(
+                    (int) $distritoSolicitado,
+                    $distritosLocalesAsignados,
+                    true
+                )
                     ? (string) (int) $distritoSolicitado
                     : (string) $distritosLocalesAsignados[0]
             )
             : $distritoSolicitado;
-        $distritoFederal = trim((string) $request->query('distrito_federal'));
-        $referente = trim((string) $request->query('referente'));
+
+        $distritoFederal = trim(
+            (string) $request->query(
+                'distrito_federal'
+            )
+        );
+
+        $referente = trim(
+            (string) $request->query(
+                'referente'
+            )
+        );
+
         $referentesOficiales = AfiliadoController::REFERENTES;
 
-        if ($referente !== '' && !in_array($referente, $referentesOficiales, true)) {
+        if (
+            $referente !== ''
+            && !in_array(
+                $referente,
+                $referentesOficiales,
+                true
+            )
+        ) {
             $referente = '';
+        }
+
+        $tipoCarga = Str::lower(
+            trim(
+                (string) $request->query(
+                    'tipo_carga',
+                    'todos'
+                )
+            )
+        );
+
+        if (
+            !in_array(
+                $tipoCarga,
+                [
+                    'todos',
+                    'distritales',
+                    'politicos',
+                ],
+                true
+            )
+        ) {
+            $tipoCarga = 'todos';
         }
 
         $capturistaId = $puedeVerTodo
             ? (
-                $request->filled('capturista_id')
-                    ? (int) $request->query('capturista_id')
+                $request->filled(
+                    'capturista_id'
+                )
+                    ? (int) $request->query(
+                        'capturista_id'
+                    )
                     : null
             )
             : (int) $usuario->id;
@@ -959,14 +1180,20 @@ class MetaAvanceController extends Controller
             'distritoFederal',
             'referente',
             'referentesOficiales',
-            'capturistaId'
+            'capturistaId',
+            'tipoCarga'
         );
     }
 
     private function convencidosQuery(array $filters): Builder
     {
-        return DB::table('afiliados as a')
-            ->leftJoin('users as capturistas_detalle', 'capturistas_detalle.id', '=', 'a.capturista_id')
+        $query = DB::table('afiliados as a')
+            ->leftJoin(
+                'users as capturistas_detalle',
+                'capturistas_detalle.id',
+                '=',
+                'a.capturista_id'
+            )
             ->select([
                 'a.id',
                 'a.nombre',
@@ -986,25 +1213,167 @@ class MetaAvanceController extends Controller
             ->whereNull('a.deleted_at')
             ->when(
                 $filters['cveMun'] !== '',
-                fn($query) => $query->where('a.cve_mun', $filters['cveMun'])
+                fn($query) => $query->where(
+                    'a.cve_mun',
+                    $filters['cveMun']
+                )
             )
             ->when(
                 $filters['distritoLocal'] !== '',
-                fn($query) => $query->where('a.distrito_local', $filters['distritoLocal'])
+                fn($query) => $query->where(
+                    'a.distrito_local',
+                    $filters['distritoLocal']
+                )
             )
             ->when(
                 $filters['distritoFederal'] !== '',
-                fn($query) => $query->where('a.distrito_federal', $filters['distritoFederal'])
+                fn($query) => $query->where(
+                    'a.distrito_federal',
+                    $filters['distritoFederal']
+                )
             )
             ->when(
                 $filters['referente'] !== '',
-                fn($query) => $query->whereRaw('TRIM(a.perfil) = ?', [$filters['referente']])
+                fn($query) => $query->whereRaw(
+                    'TRIM(a.perfil) = ?',
+                    [$filters['referente']]
+                )
             )
             ->when(
                 $filters['capturistaId'],
-                fn($query) => $query->where('a.capturista_id', $filters['capturistaId'])
+                fn($query) => $query->where(
+                    'a.capturista_id',
+                    $filters['capturistaId']
+                )
             );
+
+        $this->applyTipoCargaFilter(
+            $query,
+            $filters['tipoCarga'],
+            $filters['referentesOficiales'],
+            'a.perfil',
+            'a.capturista_id'
+        );
+
+        return $query;
     }
+
+    private function applyTipoCargaFilter(
+        Builder $query,
+        string $tipoCarga,
+        array $referentesOficiales,
+        string $referenteColumn,
+        string $capturistaColumn
+    ): Builder {
+        if ($tipoCarga === 'todos') {
+            return $query;
+        }
+
+        if ($tipoCarga === 'distritales') {
+            $query->where(
+                function ($query) use (
+                    $referentesOficiales,
+                    $referenteColumn,
+                    $capturistaColumn
+                ) {
+                    $query
+                        ->whereIn(
+                            DB::raw(
+                                "TRIM({$referenteColumn})"
+                            ),
+                            $referentesOficiales
+                        )
+                        ->orWhereExists(
+                            function ($subquery) use (
+                                $capturistaColumn
+                            ) {
+                                $subquery
+                                    ->selectRaw('1')
+                                    ->from(
+                                        'model_has_roles as mhr_tipo'
+                                    )
+                                    ->join(
+                                        'roles as roles_tipo',
+                                        'roles_tipo.id',
+                                        '=',
+                                        'mhr_tipo.role_id'
+                                    )
+                                    ->whereColumn(
+                                        'mhr_tipo.model_id',
+                                        $capturistaColumn
+                                    )
+                                    ->where(
+                                        'mhr_tipo.model_type',
+                                        User::class
+                                    )
+                                    ->where(
+                                        'roles_tipo.name',
+                                        'Distrito Local'
+                                    );
+                            }
+                        );
+                }
+            );
+
+            return $query;
+        }
+
+        if ($tipoCarga === 'politicos') {
+            $query->where(
+                function ($query) use (
+                    $referentesOficiales,
+                    $referenteColumn
+                ) {
+                    $query
+                        ->whereNull(
+                            $referenteColumn
+                        )
+                        ->orWhereRaw(
+                            "TRIM({$referenteColumn}) = ''"
+                        )
+                        ->orWhereNotIn(
+                            DB::raw(
+                                "TRIM({$referenteColumn})"
+                            ),
+                            $referentesOficiales
+                        );
+                }
+            );
+
+            $query->whereNotExists(
+                function ($subquery) use (
+                    $capturistaColumn
+                ) {
+                    $subquery
+                        ->selectRaw('1')
+                        ->from(
+                            'model_has_roles as mhr_tipo'
+                        )
+                        ->join(
+                            'roles as roles_tipo',
+                            'roles_tipo.id',
+                            '=',
+                            'mhr_tipo.role_id'
+                        )
+                        ->whereColumn(
+                            'mhr_tipo.model_id',
+                            $capturistaColumn
+                        )
+                        ->where(
+                            'mhr_tipo.model_type',
+                            User::class
+                        )
+                        ->where(
+                            'roles_tipo.name',
+                            'Distrito Local'
+                        );
+                }
+            );
+        }
+
+        return $query;
+    }
+
 
     private function filterSummary(array $filters): array
     {
@@ -1013,16 +1382,36 @@ class MetaAvanceController extends Controller
                 ->where('cve_mun', $filters['cveMun'])
                 ->value('municipio')
             : null;
+
         $capturista = $filters['capturistaId']
-            ? DB::table('users')->where('id', $filters['capturistaId'])->value('name')
+            ? DB::table('users')
+                ->where('id', $filters['capturistaId'])
+                ->value('name')
             : null;
 
+        $tipoCarga = match ($filters['tipoCarga']) {
+            'distritales' => 'Distritales',
+            'politicos' => 'Políticos',
+            default => 'Todos',
+        };
+
         return [
+            'Tipo de carga' => $tipoCarga,
             'Distrito local' => $filters['distritoLocal'] !== ''
-                ? str_pad($filters['distritoLocal'], 2, '0', STR_PAD_LEFT)
+                ? str_pad(
+                    $filters['distritoLocal'],
+                    2,
+                    '0',
+                    STR_PAD_LEFT
+                )
                 : 'Todos',
             'Distrito federal' => $filters['distritoFederal'] !== ''
-                ? str_pad($filters['distritoFederal'], 2, '0', STR_PAD_LEFT)
+                ? str_pad(
+                    $filters['distritoFederal'],
+                    2,
+                    '0',
+                    STR_PAD_LEFT
+                )
                 : 'Todos',
             'Municipio' => $municipio ?: 'Todos',
             'Referente' => $filters['referente'] ?: 'Todos',
