@@ -1,14 +1,12 @@
 {
   "ExpandedNodes": [
     "",
-    "\\app",
-    "\\app\\Http",
-    "\\app\\Http\\Controllers",
     "\\resources",
     "\\resources\\views",
-    "\\resources\\views\\avance_municipal",
-    "\\resources\\views\\avance_seccional"
+    "\\resources\\views\\afiliados",
+    "\\resources\\views\\auth",
+    "\\resources\\views\\layouts"
   ],
-  "SelectedNode": "\\app\\Http\\Controllers\\AvanceMunicipalController.php",
+  "SelectedNode": "\\resources\\views\\auth\\login.blade.php",
   "PreviewInSolutionExplorer": false
 }

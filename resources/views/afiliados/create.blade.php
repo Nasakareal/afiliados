@@ -421,32 +421,61 @@
             @enderror
           </div>
 
-          <div class="col-md-12">
-              <label class="form-label {{ $req('perfil') ? 'required' : '' }}">
-                Referente
-              </label>
+            @if($esDistritoLocal)
 
-              <select
-                name="perfil"
-                class="form-select @error('perfil') is-invalid @enderror"
-                {{ $req('perfil') ? 'required' : '' }}
-              >
-                <option value="">Seleccione un referente...</option>
+                <div class="col-md-12">
+                    <label class="form-label required">
+                        Referente
+                    </label>
 
-                @foreach($referentes as $referente)
-                  <option
-                    value="{{ $referente }}"
-                    {{ old('perfil') === $referente ? 'selected' : '' }}
-                  >
-                    {{ $referente }}
-                  </option>
-                @endforeach
-              </select>
+                    <input
+                        type="text"
+                        class="form-control"
+                        value="{{ $referenteUsuario }}"
+                        readonly
+                    >
 
-              @error('perfil')
-                <div class="invalid-feedback">{{ $message }}</div>
-              @enderror
-            </div>
+                    <input
+                        type="hidden"
+                        name="perfil"
+                        value="{{ $referenteUsuario }}"
+                    >
+
+                    @error('perfil')
+                        <div class="text-danger mt-1">{{ $message }}</div>
+                    @enderror
+                </div>
+
+            @else
+
+                <div class="col-md-12">
+                    <label class="form-label {{ $req('perfil') ? 'required' : '' }}">
+                        Referente
+                    </label>
+
+                    <select
+                        name="perfil"
+                        class="form-select @error('perfil') is-invalid @enderror"
+                        {{ $req('perfil') ? 'required' : '' }}
+                    >
+                        <option value="">Seleccione un referente...</option>
+
+                        @foreach($referentes as $referente)
+                            <option
+                                value="{{ $referente }}"
+                                {{ old('perfil') === $referente ? 'selected' : '' }}
+                            >
+                                {{ $referente }}
+                            </option>
+                        @endforeach
+                    </select>
+
+                    @error('perfil')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+            @endif
 
           @unless($esDistritoLocal)
             <div class="col-md-12">

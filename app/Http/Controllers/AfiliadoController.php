@@ -19,30 +19,17 @@ class AfiliadoController extends Controller
     public const PER_PAGE_OPTIONS = [25, 50, 100, 200, 300, 500];
 
     public const REFERENTES = [
-        'Gladyz Butanda',
-        'Moises Navarro',
-        'Andrea Serna',
-        'Oscar Solis',
-        'Erendira Isauro',
-        'David Alfaro',
-        'Monica Valdez',
-        'Sergio Ramirez',
-        'Emmanuel Uribe',
-        'Marco Polo',
-        'Alejandra Anguiano',
-        'Antonio Itlahuac',
-        'Eranderini',
-        'Alejandro Mendez',
-        'Olivia Guzman',
-        'Alex Moran',
-        'Elias Ibarra',
-        'Elías Ibarra Torres',
-        'Salvador Vázquez',
-        'Erandeni',
-        'Sergio Baez',
-        'Yeyo Pimentel',
-        'Fany Arreola',
-        'Nallely Pedraza',
+        'VANESA MILLAN',
+        'GUME CAMPOS',
+        'JUAN CARLOS RINCON',
+        'MAGALY VEGA',
+        'HEBER GARCIA',
+        'ALBERTO LUCAS',
+        'ALEX MORAN',
+        'JULIO PEGUERO',
+        'MARIANA SOSA',
+        'BENJAMIN',
+        'MARIANA OROZCO',
     ];
 
     public function index(Request $request)
@@ -308,8 +295,16 @@ class AfiliadoController extends Controller
         $rules = $this->rulesStore();
         $required = $this->requiredMap($rules);
         $fullNameField = $this->fullNameField();
+
         $esDistritoLocal = $this->isDistritoLocal();
-        $referentes = self::REFERENTES;
+
+        $referenteUsuario = $esDistritoLocal
+            ? trim((string) Auth::user()->name)
+            : null;
+
+        $referentes = $esDistritoLocal
+            ? []
+            : self::REFERENTES;
 
         return view('afiliados.create', compact(
             'municipios',
@@ -317,6 +312,7 @@ class AfiliadoController extends Controller
             'required',
             'fullNameField',
             'esDistritoLocal',
+            'referenteUsuario',
             'referentes'
         ));
     }
@@ -330,7 +326,15 @@ class AfiliadoController extends Controller
         $raw = $this->squish($request->input($full, ''));
         $name = Str::upper(Str::ascii($raw));
 
-        $request->merge([$full => $name]);
+        $request->merge([
+            $full => $name,
+        ]);
+
+        if ($this->isDistritoLocal()) {
+            $request->merge([
+                'perfil' => trim((string) Auth::user()->name),
+            ]);
+        }
 
         $data = $request->validate(
             $this->rulesStore(),
@@ -406,8 +410,16 @@ class AfiliadoController extends Controller
         $rules = $this->rulesUpdate($afiliado);
         $required = $this->requiredMap($rules);
         $fullNameField = $this->fullNameField();
+
         $esDistritoLocal = $this->isDistritoLocal();
-        $referentes = self::REFERENTES;
+
+        $referenteUsuario = $esDistritoLocal
+            ? trim((string) Auth::user()->name)
+            : null;
+
+        $referentes = $esDistritoLocal
+            ? []
+            : self::REFERENTES;
 
         return view('afiliados.edit', compact(
             'afiliado',
@@ -416,6 +428,7 @@ class AfiliadoController extends Controller
             'required',
             'fullNameField',
             'esDistritoLocal',
+            'referenteUsuario',
             'referentes'
         ));
     }
@@ -432,7 +445,15 @@ class AfiliadoController extends Controller
 
         $name = Str::upper(Str::ascii($raw));
 
-        $request->merge([$full => $name]);
+        $request->merge([
+            $full => $name,
+        ]);
+
+        if ($this->isDistritoLocal()) {
+            $request->merge([
+                'perfil' => trim((string) Auth::user()->name),
+            ]);
+        }
 
         $data = $request->validate(
             $this->rulesUpdate($afiliado),
@@ -501,39 +522,129 @@ class AfiliadoController extends Controller
                 'max:120',
                 Rule::unique('afiliados', $full),
             ],
-            'edad' => ['nullable', 'integer', 'min:0', 'max:120'],
-            'sexo' => ['nullable', Rule::in(['M', 'F', 'Otro'])],
-            'email' => ['nullable', 'email', 'max:150'],
-            'telefono' => ['nullable', 'string', 'max:30'],
+
+            'edad' => [
+                'nullable',
+                'integer',
+                'min:0',
+                'max:120',
+            ],
+
+            'sexo' => [
+                'nullable',
+                Rule::in(['M', 'F', 'Otro']),
+            ],
+
+            'email' => [
+                'nullable',
+                'email',
+                'max:150',
+            ],
+
+            'telefono' => [
+                'nullable',
+                'string',
+                'max:30',
+            ],
+
             'clave_elector' => [
                 'nullable',
                 'string',
                 'max:30',
                 Rule::unique('afiliados', 'clave_elector'),
             ],
+
             'tipo_vinculo' => [
                 'nullable',
                 'string',
                 Rule::in(array_keys(Afiliado::TIPOS_VINCULO)),
             ],
-            'numero_mov' => ['nullable', 'string', 'max:50'],
-            'municipio' => ['nullable', 'string', 'max:120'],
-            'cve_mun' => ['nullable', 'string', 'size:3'],
-            'seccion' => ['required', 'string', 'max:6'],
-            'distrito_federal' => ['nullable', 'integer'],
-            'distrito_local' => ['nullable', 'integer'],
-            'perfil' => ['required','string',Rule::in(self::REFERENTES),],
-            'localidad' => ['nullable', 'string', 'max:150'],
-            'colonia' => ['nullable', 'string', 'max:150'],
-            'calle' => ['nullable', 'string', 'max:150'],
-            'numero_ext' => ['nullable', 'string', 'max:20'],
-            'numero_int' => ['nullable', 'string', 'max:20'],
-            'cp' => ['nullable', 'string', 'max:10'],
+
+            'numero_mov' => [
+                'nullable',
+                'string',
+                'max:50',
+            ],
+
+            'municipio' => [
+                'nullable',
+                'string',
+                'max:120',
+            ],
+
+            'cve_mun' => [
+                'nullable',
+                'string',
+                'size:3',
+            ],
+
+            'seccion' => [
+                'required',
+                'string',
+                'max:6',
+            ],
+
+            'distrito_federal' => [
+                'nullable',
+                'integer',
+            ],
+
+            'distrito_local' => [
+                'nullable',
+                'integer',
+            ],
+
+            'perfil' => [
+                'required',
+                'string',
+                Rule::in(self::REFERENTES),
+            ],
+
+            'localidad' => [
+                'nullable',
+                'string',
+                'max:150',
+            ],
+
+            'colonia' => [
+                'nullable',
+                'string',
+                'max:150',
+            ],
+
+            'calle' => [
+                'nullable',
+                'string',
+                'max:150',
+            ],
+
+            'numero_ext' => [
+                'nullable',
+                'string',
+                'max:20',
+            ],
+
+            'numero_int' => [
+                'nullable',
+                'string',
+                'max:20',
+            ],
+
+            'cp' => [
+                'nullable',
+                'string',
+                'max:10',
+            ],
+
             'estatus' => [
                 'required',
                 Rule::in(['validado', 'descartado']),
             ],
-            'fecha_convencimiento' => ['nullable', 'date'],
+
+            'fecha_convencimiento' => [
+                'nullable',
+                'date',
+            ],
         ];
     }
 
@@ -553,10 +664,31 @@ class AfiliadoController extends Controller
                 Rule::unique('afiliados', $full)
                     ->ignore($afiliado->id, 'id'),
             ],
-            'edad' => ['nullable', 'integer', 'min:0', 'max:120'],
-            'sexo' => ['nullable', Rule::in(['M', 'F', 'Otro'])],
-            'email' => ['nullable', 'email', 'max:150'],
-            'telefono' => ['nullable', 'string', 'max:30'],
+
+            'edad' => [
+                'nullable',
+                'integer',
+                'min:0',
+                'max:120',
+            ],
+
+            'sexo' => [
+                'nullable',
+                Rule::in(['M', 'F', 'Otro']),
+            ],
+
+            'email' => [
+                'nullable',
+                'email',
+                'max:150',
+            ],
+
+            'telefono' => [
+                'nullable',
+                'string',
+                'max:30',
+            ],
+
             'clave_elector' => [
                 'nullable',
                 'string',
@@ -564,33 +696,98 @@ class AfiliadoController extends Controller
                 Rule::unique('afiliados', 'clave_elector')
                     ->ignore($afiliado->id, 'id'),
             ],
+
             'tipo_vinculo' => [
                 'nullable',
                 'string',
                 Rule::in(array_keys(Afiliado::TIPOS_VINCULO)),
             ],
-            'numero_mov' => ['nullable', 'string', 'max:50'],
-            'municipio' => ['nullable', 'string', 'max:120'],
-            'cve_mun' => ['nullable', 'string', 'size:3'],
-            'seccion' => ['required', 'string', 'max:6'],
-            'distrito_federal' => ['nullable', 'integer'],
-            'distrito_local' => ['nullable', 'integer'],
+
+            'numero_mov' => [
+                'nullable',
+                'string',
+                'max:50',
+            ],
+
+            'municipio' => [
+                'nullable',
+                'string',
+                'max:120',
+            ],
+
+            'cve_mun' => [
+                'nullable',
+                'string',
+                'size:3',
+            ],
+
+            'seccion' => [
+                'required',
+                'string',
+                'max:6',
+            ],
+
+            'distrito_federal' => [
+                'nullable',
+                'integer',
+            ],
+
+            'distrito_local' => [
+                'nullable',
+                'integer',
+            ],
+
             'perfil' => [
                 'required',
                 'string',
                 Rule::in(self::REFERENTES),
             ],
-            'localidad' => ['nullable', 'string', 'max:150'],
-            'colonia' => ['nullable', 'string', 'max:150'],
-            'calle' => ['nullable', 'string', 'max:150'],
-            'numero_ext' => ['nullable', 'string', 'max:20'],
-            'numero_int' => ['nullable', 'string', 'max:20'],
-            'cp' => ['nullable', 'string', 'max:10'],
+
+            'localidad' => [
+                'nullable',
+                'string',
+                'max:150',
+            ],
+
+            'colonia' => [
+                'nullable',
+                'string',
+                'max:150',
+            ],
+
+            'calle' => [
+                'nullable',
+                'string',
+                'max:150',
+            ],
+
+            'numero_ext' => [
+                'nullable',
+                'string',
+                'max:20',
+            ],
+
+            'numero_int' => [
+                'nullable',
+                'string',
+                'max:20',
+            ],
+
+            'cp' => [
+                'nullable',
+                'string',
+                'max:10',
+            ],
+
             'estatus' => [
                 'required',
                 Rule::in(['validado', 'descartado']),
             ],
-            'fecha_convencimiento' => ['nullable', 'date'],
+
+            'fecha_convencimiento' => [
+                'nullable',
+                'date',
+            ],
         ];
     }
 
@@ -882,7 +1079,8 @@ class AfiliadoController extends Controller
         return $user ? $user->hasRole('Distrito Local') : false;
     }
 
-    private function districtLocalRules(string $full, ?Afiliado $afiliado = null): array {
+    private function districtLocalRules(string $full,?Afiliado $afiliado = null): array
+    {
         $claveElectorUnique = Rule::unique(
             'afiliados',
             'clave_elector'
@@ -898,79 +1096,95 @@ class AfiliadoController extends Controller
                 'string',
                 'max:120',
             ],
+
             'sexo' => [
                 'required',
                 Rule::in(['M', 'F', 'Otro']),
             ],
+
             'telefono' => [
                 'required',
                 'string',
                 'max:30',
             ],
+
             'clave_elector' => [
                 'nullable',
                 'string',
                 'max:30',
                 $claveElectorUnique,
             ],
+
             'municipio' => [
                 'nullable',
                 'string',
                 'max:120',
             ],
+
             'cve_mun' => [
                 'nullable',
                 'string',
                 'size:3',
             ],
+
             'seccion' => [
                 'required',
                 'string',
                 'max:6',
             ],
+
             'distrito_local' => [
                 'nullable',
                 'integer',
             ],
+
             'distrito_federal' => [
                 'nullable',
                 'integer',
             ],
+
             'perfil' => [
                 'required',
                 'string',
-                Rule::in(self::REFERENTES),
+                'max:255',
             ],
+
             'localidad' => [
                 'nullable',
                 'string',
                 'max:150',
             ],
+
             'colonia' => [
                 'nullable',
                 'string',
                 'max:150',
             ],
+
             'calle' => [
                 'nullable',
                 'string',
                 'max:150',
             ],
+
             'numero_ext' => [
                 'nullable',
                 'string',
                 'max:20',
             ],
+
             'numero_int' => [
                 'nullable',
                 'string',
                 'max:20',
             ],
+
             'cp' => [
                 'nullable',
                 'string',
                 'max:10',
             ],
+
             'estatus' => [
                 'required',
                 Rule::in(['validado', 'descartado']),
