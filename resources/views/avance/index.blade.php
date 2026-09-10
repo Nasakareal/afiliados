@@ -123,7 +123,7 @@
     if ($distritoLocal !== '') $tituloDistrito .= ' · Distrito local '.$dlTexto;
 
     $tipoCargaTexto = match($tipoCarga) {
-      'distritales' => 'Distritales',
+      'distritales' => 'Distrito local',
       'politicos' => 'Políticos',
       default => 'Todos',
     };
@@ -141,7 +141,7 @@
         <label for="quickTipoCarga" class="visually-hidden">Tipo de carga</label>
         <select name="tipo_carga" id="quickTipoCarga" class="form-select form-select-sm" title="Tipo de carga" onchange="this.form.submit()">
           <option value="todos" {{ $tipoCarga === 'todos' ? 'selected' : '' }}>Todos</option>
-          <option value="distritales" {{ $tipoCarga === 'distritales' ? 'selected' : '' }}>Distritales</option>
+          <option value="distritales" {{ $tipoCarga === 'distritales' ? 'selected' : '' }}>Distrito local</option>
           <option value="politicos" {{ $tipoCarga === 'politicos' ? 'selected' : '' }}>Políticos</option>
         </select>
 
@@ -443,7 +443,7 @@
               <label class="form-label">Tipo de carga</label>
               <select name="tipo_carga" class="form-select">
                 <option value="todos" {{ $tipoCarga === 'todos' ? 'selected' : '' }}>Todos</option>
-                <option value="distritales" {{ $tipoCarga === 'distritales' ? 'selected' : '' }}>Distritales</option>
+                <option value="distritales" {{ $tipoCarga === 'distritales' ? 'selected' : '' }}>Distrito local</option>
                 <option value="politicos" {{ $tipoCarga === 'politicos' ? 'selected' : '' }}>Políticos</option>
               </select>
             </div>

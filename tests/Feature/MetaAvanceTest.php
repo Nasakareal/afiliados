@@ -8,6 +8,7 @@ use Database\Seeders\PermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class MetaAvanceTest extends TestCase
@@ -183,7 +184,7 @@ class MetaAvanceTest extends TestCase
         ])->assertForbidden();
     }
 
-    public function test_referent_filter_only_lists_official_names_with_active_records(): void
+    public function test_referent_filter_accepts_any_registered_profile(): void
     {
         $admin = User::factory()->create(['must_change_password' => false]);
         $admin->assignRole('Admin');
@@ -234,9 +235,88 @@ class MetaAvanceTest extends TestCase
             'referente' => '0806',
         ]))->assertOk();
 
-        $this->assertSame('', $response->viewData('referente'));
-        $this->assertSame(['Moises Navarro'], $response->viewData('referentes')->all());
-        $this->assertSame(['Moises Navarro'], $response->viewData('topReferentes')->pluck('name')->all());
+        $this->assertSame('0806', $response->viewData('referente'));
+        $this->assertSame(['0806'], $response->viewData('referentes')->all());
+        $this->assertSame([], $response->viewData('topReferentes')->pluck('name')->all());
+    }
+
+    public function test_load_type_separates_local_district_and_political_profiles(): void
+    {
+        $admin = User::factory()->create(['must_change_password' => false]);
+        $admin->assignRole('Admin');
+
+        $districtCapturer = User::factory()->create([
+            'name' => 'Capturista con distrito local',
+            'must_change_password' => false,
+        ]);
+        Role::firstOrCreate([
+            'name' => 'Distrito Local',
+            'guard_name' => 'web',
+        ]);
+        $districtCapturer->assignRole('Distrito Local');
+
+        $politicalCapturer = User::factory()->create([
+            'name' => 'Capturista político',
+            'must_change_password' => false,
+        ]);
+
+        $records = [
+            ['Distrital histórico', 'Moises Navarro', $politicalCapturer->id],
+            ['Distrital compartido', 'ALEX MORAN', $politicalCapturer->id],
+            ['Distrital por usuario', 'MAGALY VEGA', $districtCapturer->id],
+            ['Político del catálogo', 'VANESA MILLAN', $politicalCapturer->id],
+            ['Político adicional', 'OTRO PERFIL', $politicalCapturer->id],
+            ['Sin perfil', '', $politicalCapturer->id],
+        ];
+
+        foreach ($records as [$nombre, $perfil, $capturistaId]) {
+            DB::table('afiliados')->insert([
+                'capturista_id' => $capturistaId,
+                'nombre' => $nombre,
+                'municipio' => 'Municipio de prueba',
+                'cve_mun' => '001',
+                'seccion' => '0001',
+                'distrito_local' => 1,
+                'distrito_federal' => 3,
+                'perfil' => $perfil,
+                'estatus' => 'validado',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        $distritales = $this->actingAs($admin)->get(route('avance.index', [
+            'tipo_carga' => 'distritales',
+        ]))->assertOk();
+
+        $this->assertSame(3, $distritales->viewData('totales')['total_convencidos']);
+        $this->assertEqualsCanonicalizing(
+            ['Moises Navarro', 'ALEX MORAN', 'MAGALY VEGA'],
+            $distritales->viewData('referentes')->all()
+        );
+
+        $politicos = $this->actingAs($admin)->get(route('avance.index', [
+            'tipo_carga' => 'politicos',
+        ]))->assertOk();
+
+        $this->assertSame(2, $politicos->viewData('totales')['total_convencidos']);
+        $this->assertEqualsCanonicalizing(
+            ['VANESA MILLAN', 'OTRO PERFIL'],
+            $politicos->viewData('referentes')->all()
+        );
+
+        $detallePolitico = $this->actingAs($admin)->get(route('avance.convencidos', [
+            'tipo_carga' => 'politicos',
+        ]));
+
+        $detallePolitico
+            ->assertOk()
+            ->assertSeeText('Político del catálogo')
+            ->assertSeeText('Político adicional')
+            ->assertDontSeeText('Distrital histórico')
+            ->assertDontSeeText('Distrital compartido')
+            ->assertDontSeeText('Distrital por usuario')
+            ->assertDontSeeText('Sin perfil');
     }
 
     public function test_convinced_goal_can_be_saved_without_inventing_a_banner_goal(): void

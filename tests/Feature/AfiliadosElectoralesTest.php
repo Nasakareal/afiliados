@@ -207,7 +207,7 @@ class AfiliadosElectoralesTest extends TestCase
             'municipio' => 'Morelia',
             'cve_mun' => '053',
             'seccion' => '1234',
-            'perfil' => 'Gladyz Butanda',
+            'perfil' => 'VANESA MILLAN',
             'estatus' => 'validado',
         ], $overrides);
     }

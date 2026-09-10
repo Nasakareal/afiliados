@@ -17,7 +17,34 @@ class MetaAvanceController extends Controller
     private const META_FECHA_INICIO = '2000-01-01';
     private const META_FECHA_FIN = '2099-12-31';
 
-     public function index(Request $request)
+    private const REFERENTES_DISTRITALES = [
+        'Gladyz Butanda',
+        'Moises Navarro',
+        'Andrea Serna',
+        'Oscar Solis',
+        'Erendira Isauro',
+        'David Alfaro',
+        'Monica Valdez',
+        'Sergio Ramirez',
+        'Emmanuel Uribe',
+        'Marco Polo',
+        'Alejandra Anguiano',
+        'Antonio Itlahuac',
+        'Eranderini',
+        'Alejandro Mendez',
+        'Olivia Guzman',
+        'Alex Moran',
+        'Elias Ibarra',
+        'Elías Ibarra Torres',
+        'Salvador Vázquez',
+        'Erandeni',
+        'Sergio Baez',
+        'Yeyo Pimentel',
+        'Fany Arreola',
+        'Nallely Pedraza',
+    ];
+
+    public function index(Request $request)
     {
         extract($this->resolveFilters($request));
 
@@ -178,10 +205,6 @@ class MetaAvanceController extends Controller
             ->whereNull('a.deleted_at')
             ->whereNotNull('a.perfil')
             ->whereRaw("TRIM(a.perfil) <> ''")
-            ->whereIn(
-                DB::raw('TRIM(a.perfil)'),
-                $referentesOficiales
-            )
             ->when(
                 $cveMun !== '',
                 fn($query) => $query->where(
@@ -217,6 +240,14 @@ class MetaAvanceController extends Controller
                     $capturistaId
                 )
             );
+
+        $this->applyTipoCargaFilter(
+            $topReferentesQuery,
+            $tipoCarga,
+            $referentesOficiales,
+            'a.perfil',
+            'a.capturista_id'
+        );
 
         $topReferentes = $topReferentesQuery
             ->groupByRaw('TRIM(a.perfil)')
@@ -600,10 +631,6 @@ class MetaAvanceController extends Controller
             ->whereRaw(
                 "TRIM(lonas.responsable) <> ''"
             )
-            ->whereIn(
-                DB::raw('TRIM(lonas.responsable)'),
-                $referentesOficiales
-            )
             ->when(
                 $cveMun !== '',
                 fn($query) => $query->where(
@@ -633,6 +660,14 @@ class MetaAvanceController extends Controller
                 )
             );
 
+        $this->applyTipoCargaFilter(
+            $referentesLonasQuery,
+            $tipoCarga,
+            $referentesOficiales,
+            'lonas.responsable',
+            'lonas.capturado_por'
+        );
+
         $referentesLonas = $referentesLonasQuery
             ->distinct()
             ->pluck('referente');
@@ -644,29 +679,7 @@ class MetaAvanceController extends Controller
             ->sort()
             ->values();
 
-        $catalogoReferentes = collect(
-            $referentesOficiales
-        )->keyBy(
-            fn($nombre) => Str::lower(
-                Str::ascii(
-                    trim($nombre)
-                )
-            )
-        );
-
         $referentes = $referentesRegistrados
-            ->map(
-                fn($nombre) => $catalogoReferentes->get(
-                    Str::lower(
-                        Str::ascii(
-                            trim(
-                                (string) $nombre
-                            )
-                        )
-                    )
-                )
-            )
-            ->filter()
             ->unique()
             ->sort()
             ->values();
@@ -1122,18 +1135,7 @@ class MetaAvanceController extends Controller
             )
         );
 
-        $referentesOficiales = AfiliadoController::REFERENTES;
-
-        if (
-            $referente !== ''
-            && !in_array(
-                $referente,
-                $referentesOficiales,
-                true
-            )
-        ) {
-            $referente = '';
-        }
+        $referentesOficiales = self::REFERENTES_DISTRITALES;
 
         $tipoCarga = Str::lower(
             trim(
@@ -1270,18 +1272,23 @@ class MetaAvanceController extends Controller
         }
 
         if ($tipoCarga === 'distritales') {
+            $referentesNormalizados = array_map(
+                fn($nombre) => Str::lower(trim($nombre)),
+                $referentesOficiales
+            );
+
             $query->where(
                 function ($query) use (
-                    $referentesOficiales,
+                    $referentesNormalizados,
                     $referenteColumn,
                     $capturistaColumn
                 ) {
                     $query
                         ->whereIn(
                             DB::raw(
-                                "TRIM({$referenteColumn})"
+                                "LOWER(TRIM({$referenteColumn}))"
                             ),
-                            $referentesOficiales
+                            $referentesNormalizados
                         )
                         ->orWhereExists(
                             function ($subquery) use (
@@ -1319,26 +1326,20 @@ class MetaAvanceController extends Controller
         }
 
         if ($tipoCarga === 'politicos') {
-            $query->where(
-                function ($query) use (
-                    $referentesOficiales,
-                    $referenteColumn
-                ) {
-                    $query
-                        ->whereNull(
-                            $referenteColumn
-                        )
-                        ->orWhereRaw(
-                            "TRIM({$referenteColumn}) = ''"
-                        )
-                        ->orWhereNotIn(
-                            DB::raw(
-                                "TRIM({$referenteColumn})"
-                            ),
-                            $referentesOficiales
-                        );
-                }
+            $referentesNormalizados = array_map(
+                fn($nombre) => Str::lower(trim($nombre)),
+                $referentesOficiales
             );
+
+            $query
+                ->whereNotNull($referenteColumn)
+                ->whereRaw("TRIM({$referenteColumn}) <> ''")
+                ->whereNotIn(
+                    DB::raw(
+                        "LOWER(TRIM({$referenteColumn}))"
+                    ),
+                    $referentesNormalizados
+                );
 
             $query->whereNotExists(
                 function ($subquery) use (
@@ -1390,7 +1391,7 @@ class MetaAvanceController extends Controller
             : null;
 
         $tipoCarga = match ($filters['tipoCarga']) {
-            'distritales' => 'Distritales',
+            'distritales' => 'Distrito local',
             'politicos' => 'Políticos',
             default => 'Todos',
         };
