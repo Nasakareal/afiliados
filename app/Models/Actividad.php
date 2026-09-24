@@ -12,11 +12,12 @@ class Actividad extends Model
     protected $table = 'actividades';
 
     protected $fillable = [
-        'titulo','descripcion',
+        'titulo','tipo','origen','descripcion',
         'inicio','fin','all_day',
-        'lugar',
-        'creado_por','distrito_local',
-        'estado',
+        'lugar','colonia',
+        'creado_por','responsable_id','capturista_id','distrito_local',
+        'asistentes','evidencia_url','evidencia_path','evidencia_nombre','capturada_en','demo_batch',
+        'estado','estado_revision','revisado_por','revisado_en',
     ];
 
     protected $casts = [
@@ -24,11 +25,35 @@ class Actividad extends Model
         'fin'     => 'datetime',
         'all_day' => 'boolean',
         'distrito_local' => 'integer',
+        'asistentes' => 'integer',
+        'capturada_en' => 'datetime',
+        'revisado_en' => 'datetime',
     ];
 
     public function creador()
     {
         return $this->belongsTo(User::class, 'creado_por');
+    }
+
+    public function responsable()
+    {
+        return $this->belongsTo(User::class, 'responsable_id');
+    }
+
+    public function capturista()
+    {
+        return $this->belongsTo(User::class, 'capturista_id');
+    }
+
+    public function afiliados()
+    {
+        return $this->hasMany(Afiliado::class, 'actividad_id');
+    }
+
+    public function participantes()
+    {
+        return $this->belongsToMany(User::class, 'actividad_participantes')
+            ->withPivot('asistio_en')->withTimestamps();
     }
 
     public function scopeEstado($q, $estado)

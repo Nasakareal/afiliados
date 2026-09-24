@@ -37,6 +37,29 @@
             @error('lugar')<div class="invalid-feedback">{{ $message }}</div>@enderror
           </div>
 
+          <div class="col-md-4">
+            <label class="form-label">Tipo de actividad</label>
+            <input type="text" name="tipo" value="{{ old('tipo', $actividad->tipo) }}" class="form-control @error('tipo') is-invalid @enderror">
+            @error('tipo')<div class="invalid-feedback">{{ $message }}</div>@enderror
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Colonia</label>
+            <input type="text" name="colonia" value="{{ old('colonia', $actividad->colonia) }}" class="form-control @error('colonia') is-invalid @enderror">
+            @error('colonia')<div class="invalid-feedback">{{ $message }}</div>@enderror
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Responsable</label>
+            <select name="responsable_id" class="form-select @error('responsable_id') is-invalid @enderror">
+              <option value="">Sin asignar</option>
+              @foreach($responsables as $responsable)
+                <option value="{{ $responsable->id }}" {{ (string) old('responsable_id', $actividad->responsable_id) === (string) $responsable->id ? 'selected' : '' }}>{{ $responsable->name }}</option>
+              @endforeach
+            </select>
+            @error('responsable_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
+          </div>
+
           <div class="col-md-12">
             <label class="form-label">Descripción</label>
             <textarea name="descripcion" rows="3"
@@ -73,6 +96,24 @@
               <option value="1" {{ $allDayOld == '1' ? 'selected' : '' }}>Sí</option>
             </select>
             @error('all_day')<div class="invalid-feedback">{{ $message }}</div>@enderror
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Personas asistentes</label>
+            <input type="number" min="0" name="asistentes" value="{{ old('asistentes', $actividad->asistentes) }}" class="form-control @error('asistentes') is-invalid @enderror">
+            @error('asistentes')<div class="invalid-feedback">{{ $message }}</div>@enderror
+          </div>
+
+          <div class="col-md-8">
+            <label class="form-label">Evidencia (URL)</label>
+            <input type="url" name="evidencia_url" value="{{ old('evidencia_url', $actividad->evidencia_url) }}" class="form-control @error('evidencia_url') is-invalid @enderror">
+            @error('evidencia_url')<div class="invalid-feedback">{{ $message }}</div>@enderror
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Fecha de captura</label>
+            <input type="datetime-local" name="capturada_en" value="{{ old('capturada_en', optional($actividad->capturada_en)->format('Y-m-d\TH:i')) }}" class="form-control @error('capturada_en') is-invalid @enderror">
+            @error('capturada_en')<div class="invalid-feedback">{{ $message }}</div>@enderror
           </div>
 
           <div class="col-md-4">

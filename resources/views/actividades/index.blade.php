@@ -10,9 +10,14 @@
         <i class="fa fa-list-ul me-1"></i> Actividades
       </h3>
       <div class="d-flex gap-2">
+        @can('actividades.reportar')
+        <a href="{{ route('actividades.reportar') }}" class="btn btn-granate btn-sm"><i class="fa-solid fa-clipboard-check"></i> Reportar mi actividad</a>
+        @endcan
+        @can('actividades.crear')
         <a href="{{ route('actividades.create') }}" class="btn btn-primary btn-sm">
-          <i class="fa fa-plus"></i> Nueva actividad
+          <i class="fa fa-plus"></i> Actividad oficial
         </a>
+        @endcan
         <a href="{{ route('calendario.index') }}" class="btn btn-outline-primary btn-sm">
           <i class="fa fa-calendar-alt"></i> Ver calendario
         </a>
@@ -39,6 +44,7 @@
               <tr>
                 <th style="width:32px">#</th>
                 <th>Título</th>
+                <th>Origen</th>
                 <th>Lugar</th>
                 <th>Inicio</th>
                 <th>Fin</th>
@@ -56,6 +62,7 @@
                       {{ $a->titulo }}
                     </a>
                   </td>
+                  <td>@if($a->origen === 'reporte_usuario')<span class="badge bg-warning text-dark">Reporte del equipo</span><div class="small text-muted">{{ ucfirst($a->estado_revision) }}</div>@else<span class="badge bg-primary">Oficial</span>@endif</td>
                   <td>{{ $a->lugar ?: '—' }}</td>
                   <td>{{ optional($a->inicio)->format('d/m/Y, h:i a') }}</td>
                   <td>{{ $a->fin ? $a->fin->format('d/m/Y, h:i a') : '—' }}</td>
@@ -77,9 +84,10 @@
                       <a href="{{ route('actividades.show', $a->id) }}" class="btn btn-info">
                         <i class="fa fa-eye"></i>
                       </a>
-                      <a href="{{ route('actividades.edit', $a->id) }}" class="btn btn-success">
+                      @can('actividades.editar')<a href="{{ route('actividades.edit', $a->id) }}" class="btn btn-success">
                         <i class="fa fa-pen"></i>
-                      </a>
+                      </a>@endcan
+                      @can('actividades.borrar')
                       <form action="{{ route('actividades.destroy', $a->id) }}" method="POST"
                             onsubmit="return confirm('¿Eliminar la actividad \"{{ $a->titulo }}\"?');">
                         @csrf @method('DELETE')
@@ -87,6 +95,7 @@
                           <i class="fa fa-trash"></i>
                         </button>
                       </form>
+                      @endcan
                     </div>
                   </td>
                 </tr>

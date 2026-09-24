@@ -18,6 +18,7 @@ class Afiliado extends Model
 
     protected $fillable = [
         'capturista_id',
+        'actividad_id',
         'nombre','apellido_paterno','apellido_materno',
         'edad','sexo',
         'telefono','email','clave_elector','tipo_vinculo','numero_mov',
@@ -45,6 +46,11 @@ class Afiliado extends Model
     public function capturista()
     {
         return $this->belongsTo(User::class,'capturista_id');
+    }
+
+    public function actividad()
+    {
+        return $this->belongsTo(Actividad::class);
     }
 
     // 🔧 Relación a Seccion por (seccion,cve_mun)

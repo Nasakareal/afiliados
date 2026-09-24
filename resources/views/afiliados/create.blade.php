@@ -496,6 +496,20 @@
             </div>
           @endunless
 
+          <div class="col-md-9">
+            <label class="form-label">Actividad de origen</label>
+            <select name="actividad_id" class="form-select @error('actividad_id') is-invalid @enderror">
+              <option value="">Sin actividad vinculada</option>
+              @foreach($actividades as $actividad)
+                <option value="{{ $actividad->id }}" {{ (string) old('actividad_id') === (string) $actividad->id ? 'selected' : '' }}>
+                  {{ $actividad->inicio->format('d/m/Y') }} · {{ $actividad->titulo }}{{ $actividad->colonia ? ' · '.$actividad->colonia : '' }}
+                </option>
+              @endforeach
+            </select>
+            <div class="form-text">Permite explicar el origen del registro y medir resultados reales por actividad.</div>
+            @error('actividad_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
+          </div>
+
           <div class="col-md-3">
               <label class="form-label {{ $req('estatus') ? 'required' : '' }}">
                 Afiliado

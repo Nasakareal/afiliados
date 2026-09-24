@@ -10,10 +10,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Support\LocalDistrictAccess;
+use App\Services\OperationalDashboardService;
 
 class DashboardController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request, OperationalDashboardService $operationalDashboard)
     {
         $user = $request->user();
 
@@ -92,12 +93,17 @@ class DashboardController extends Controller
             ->limit(8)
             ->get();
 
+        $operational = $user->hasAnyRole(['Admin', 'SuperAdmin'])
+            ? $operationalDashboard->build($user)
+            : null;
+
         return view('dashboard', compact(
             'stats',
             'porMunicipio',
             'porSeccion',
             'actividades',
-            'comunicadosRecientes'
+            'comunicadosRecientes',
+            'operational'
         ));
     }
 

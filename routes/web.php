@@ -104,9 +104,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/calendario', [ActividadController::class,'index'])->name('calendario.index')->middleware('permission:actividades.ver');
     Route::get('/actividades/feed', [ActividadController::class,'feed'])->name('actividades.feed')->middleware('permission:actividades.ver');
     Route::get('/actividades', [ActividadController::class,'list'])->name('actividades.index')->middleware('permission:actividades.ver');
+    Route::get('/mis-actividades/reportar', [ActividadController::class,'reportForm'])->name('actividades.reportar')->middleware('permission:actividades.reportar');
+    Route::post('/mis-actividades/reportar', [ActividadController::class,'storeReport'])->name('actividades.reportes.store')->middleware('permission:actividades.reportar');
     Route::get('/actividades/create', [ActividadController::class,'create'])->name('actividades.create')->middleware('permission:actividades.crear');
     Route::post('/actividades', [ActividadController::class,'store'])->name('actividades.store')->middleware('permission:actividades.crear');
     Route::get('/actividades/{actividad}', [ActividadController::class,'show'])->name('actividades.show')->middleware('permission:actividades.ver');
+    Route::get('/actividades/{actividad}/evidencia', [ActividadController::class,'evidence'])->name('actividades.evidencia')->middleware('permission:actividades.ver|actividades.reportar');
+    Route::post('/actividades/{actividad}/asistencia', [ActividadController::class,'attend'])->name('actividades.asistencia')->middleware('permission:actividades.reportar');
+    Route::put('/actividades/{actividad}/revision', [ActividadController::class,'review'])->name('actividades.revision')->middleware('role:Admin|SuperAdmin');
     Route::get('/actividades/{actividad}/edit', [ActividadController::class,'edit'])->name('actividades.edit')->middleware('permission:actividades.editar');
     Route::put('/actividades/{actividad}', [ActividadController::class,'update'])->name('actividades.update')->middleware('permission:actividades.editar');
     Route::delete('/actividades/{actividad}', [ActividadController::class,'destroy'])->name('actividades.destroy')->middleware('permission:actividades.borrar');

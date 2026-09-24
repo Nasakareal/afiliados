@@ -210,6 +210,10 @@
               <i class="fa-solid fa-calendar-days me-1"></i> Actividades
             </a>
             <ul class="dropdown-menu">
+              @can('actividades.reportar')
+              <li><a class="dropdown-item {{ is_active('actividades.reportar') }}" href="{{ route('actividades.reportar') }}"><i class="fa-solid fa-clipboard-check me-1"></i> Reportar mi actividad</a></li>
+              <li><hr class="dropdown-divider"></li>
+              @endcan
               <li><a class="dropdown-item {{ is_active('calendario.index') }}" href="{{ route('calendario.index') }}"><i class="fa-regular fa-calendar me-1"></i> Calendario</a></li>
               <li><a class="dropdown-item {{ is_active('actividades.index') }}" href="{{ route('actividades.index') }}"><i class="fa-solid fa-list-check me-1"></i> Listado</a></li>
               @can('actividades.crear')

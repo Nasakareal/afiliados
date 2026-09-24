@@ -12,7 +12,7 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, HasRoles;
 
-    protected $fillable = ['name','email','password','distrito_local'];
+    protected $fillable = ['name','email','password','distrito_local','demo_batch'];
 
     protected $hidden = ['password','remember_token'];
 
@@ -32,6 +32,11 @@ class User extends Authenticatable
     public function actividadesCreadas()
     {
         return $this->hasMany(Actividad::class, 'creado_por');
+    }
+
+    public function actividadesAsignadas()
+    {
+        return $this->hasMany(Actividad::class, 'responsable_id');
     }
 
     public function lonasCapturadas()

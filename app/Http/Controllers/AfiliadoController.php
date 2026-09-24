@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Afiliado;
+use App\Models\Actividad;
 use App\Services\AfiliadosExcelExporter;
 use App\Support\LocalDistrictAccess;
 use Illuminate\Http\Request;
@@ -305,6 +306,9 @@ class AfiliadoController extends Controller
         $referentes = $esDistritoLocal
             ? []
             : self::REFERENTES;
+        $actividades = Actividad::query()
+            ->where('inicio', '>=', now()->subMonths(3))
+            ->orderByDesc('inicio')->limit(150)->get(['id', 'titulo', 'inicio', 'colonia']);
 
         return view('afiliados.create', compact(
             'municipios',
@@ -313,7 +317,8 @@ class AfiliadoController extends Controller
             'fullNameField',
             'esDistritoLocal',
             'referenteUsuario',
-            'referentes'
+            'referentes',
+            'actividades'
         ));
     }
 
@@ -420,6 +425,9 @@ class AfiliadoController extends Controller
         $referentes = $esDistritoLocal
             ? []
             : self::REFERENTES;
+        $actividades = Actividad::query()
+            ->where('inicio', '>=', now()->subMonths(3))
+            ->orderByDesc('inicio')->limit(150)->get(['id', 'titulo', 'inicio', 'colonia']);
 
         return view('afiliados.edit', compact(
             'afiliado',
@@ -429,7 +437,8 @@ class AfiliadoController extends Controller
             'fullNameField',
             'esDistritoLocal',
             'referenteUsuario',
-            'referentes'
+            'referentes',
+            'actividades'
         ));
     }
 
@@ -597,7 +606,7 @@ class AfiliadoController extends Controller
             'perfil' => [
                 'required',
                 'string',
-                Rule::in(self::REFERENTES),
+                'max:255',
             ],
 
             'localidad' => [
@@ -639,6 +648,12 @@ class AfiliadoController extends Controller
             'estatus' => [
                 'required',
                 Rule::in(['validado', 'descartado']),
+            ],
+
+            'actividad_id' => [
+                'nullable',
+                'integer',
+                'exists:actividades,id',
             ],
 
             'fecha_convencimiento' => [
@@ -740,7 +755,7 @@ class AfiliadoController extends Controller
             'perfil' => [
                 'required',
                 'string',
-                Rule::in(self::REFERENTES),
+                'max:255',
             ],
 
             'localidad' => [
@@ -782,6 +797,12 @@ class AfiliadoController extends Controller
             'estatus' => [
                 'required',
                 Rule::in(['validado', 'descartado']),
+            ],
+
+            'actividad_id' => [
+                'nullable',
+                'integer',
+                'exists:actividades,id',
             ],
 
             'fecha_convencimiento' => [
@@ -1188,6 +1209,12 @@ class AfiliadoController extends Controller
             'estatus' => [
                 'required',
                 Rule::in(['validado', 'descartado']),
+            ],
+
+            'actividad_id' => [
+                'nullable',
+                'integer',
+                'exists:actividades,id',
             ],
         ];
     }

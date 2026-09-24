@@ -11,6 +11,15 @@
         <i class="fa fa-calendar-day me-1"></i> {{ $actividad->titulo }}
       </h3>
       <div class="d-flex gap-2">
+        @if($actividad->origen === 'reporte_usuario' && $actividad->estado_revision === 'pendiente' && auth()->user()->hasAnyRole(['Admin','SuperAdmin']))
+        <form action="{{ route('actividades.revision',$actividad) }}" method="POST">@csrf @method('PUT')<input type="hidden" name="estado_revision" value="aprobada"><button class="btn btn-success btn-sm"><i class="fa-solid fa-check"></i> Aprobar reporte</button></form>
+        <form action="{{ route('actividades.revision',$actividad) }}" method="POST">@csrf @method('PUT')<input type="hidden" name="estado_revision" value="rechazada"><button class="btn btn-outline-danger btn-sm"><i class="fa-solid fa-xmark"></i> Rechazar</button></form>
+        @endif
+        @can('actividades.reportar')
+        @unless($yoAsisti)
+        <form action="{{ route('actividades.asistencia',$actividad) }}" method="POST">@csrf<button class="btn btn-granate btn-sm"><i class="fa-solid fa-user-check"></i> Yo asistí</button></form>
+        @endunless
+        @endcan
         @can('actividades.editar')
         <a href="{{ route('actividades.edit',$actividad->id) }}" class="btn btn-success btn-sm">
           <i class="fa fa-pen"></i> Editar
@@ -36,6 +45,29 @@
 
         <dt class="col-sm-3">Lugar</dt>
         <dd class="col-sm-9">{{ $actividad->lugar ?: '—' }}</dd>
+
+        <dt class="col-sm-3">Tipo / colonia</dt>
+        <dd class="col-sm-9">{{ $actividad->tipo ?: '—' }} / {{ $actividad->colonia ?: '—' }}</dd>
+
+        <dt class="col-sm-3">Origen</dt>
+        <dd class="col-sm-9">@if($actividad->origen === 'reporte_usuario')<span class="badge bg-warning text-dark">Reporte del equipo · {{ ucfirst($actividad->estado_revision) }}</span>@else<span class="badge bg-primary">Actividad oficial</span>@endif</dd>
+
+        <dt class="col-sm-3">Responsable</dt>
+        <dd class="col-sm-9">{{ $actividad->responsable?->name ?? 'Sin asignar' }}</dd>
+
+        <dt class="col-sm-3">Asistencia / registros</dt>
+        <dd class="col-sm-9">{{ number_format($actividad->asistentes ?? 0) }} asistentes reportados · {{ number_format($actividad->participantes->count()) }} integrantes confirmaron asistencia · {{ number_format($actividad->afiliados()->count()) }} registros vinculados</dd>
+
+        <dt class="col-sm-3">Evidencia</dt>
+        <dd class="col-sm-9">
+          @if($actividad->evidencia_path)
+            <a href="{{ route('actividades.evidencia',$actividad) }}" target="_blank">Ver {{ $actividad->evidencia_nombre ?: 'archivo' }} <i class="fa-solid fa-paperclip"></i></a>
+          @elseif($actividad->evidencia_url)
+            <a href="{{ $actividad->evidencia_url }}" target="_blank" rel="noopener">Abrir evidencia <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+          @else
+            <span class="text-warning">Sin evidencia</span>
+          @endif
+        </dd>
 
         <dt class="col-sm-3">Inicio</dt>
         <dd class="col-sm-9">{{ $actividad->inicio->format('d/m/Y H:i') }}</dd>

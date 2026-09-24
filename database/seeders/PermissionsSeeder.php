@@ -31,6 +31,7 @@ class PermissionsSeeder extends Seeder
 
             // Actividades (calendario)
             'actividades.ver', 'actividades.crear', 'actividades.editar', 'actividades.borrar',
+            'actividades.reportar',
 
             // Captura y mapa de lonas
             'lonas.ver', 'lonas.crear', 'lonas.editar', 'lonas.borrar',
@@ -80,6 +81,7 @@ class PermissionsSeeder extends Seeder
         $roleCoord->givePermissionTo([
             'afiliados.ver','afiliados.crear','afiliados.editar','afiliados.borrar',
             'actividades.ver','actividades.crear','actividades.editar','actividades.borrar',
+            'actividades.reportar',
             'secciones.ver','mapa.ver','reportes.ver',
             'avance.ver',
             'lonas.ver','lonas.crear','lonas.editar','lonas.borrar',
@@ -88,6 +90,7 @@ class PermissionsSeeder extends Seeder
         // Capturista: crear/ver afiliados + ver mapa (aditivo)
         $roleCapt->givePermissionTo([
             'afiliados.ver','afiliados.crear','mapa.ver',
+            'actividades.ver','actividades.reportar',
             'lonas.ver','lonas.crear',
         ]);
 

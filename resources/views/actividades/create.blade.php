@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title','Nueva Actividad')
+@section('title','Nueva Actividad Oficial')
 
 @section('content')
 <div class="container-xl">
   <div class="card card-outline card-primary shadow-sm">
     <div class="card-header">
-      <h3 class="card-title mb-0"><i class="fa fa-plus-circle me-1"></i> Crear nueva actividad</h3>
+      <h3 class="card-title mb-0"><i class="fa fa-plus-circle me-1"></i> Crear actividad oficial</h3>
     </div>
     <div class="card-body">
       <form action="{{ route('actividades.store') }}" method="POST" autocomplete="off">
@@ -25,6 +25,29 @@
             <input type="text" name="lugar" value="{{ old('lugar') }}" 
                    class="form-control @error('lugar') is-invalid @enderror">
             @error('lugar')<div class="invalid-feedback">{{ $message }}</div>@enderror
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Tipo de actividad</label>
+            <input type="text" name="tipo" value="{{ old('tipo') }}" class="form-control @error('tipo') is-invalid @enderror" placeholder="Jornada, reunión, recorrido…">
+            @error('tipo')<div class="invalid-feedback">{{ $message }}</div>@enderror
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Colonia</label>
+            <input type="text" name="colonia" value="{{ old('colonia') }}" class="form-control @error('colonia') is-invalid @enderror">
+            @error('colonia')<div class="invalid-feedback">{{ $message }}</div>@enderror
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Responsable</label>
+            <select name="responsable_id" class="form-select @error('responsable_id') is-invalid @enderror">
+              <option value="">Usuario actual</option>
+              @foreach($responsables as $responsable)
+                <option value="{{ $responsable->id }}" {{ (string) old('responsable_id') === (string) $responsable->id ? 'selected' : '' }}>{{ $responsable->name }}</option>
+              @endforeach
+            </select>
+            @error('responsable_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
           </div>
 
           <div class="col-md-12">
@@ -55,6 +78,24 @@
               <option value="1" {{ old('all_day') == '1' ? 'selected' : '' }}>Sí</option>
             </select>
             @error('all_day')<div class="invalid-feedback">{{ $message }}</div>@enderror
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Personas asistentes</label>
+            <input type="number" min="0" name="asistentes" value="{{ old('asistentes') }}" class="form-control @error('asistentes') is-invalid @enderror">
+            @error('asistentes')<div class="invalid-feedback">{{ $message }}</div>@enderror
+          </div>
+
+          <div class="col-md-8">
+            <label class="form-label">Evidencia (URL)</label>
+            <input type="url" name="evidencia_url" value="{{ old('evidencia_url') }}" class="form-control @error('evidencia_url') is-invalid @enderror" placeholder="https://…">
+            @error('evidencia_url')<div class="invalid-feedback">{{ $message }}</div>@enderror
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Fecha de captura</label>
+            <input type="datetime-local" name="capturada_en" value="{{ old('capturada_en') }}" class="form-control @error('capturada_en') is-invalid @enderror">
+            @error('capturada_en')<div class="invalid-feedback">{{ $message }}</div>@enderror
           </div>
 
           <div class="col-md-4">
