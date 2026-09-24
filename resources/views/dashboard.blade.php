@@ -24,6 +24,7 @@
   .ops-dashboard .table{--bs-table-bg:transparent}.ops-dashboard .table th{font-size:.69rem;text-transform:uppercase;letter-spacing:.07em;color:#7a8494;border-bottom-color:var(--line);white-space:nowrap}.ops-dashboard .table td{vertical-align:middle;border-bottom-color:#f0f2f6;font-size:.84rem}
   .ops-dashboard .person-avatar{width:36px;height:36px;display:grid;place-items:center;border-radius:11px;background:linear-gradient(145deg,#f8dfe9,#f3eef4);color:var(--wine);font-weight:800}.ops-dashboard .alert-row{display:flex;gap:13px;padding:13px 0;border-bottom:1px solid var(--line)}.ops-dashboard .alert-row:last-child{border:0}.ops-dashboard .alert-icon{width:36px;height:36px;flex:0 0 auto;display:grid;place-items:center;border-radius:11px}.ops-dashboard .tone-warning{background:#fff5da;color:#946500}.ops-dashboard .tone-danger{background:#ffebef;color:#b32240}.ops-dashboard .tone-info{background:#e9f3ff;color:#246ca6}
   .ops-dashboard .audit-line{position:relative;padding:0 0 19px 24px;border-left:2px solid #edf0f4}.ops-dashboard .audit-line:before{content:"";position:absolute;width:10px;height:10px;left:-6px;top:4px;border:2px solid #fff;border-radius:50%;background:var(--pink);box-shadow:0 0 0 2px #f1c8dc}.ops-dashboard .audit-line:last-child{padding-bottom:0}.ops-dashboard .metric-tile{border:1px solid var(--line);border-radius:14px;padding:13px;background:#fbfcfd}.ops-dashboard .metric-tile strong{display:block;font-size:1.25rem}.ops-dashboard .metric-tile span{font-size:.72rem;color:var(--muted)}
+  .ops-dashboard .people-base{background:linear-gradient(120deg,#fff 0%,#fff 62%,#fbf1f5 100%);border-left:5px solid var(--wine)}.ops-dashboard .people-stat{height:100%;padding:17px 19px;border:1px solid var(--line);border-radius:15px;background:#fff}.ops-dashboard .people-stat.primary{background:linear-gradient(140deg,#21141a,#74122f);color:#fff;border:0}.ops-dashboard .people-number{font-size:1.65rem;font-weight:850;letter-spacing:-.035em}.ops-dashboard .people-label{font-size:.71rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}.ops-dashboard .people-stat.primary .people-label{color:rgba(255,255,255,.65)}
   @media(max-width:767px){.ops-dashboard .ops-hero{padding:23px 20px}.ops-dashboard .panel{padding:17px}.ops-dashboard .table-responsive{margin:0 -17px;padding:0 17px}}
 </style>
 @endpush
@@ -44,6 +45,15 @@
     ] as [$label,$value,$icon,$hint])
     <div class="col"><div class="kpi-card"><div class="d-flex justify-content-between align-items-start"><div class="kpi-icon"><i class="fa-solid fa-{{ $icon }}"></i></div><span class="mini-delta">{{ $hint }}</span></div><div class="kpi-value">{{ is_numeric($value) ? number_format((float)$value, str_contains((string)$value,'.') ? 1 : 0) : $value }}</div><div class="kpi-label">{{ $label }}</div></div></div>
     @endforeach
+  </div>
+
+  <div class="panel people-base mb-3">
+    <div class="row g-3 align-items-center">
+      <div class="col-xl-5"><div class="d-flex align-items-center gap-3"><div class="kpi-icon"><i class="fa-solid fa-address-book"></i></div><div><h2 class="panel-title">Base de convencidos</h2><div class="panel-subtitle">Conteo vigente de personas registradas y su decisión de afiliación</div></div></div></div>
+      <div class="col-12 col-md-4 col-xl"><div class="people-stat primary"><div class="people-number">{{ number_format($stats['total']) }}</div><div class="people-label">Total convencidos</div></div></div>
+      <div class="col-6 col-md-4 col-xl"><div class="people-stat"><div class="people-number text-success">{{ number_format($stats['validado']) }}</div><div class="people-label"><i class="fa-solid fa-circle-check me-1 text-success"></i>Sí afiliados</div></div></div>
+      <div class="col-6 col-md-4 col-xl"><div class="people-stat"><div class="people-number text-danger">{{ number_format($stats['descartado']) }}</div><div class="people-label"><i class="fa-solid fa-circle-xmark me-1 text-danger"></i>No afiliados</div></div></div>
+    </div>
   </div>
 
   <div class="row g-3 mb-3">
