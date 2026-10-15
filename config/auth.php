@@ -2,6 +2,8 @@
 
 return [
 
+    'restrict_system_access' => env('SYSTEM_ACCESS_RESTRICTED', true),
+
     /*
     |--------------------------------------------------------------------------
     | Authentication Defaults

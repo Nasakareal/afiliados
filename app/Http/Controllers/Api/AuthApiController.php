@@ -22,6 +22,12 @@ class AuthApiController extends Controller
             throw ValidationException::withMessages(['email' => 'Credenciales inválidas']);
         }
 
+        if (!$user->canAccessSystem()) {
+            throw ValidationException::withMessages([
+                'email' => User::ACCESS_RESTRICTION_MESSAGE,
+            ]);
+        }
+
         $token = $user->createToken('flutter')->plainTextToken;
 
         return response()->json([

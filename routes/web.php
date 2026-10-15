@@ -39,7 +39,7 @@ if (file_exists(base_path('routes/auth.php'))) {
     require __DIR__.'/auth.php';
 }
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'system.access'])->group(function () {
 
     Route::get('/dashboard', [DashboardController::class,'index'])->name('dashboard');
 

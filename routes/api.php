@@ -16,7 +16,7 @@ use App\Http\Controllers\MetaAvanceController;
 Route::prefix('v1')->group(function () {
     Route::post('/auth/login', [AuthApiController::class, 'login'])->name('api.auth.login');
 
-    Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
+    Route::middleware(['auth:sanctum', 'throttle:api', 'system.access'])->group(function () {
         Route::get('/auth/me', [AuthApiController::class, 'me'])->name('api.auth.me');
         Route::post('/auth/logout', [AuthApiController::class, 'logout'])->name('api.auth.logout');
 

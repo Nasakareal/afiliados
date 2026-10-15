@@ -12,6 +12,9 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, HasRoles;
 
+    public const SYSTEM_ACCESS_ROLES = ['Admin', 'SuperAdmin'];
+    public const ACCESS_RESTRICTION_MESSAGE = 'El acceso está temporalmente restringido a administradores.';
+
     protected $fillable = ['name','email','password','distrito_local','demo_batch'];
 
     protected $hidden = ['password','remember_token'];
@@ -22,6 +25,12 @@ class User extends Authenticatable
         'password_changed_at' => 'datetime',
         'distrito_local' => 'integer',
     ];
+
+    public function canAccessSystem(): bool
+    {
+        return ! config('auth.restrict_system_access', true)
+            || $this->hasAnyRole(self::SYSTEM_ACCESS_ROLES);
+    }
 
     // === Relaciones de conveniencia ===
     public function afiliadosCapturados()
