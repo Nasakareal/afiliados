@@ -23,6 +23,8 @@ class ElectoralIntelligenceProjectionTest extends TestCase
         $this->insertAffiliate($user->id, '1118', 'validado');
         $this->insertAffiliate($user->id, '1118', 'descartado');
         $this->insertAffiliate($user->id, '1200', 'validado');
+        $this->insertAffiliate($user->id, '9999', 'validado', 'Morelos', '054');
+        $this->insertAffiliate($user->id, '9998', 'validado');
 
         $response = $this->actingAs($user)
             ->get(route('electoral.data'))
@@ -31,6 +33,9 @@ class ElectoralIntelligenceProjectionTest extends TestCase
             ->assertJsonPath('operacion.afiliados_si', 3)
             ->assertJsonPath('operacion.afiliados_no', 1)
             ->assertJsonPath('operacion.secciones_cubiertas', 2)
+            ->assertJsonPath('operacion.registros_fuera_mapa', 1)
+            ->assertJsonPath('operacion.sin_base_si', 400)
+            ->assertJsonPath('operacion.estructura_minima', 2)
             ->assertHeader('Cache-Control', 'no-store, private');
 
         $section = collect($response->json('secciones'))->firstWhere('seccion', 1118);
@@ -42,17 +47,26 @@ class ElectoralIntelligenceProjectionTest extends TestCase
         $this->get(route('electoral.index'))
             ->assertOk()
             ->assertSeeText('Proyección operativa con la base actual')
-            ->assertSeeText('Base movilizada estimada')
+            ->assertSeeText('Podrían acudir')
+            ->assertSeeText('Cauteloso · 60%')
+            ->assertSeeText('Dónde fortalecer la estructura')
+            ->assertSeeText('Prioridad sugerida')
             ->assertSee('Sí afiliados registrados por sección');
     }
 
-    private function insertAffiliate(int $capturistaId, string $section, string $status): void
+    private function insertAffiliate(
+        int $capturistaId,
+        string $section,
+        string $status,
+        string $municipality = 'Morelia',
+        string $municipalityKey = '053'
+    ): void
     {
         DB::table('afiliados')->insert([
             'capturista_id' => $capturistaId,
             'nombre' => 'Registro de prueba',
-            'municipio' => 'Morelia',
-            'cve_mun' => '054',
+            'municipio' => $municipality,
+            'cve_mun' => $municipalityKey,
             'seccion' => $section,
             'distrito_local' => 17,
             'distrito_federal' => 10,

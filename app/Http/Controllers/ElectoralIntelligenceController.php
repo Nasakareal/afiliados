@@ -48,7 +48,11 @@ class ElectoralIntelligenceController extends Controller
     private function datasetWithOperation(Request $request): array
     {
         $dataset = $this->dataset();
-        $operation = $this->operationBySection($request);
+        $validSections = collect($dataset['secciones'])
+            ->pluck('seccion')
+            ->map(fn ($section): string => (string) $section)
+            ->all();
+        $operation = $this->operationBySection($request, $validSections);
 
         foreach ($dataset['secciones'] as &$section) {
             $section['operacion'] = $operation['secciones'][(string) $section['seccion']] ?? [
@@ -60,23 +64,50 @@ class ElectoralIntelligenceController extends Controller
         unset($section);
 
         $dataset['operacion'] = $operation['resumen'];
+        $operationalSections = collect($dataset['secciones']);
+        $dataset['operacion']['sin_base_si'] = $operationalSections
+            ->filter(fn (array $section) => $section['operacion']['afiliados_si'] === 0)
+            ->count();
+        $dataset['operacion']['estructura_minima'] = $operationalSections
+            ->filter(fn (array $section) => $section['operacion']['afiliados_si'] >= 1 && $section['operacion']['afiliados_si'] <= 9)
+            ->count();
+        $dataset['operacion']['estructura_fuerte'] = $operationalSections
+            ->filter(fn (array $section) => $section['operacion']['afiliados_si'] >= 100)
+            ->count();
+        $dataset['operacion']['derrotas_margen_corto'] = $operationalSections
+            ->filter(function (array $section): bool {
+                $result = $section['historial']['2024'];
+
+                return $result !== null
+                    && !$result['morena_gano']
+                    && abs((int) $result['margen_morena']) <= 100;
+            })
+            ->count();
 
         return $dataset;
     }
 
-    private function operationBySection(Request $request): array
+    private function operationBySection(Request $request, array $validSections): array
     {
-        $query = DB::table('afiliados_resumen as a')
+        $baseQuery = DB::table('afiliados_resumen as a')
+            // La cartografia electoral identifica Morelia como municipio 054,
+            // mientras que la base operativa usa la clave municipal 053.
+            ->where(function ($municipality): void {
+                $municipality
+                    ->where('a.cve_mun', '053')
+                    ->orWhereRaw('UPPER(TRIM(a.municipio)) = ?', ['MORELIA']);
+            });
+
+        LocalDistrictAccess::scope($baseQuery, 'a.distrito_local', $request->user());
+
+        $allRegistered = (int) (clone $baseQuery)->sum('a.total');
+
+        $rows = (clone $baseQuery)
             ->select('a.seccion')
             ->selectRaw('SUM(a.total) AS registrados')
             ->selectRaw("SUM(CASE WHEN a.estatus = 'validado' THEN a.total ELSE 0 END) AS afiliados_si")
             ->selectRaw("SUM(CASE WHEN a.estatus = 'descartado' THEN a.total ELSE 0 END) AS afiliados_no")
-            ->where('a.cve_mun', '054')
-            ->where('a.seccion', '<>', '');
-
-        LocalDistrictAccess::scope($query, 'a.distrito_local', $request->user());
-
-        $rows = $query
+            ->whereIn('a.seccion', $validSections)
             ->groupBy('a.seccion')
             ->get()
             ->mapWithKeys(function ($row): array {
@@ -93,7 +124,8 @@ class ElectoralIntelligenceController extends Controller
                 'registrados' => (int) $rows->sum('registrados'),
                 'afiliados_si' => (int) $rows->sum('afiliados_si'),
                 'afiliados_no' => (int) $rows->sum('afiliados_no'),
-                'secciones_cubiertas' => $rows->filter(fn (array $row) => $row['registrados'] > 0)->count(),
+                'secciones_cubiertas' => $rows->filter(fn (array $row) => $row['afiliados_si'] > 0)->count(),
+                'registros_fuera_mapa' => max(0, $allRegistered - (int) $rows->sum('registrados')),
                 'tasa_movilizacion_inicial' => 0.75,
                 'alcance_restringido' => LocalDistrictAccess::restricted($request->user()),
             ],

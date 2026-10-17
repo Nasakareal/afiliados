@@ -19,11 +19,12 @@
   .ei .history-table th{font-size:.66rem;text-transform:uppercase;letter-spacing:.07em;color:#7a8494;border-bottom-color:var(--line);white-space:nowrap}.ei .history-table td{vertical-align:middle;font-size:.82rem;border-bottom-color:#eef1f5}.ei .metric-bar{height:6px;background:#edf0f4;border-radius:20px;overflow:hidden}.ei .metric-bar span{display:block;height:100%;background:linear-gradient(90deg,#8b1538,#d91785);border-radius:inherit}
   .ei .year-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.ei .year-card{padding:16px;border:1px solid var(--line);border-radius:15px;background:#fafbfc}.ei .year-card h3{font-size:1rem;font-weight:850;margin:0}.ei .year-total{font-size:1.35rem;font-weight:850;letter-spacing:-.03em}.ei .composition{height:10px;display:flex;overflow:hidden;border-radius:999px;background:#edf0f4}.ei .composition .morena{background:linear-gradient(90deg,#7a0019,#d91785)}.ei .composition .otros{background:#7da6cc}.ei .composition .invalidos{background:#c9ced6}.ei .composition-legend{display:flex;flex-wrap:wrap;gap:10px 16px;color:var(--muted);font-size:.7rem}.ei .composition-legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
   .ei .section-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.ei .section-stat{padding:11px;border-radius:12px;background:#f6f7f9}.ei .section-stat span{display:block;font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:800}.ei .section-stat strong{display:block;margin-top:3px;font-size:1rem}.ei .election-card{border:1px solid var(--line);border-radius:14px;padding:13px;margin-top:10px}.ei .election-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}.ei .election-year{font-size:1rem;font-weight:850}.ei .election-row{display:flex;justify-content:space-between;gap:10px;margin-top:7px;font-size:.76rem}.ei .election-row span{color:var(--muted)}.ei .share-track{height:7px;border-radius:999px;background:#edf0f4;overflow:hidden;margin-top:8px}.ei .share-track span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#7a0019,#d91785)}
-  .ei .projection-panel{background:linear-gradient(135deg,#fff 0%,#fff8fb 100%);border-color:#f0d7e1}.ei .projection-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}.ei .projection-stat{padding:14px;border-radius:14px;background:#fff;border:1px solid #f0e4e9}.ei .projection-stat span{display:block;color:var(--muted);font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em}.ei .projection-stat strong{display:block;font-size:1.35rem;letter-spacing:-.03em;margin-top:4px}.ei .projection-stat.accent{color:#fff;background:linear-gradient(135deg,#7a0019,#d91785);border:0}.ei .projection-stat.accent span{color:rgba(255,255,255,.76)}.ei .projection-note{border-left:3px solid #d91785;padding-left:11px;color:var(--muted);font-size:.76rem}.ei .range-value{min-width:54px;text-align:center;color:var(--wine);font-weight:850}.ei .operation-card{border:1px solid #efd5df;background:#fff8fb;border-radius:14px;padding:13px;margin-bottom:14px}
+  .ei .projection-panel{background:linear-gradient(135deg,#fff 0%,#fff8fb 100%);border-color:#f0d7e1}.ei .projection-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.ei .projection-stat{padding:14px;border-radius:14px;background:#fff;border:1px solid #f0e4e9}.ei .projection-stat span{display:block;color:var(--muted);font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em}.ei .projection-stat strong{display:block;font-size:1.35rem;letter-spacing:-.03em;margin-top:4px}.ei .projection-stat.accent{color:#fff;background:linear-gradient(135deg,#7a0019,#d91785);border:0}.ei .projection-stat.accent span{color:rgba(255,255,255,.76)}.ei .projection-note{border-left:3px solid #d91785;padding-left:11px;color:var(--muted);font-size:.76rem}.ei .range-value{min-width:54px;text-align:center;color:var(--wine);font-weight:850}.ei .operation-card{border:1px solid #efd5df;background:#fff8fb;border-radius:14px;padding:13px;margin-bottom:14px}.ei .scenario-box{padding:17px;border-radius:16px;background:#fff;border:1px solid #efdce4}.ei .scenario-buttons{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.ei .scenario-btn{border:1px solid #e4c5d1;background:#fff;color:#6f1835;border-radius:11px;padding:8px 5px;font-size:.73rem;font-weight:800}.ei .scenario-btn:hover,.ei .scenario-btn.active{background:#7a0019;color:#fff;border-color:#7a0019}.ei .projection-result{padding:11px 13px;border-radius:12px;background:#f9edf2;color:#561129;font-size:.82rem}.ei .projection-result strong{font-size:1.05rem}
+  .ei .action-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.ei .action-kpi{padding:12px 14px;border-radius:13px;background:#f7f8fa}.ei .action-kpi strong{display:block;font-size:1.3rem}.ei .action-kpi span{display:block;font-size:.68rem;color:var(--muted);font-weight:800;text-transform:uppercase}.ei .action-filters{display:flex;gap:7px;overflow-x:auto;padding-bottom:3px}.ei .action-filter{white-space:nowrap;border:1px solid #dfe4ea;background:#fff;color:#4d5868;border-radius:999px;padding:7px 12px;font-size:.74rem;font-weight:800}.ei .action-filter.active{background:#222b38;color:#fff;border-color:#222b38}.ei .action-table th{font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:#788395;white-space:nowrap}.ei .action-table td{font-size:.78rem;vertical-align:middle}.ei .action-badge{display:inline-flex;padding:5px 8px;border-radius:999px;font-size:.68rem;font-weight:850}.ei .action-open{background:#fff0f2;color:#a32b43}.ei .action-build{background:#fff4dd;color:#8a5a00}.ei .action-close{background:#e8f0fb;color:#23548a}.ei .action-activate{background:#e5f6ef;color:#0b6b54}.ei .action-maintain{background:#eef0f3;color:#505b6a}.ei .action-table tbody tr{cursor:pointer}.ei .action-table tbody tr:hover{background:#fff7fa}.ei .action-table tbody tr.is-selected{background:#fff0f5;box-shadow:inset 4px 0 #d91785}.ei .action-table-wrap{max-height:510px;overflow:auto}.ei .table-help{font-size:.7rem;color:var(--muted)}
   .ei .source-list a{color:var(--wine);text-decoration:none}.ei .source-list a:hover{text-decoration:underline}.ei .quality-row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}.ei .quality-row:last-child{border:0}.ei .quality-row span{color:var(--muted);font-size:.78rem}.ei .quality-row strong{font-size:.85rem}
   .ei .stable-table th{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:#7a8494;white-space:nowrap}.ei .stable-table td{font-size:.82rem;vertical-align:middle}.ei .section-link{border:0;background:none;color:var(--wine);font-weight:800;padding:0;text-decoration:underline;text-decoration-color:#e9bdca;text-underline-offset:3px}
   .leaflet-tooltip.ei-tooltip{border:0;border-radius:10px;box-shadow:0 8px 20px rgba(0,0,0,.16);padding:8px 10px;font:12px/1.35 system-ui,sans-serif}
-  @media(max-width:991.98px){.ei #electoralMap{height:520px}.ei .section-panel{min-height:0}.ei .map-toolbar{position:relative;left:auto;right:auto;top:auto;margin-bottom:10px}.ei .map-shell{display:flex;flex-direction:column}.ei .map-toolbar{order:-1}.ei .map-legend{bottom:12px}.ei .hero{padding:23px 20px}.ei .year-grid{grid-template-columns:1fr}.ei .projection-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:991.98px){.ei #electoralMap{height:520px}.ei .section-panel{min-height:0}.ei .map-toolbar{position:relative;left:auto;right:auto;top:auto;margin-bottom:10px}.ei .map-shell{display:flex;flex-direction:column}.ei .map-toolbar{order:-1}.ei .map-legend{bottom:12px}.ei .hero{padding:23px 20px}.ei .year-grid{grid-template-columns:1fr}.ei .projection-grid,.ei .action-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
 @endpush
 
@@ -82,26 +83,72 @@
 
   <div class="card-panel projection-panel mb-3">
     <div class="row g-3 align-items-center">
-      <div class="col-xl-8">
+      <div class="col-xl-7">
         <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
-          <div><h2 class="panel-title">Proyección operativa con la base actual</h2><div class="panel-subtitle">Personas registradas en <code>afiliados</code>, agregadas por sección y sin exponer datos individuales.</div></div>
+          <div><h2 class="panel-title">Proyección operativa con la base actual</h2><div class="panel-subtitle">Personas registradas en <code>afiliados</code> cuya sección coincide con el mapa vigente.</div></div>
           @if($operation['alcance_restringido'])<span class="soft-pill"><i class="fa-solid fa-shield-halved me-1"></i>Solo distritos autorizados</span>@endif
         </div>
         <div class="projection-grid">
-          <div class="projection-stat"><span>Registros totales</span><strong>{{ number_format($operation['registrados']) }}</strong></div>
+          <div class="projection-stat"><span>Registros utilizables</span><strong>{{ number_format($operation['registrados']) }}</strong></div>
           <div class="projection-stat"><span>Sí afiliados</span><strong class="text-success">{{ number_format($operation['afiliados_si']) }}</strong></div>
           <div class="projection-stat"><span>No afiliados</span><strong class="text-danger">{{ number_format($operation['afiliados_no']) }}</strong></div>
-          <div class="projection-stat"><span>Secciones cubiertas</span><strong>{{ number_format($operation['secciones_cubiertas']) }}</strong><small class="text-muted"> / {{ number_format($quality['current_sections']) }}</small></div>
-          <div class="projection-stat accent"><span>Base movilizada estimada</span><strong id="projectedCity">{{ number_format(round($operation['afiliados_si'] * $operation['tasa_movilizacion_inicial'])) }}</strong></div>
+          <div class="projection-stat"><span>Secciones con base “sí”</span><strong>{{ number_format($operation['secciones_cubiertas']) }}</strong><small class="text-muted"> / {{ number_format($quality['current_sections']) }}</small></div>
+          <div class="projection-stat accent"><span>Podrían acudir</span><strong id="projectedCity">{{ number_format(round($operation['afiliados_si'] * $operation['tasa_movilizacion_inicial'])) }}</strong></div>
+        </div>
+        @if($operation['registros_fuera_mapa'] > 0)<div class="small text-warning-emphasis mt-2"><i class="fa-solid fa-triangle-exclamation me-1"></i>{{ number_format($operation['registros_fuera_mapa']) }} registros de Morelia no entran en la proyección porque no tienen una sección válida del mapa actual.</div>@endif
+      </div>
+      <div class="col-xl-5">
+        <div class="scenario-box">
+          <div class="fw-bold">¿Qué porcentaje de los {{ number_format($operation['afiliados_si']) }} “sí afiliados” creemos que acudirá a votar?</div>
+          <div class="small text-muted mt-1 mb-2">Elige una referencia rápida o mueve la barra.</div>
+          <div class="scenario-buttons mb-3">
+            <button type="button" class="scenario-btn" data-rate="60">Cauteloso · 60%</button>
+            <button type="button" class="scenario-btn active" data-rate="75">Probable · 75%</button>
+            <button type="button" class="scenario-btn" data-rate="90">Meta alta · 90%</button>
+          </div>
+          <label for="mobilizationRate" class="small fw-bold d-flex justify-content-between align-items-center"><span>Porcentaje que acudiría</span><output id="mobilizationRateLabel" class="range-value">75%</output></label>
+          <input id="mobilizationRate" type="range" class="form-range mt-2" min="50" max="100" step="5" value="75" aria-describedby="projectionSentence">
+          <div id="projectionSentence" class="projection-result mt-2">Con el escenario probable, podrían acudir <strong>{{ number_format(round($operation['afiliados_si'] * $operation['tasa_movilizacion_inicial'])) }} personas</strong>.</div>
+          <p class="projection-note mt-3 mb-0">Sirve para planear movilización. No es una encuesta ni se suma al voto de 2024: una persona afiliada pudo haber votado por Morena anteriormente.</p>
         </div>
       </div>
-      <div class="col-xl-4">
-        <label for="mobilizationRate" class="small fw-bold d-flex justify-content-between align-items-center"><span>Supuesto de movilización de “sí afiliados”</span><output id="mobilizationRateLabel" class="range-value">75%</output></label>
-        <input id="mobilizationRate" type="range" class="form-range mt-2" min="50" max="100" step="5" value="75">
-        <div class="d-flex justify-content-between small text-muted"><span>50%</span><span>Escenario ajustable</span><span>100%</span></div>
-        <p class="projection-note mt-3 mb-0">Es un escenario de movilización, no un pronóstico del resultado. No se suma automáticamente al voto de Morena de 2024 porque ambas bases pueden contener a las mismas personas.</p>
+    </div>
+  </div>
+
+  <div class="card-panel mb-3" id="actionBoard">
+    <div class="row g-3 align-items-start mb-3">
+      <div class="col-xl-5">
+        <div class="eyebrow text-danger">Tablero de acción</div>
+        <h2 class="panel-title mt-1">Dónde fortalecer la estructura</h2>
+        <div class="panel-subtitle">Ordena las secciones con reglas visibles: cobertura actual, margen municipal de 2024 y capacidad de movilización.</div>
+      </div>
+      <div class="col-xl-7">
+        <div class="action-kpis">
+          <div class="action-kpi"><strong class="text-danger">{{ number_format($operation['sin_base_si']) }}</strong><span>Sin base “sí”</span></div>
+          <div class="action-kpi"><strong class="text-warning-emphasis">{{ number_format($operation['estructura_minima']) }}</strong><span>Con solo 1–9</span></div>
+          <div class="action-kpi"><strong class="text-primary">{{ number_format($operation['derrotas_margen_corto']) }}</strong><span>Derrotas por ≤100 votos</span></div>
+          <div class="action-kpi"><strong class="text-success">{{ number_format($operation['estructura_fuerte']) }}</strong><span>Con 100 o más</span></div>
+        </div>
       </div>
     </div>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+      <div class="action-filters" aria-label="Filtrar prioridades">
+        <button type="button" class="action-filter active" data-action-filter="priority">Prioridad sugerida</button>
+        <button type="button" class="action-filter" data-action-filter="no-base">Sin estructura</button>
+        <button type="button" class="action-filter" data-action-filter="fragile">Base de 1–9</button>
+        <button type="button" class="action-filter" data-action-filter="close-loss">Perdidas por ≤100</button>
+        <button type="button" class="action-filter" data-action-filter="strong">Fortalezas de 100+</button>
+        <button type="button" class="action-filter" data-action-filter="all">Todas</button>
+      </div>
+      <div id="actionTableCount" class="table-help">Cargando secciones…</div>
+    </div>
+    <div class="table-responsive action-table-wrap">
+      <table class="table action-table align-middle mb-0">
+        <thead class="sticky-top bg-white"><tr><th>Sección</th><th>Resultado 2024</th><th class="text-end">Brecha/ventaja</th><th class="text-end">Sí afiliados</th><th class="text-end">Acudirían</th><th class="text-end">Cobertura LN</th><th>Estructura</th><th>Acción operativa</th></tr></thead>
+        <tbody id="actionTableBody"><tr><td colspan="8" class="text-center text-muted py-4">Preparando diagnóstico…</td></tr></tbody>
+      </table>
+    </div>
+    <div class="table-help mt-2"><i class="fa-solid fa-circle-info me-1"></i>“Acudirían” usa el porcentaje elegido arriba. La brecha es histórica y la base puede solaparse con votantes de 2024; por eso no se presentan como votos adicionales. Haz clic en una fila para abrir la sección en el mapa.</div>
   </div>
 
   <div class="row g-3 mb-3">
@@ -126,6 +173,7 @@
                 <option value="affiliatesYes">Sí afiliados registrados por sección</option>
                 <option value="operationalCoverage">Cobertura de sí afiliados sobre lista nominal 2024</option>
                 <option value="mobilizedBase">Base movilizada según el escenario</option>
+                <option value="actionPriority">Prioridad operativa sugerida</option>
               </select></div>
               <div class="col-md-4"><input id="sectionSearch" class="form-control form-control-sm" inputmode="numeric" placeholder="Ir a sección"></div>
             </div>
@@ -201,12 +249,14 @@
     nominal2024:{title:'Lista nominal 2024',items:[['Menos de 1,000','#f0f1f3'],['1,000 a 2,499','#c7d5ea'],['2,500 a 4,999','#789bc8'],['5,000 o más','#284f87']]},
     affiliatesYes:{title:'Sí afiliados registrados',items:[['Sin registros','#f0f1f3'],['1 a 9','#f6c2d6'],['10 a 29','#dd6997'],['30 o más','#790019']]},
     operationalCoverage:{title:'Cobertura sobre lista nominal',items:[['Sin cobertura','#f0f1f3'],['Menos de 2%','#c8dbed'],['2% a 5%','#689ac8'],['5% o más','#214f82']]},
-    mobilizedBase:{title:'Base movilizada estimada',items:[['Sin base','#f0f1f3'],['1 a 9','#c9e5dc'],['10 a 24','#66b29b'],['25 o más','#126b55']]}
+    mobilizedBase:{title:'Base movilizada estimada',items:[['Sin base','#f0f1f3'],['1 a 9','#c9e5dc'],['10 a 24','#66b29b'],['25 o más','#126b55']]},
+    actionPriority:{title:'Prioridad operativa',items:[['Abrir estructura','#b62f48'],['Base mínima (1–9)','#e6a73b'],['Derrota por ≤100 con base','#3f79b5'],['Fortaleza (100+)','#16836a'],['Seguimiento general','#c7cdd5']]}
   };
-  let rows = new Map(), layers = new Map(), geoLayer, selectedSection = null;
+  let rows = new Map(), layers = new Map(), geoLayer, selectedSection = null, actionFilter = 'priority';
   const metricSelect = document.getElementById('metricSelect');
   const legend = document.getElementById('mapLegend');
   const mobilizationRate = document.getElementById('mobilizationRate');
+  const yesAffiliatesCity = {{ (int) $operation['afiliados_si'] }};
   const rate = () => Number(mobilizationRate.value) / 100;
   const mobilized = row => Math.round((row?.operacion?.afiliados_si || 0) * rate());
   const colorFor = (row, metric) => {
@@ -224,14 +274,79 @@
     if(metric==='affiliatesYes'){const v=row.operacion?.afiliados_si||0;return v>=30?'#790019':v>=10?'#dd6997':v>=1?'#f6c2d6':'#f0f1f3'}
     if(metric==='operationalCoverage'){const v=y24?.lista_nominal>0?(row.operacion?.afiliados_si||0)/y24.lista_nominal:0;return v>=.05?'#214f82':v>=.02?'#689ac8':v>0?'#c8dbed':'#f0f1f3'}
     if(metric==='mobilizedBase'){const v=mobilized(row);return v>=25?'#126b55':v>=10?'#66b29b':v>=1?'#c9e5dc':'#f0f1f3'}
+    if(metric==='actionPriority'){
+      const yes=row.operacion?.afiliados_si||0;
+      const closeLoss=y24&&!y24.morena_gano&&Math.abs(y24.margen_morena)<=100;
+      return yes===0?'#b62f48':closeLoss?'#3f79b5':yes<=9?'#e6a73b':yes>=100?'#16836a':'#c7cdd5';
+    }
     return '#d9dde3';
   };
   const style = feature => {const row=rows.get(Number(feature.properties.SECCION));return {color:'#fff',weight:.8,fillColor:colorFor(row,metricSelect.value),fillOpacity:.86};};
+  const refreshSelectedLayer = () => {
+    document.querySelectorAll('[data-action-section]').forEach(tableRow=>tableRow.classList.toggle('is-selected',Number(tableRow.dataset.actionSection)===selectedSection));
+    if(selectedSection===null||!geoLayer)return;
+    const selectedLayer=layers.get(selectedSection);
+    if(!selectedLayer)return;
+    geoLayer.resetStyle(selectedLayer);
+    selectedLayer.setStyle({color:'#ffd43b',weight:5,fillOpacity:.96,opacity:1});
+    selectedLayer.bringToFront();
+  };
   const renderLegend = () => {const p=palettes[metricSelect.value];legend.innerHTML=`<strong>${p.title}</strong>${p.items.map(([label,color])=>`<div class="legend-row"><span class="legend-swatch" style="background:${color}"></span><span>${label}</span></div>`).join('')}<div class="legend-row"><span class="legend-swatch" style="background:#d9dde3"></span><span>Sin dato comparable</span></div>`;};
+  const diagnose = row => {
+    const h24=row.historial['2024'];
+    const yes=row.operacion?.afiliados_si||0;
+    const gap=h24&&!h24.morena_gano?Math.abs(h24.margen_morena):0;
+    const closeLoss=Boolean(h24&&!h24.morena_gano&&gap<=100);
+    let structure='En construcción', structureClass='action-build';
+    if(yes===0){structure='Sin estructura';structureClass='action-open'}
+    else if(yes<=9){structure='Mínima';structureClass='action-build'}
+    else if(yes>=100){structure='Fortaleza';structureClass='action-activate'}
+    else if(yes>=30){structure='Sólida';structureClass='action-maintain'}
+    let action='Reducir brecha', actionClass='action-build', rank=3;
+    if(!h24){action='Validar información';actionClass='action-maintain';rank=6}
+    else if(yes===0){action='Abrir estructura';actionClass='action-open';rank=1}
+    else if(closeLoss){action='Reforzar sección competitiva';actionClass='action-close';rank=0}
+    else if(yes<=9){action='Elevar cobertura';actionClass='action-build';rank=2}
+    else if(yes>=100){action='Activar fortaleza';actionClass='action-activate';rank=h24.morena_gano?4:3}
+    else if(h24.morena_gano){action='Cuidar ventaja';actionClass='action-maintain';rank=5}
+    return {h24,yes,gap,closeLoss,structure,structureClass,action,actionClass,rank};
+  };
+  const renderActionTable = () => {
+    let diagnosed=[...rows.values()].map(row=>({row,...diagnose(row)}));
+    if(actionFilter==='no-base')diagnosed=diagnosed.filter(item=>item.yes===0);
+    if(actionFilter==='fragile')diagnosed=diagnosed.filter(item=>item.yes>=1&&item.yes<=9);
+    if(actionFilter==='close-loss')diagnosed=diagnosed.filter(item=>item.closeLoss);
+    if(actionFilter==='strong')diagnosed=diagnosed.filter(item=>item.yes>=100);
+    diagnosed.sort((a,b)=>actionFilter==='all'
+      ? a.row.seccion-b.row.seccion
+      : a.rank-b.rank||a.gap-b.gap||b.yes-a.yes||a.row.seccion-b.row.seccion);
+    document.getElementById('actionTableCount').textContent=`${number.format(diagnosed.length)} secciones mostradas`;
+    const body=document.getElementById('actionTableBody');
+    body.innerHTML=diagnosed.map(item=>{
+      const {row,h24,yes,gap,structure,structureClass,action,actionClass}=item;
+      const coverage=h24&&h24.lista_nominal>0?yes/h24.lista_nominal:null;
+      const result=h24?(h24.morena_gano?'Victoria':'Derrota'):'Sin resultado';
+      const margin=h24?(h24.morena_gano?`+${number.format(h24.margen_morena)}`:`-${number.format(gap)}`):'—';
+      return `<tr data-action-section="${row.seccion}">
+        <td><strong>${row.seccion}</strong></td><td>${result}</td><td class="text-end ${h24?.morena_gano?'text-success':'text-danger'}">${margin}</td>
+        <td class="text-end fw-bold">${number.format(yes)}</td><td class="text-end">${number.format(mobilized(row))}</td><td class="text-end">${percent(coverage)}</td>
+        <td><span class="action-badge ${structureClass}">${structure}</span></td><td><span class="action-badge ${actionClass}">${action}</span></td>
+      </tr>`;
+    }).join('')||'<tr><td colspan="8" class="text-center text-muted py-4">No hay secciones en este filtro.</td></tr>';
+    body.querySelectorAll('[data-action-section]').forEach(tableRow=>tableRow.addEventListener('click',()=>{
+      showSection(tableRow.dataset.actionSection);
+      document.getElementById('electoralMap').scrollIntoView({behavior:'smooth',block:'center'});
+    }));
+    refreshSelectedLayer();
+  };
   const showSection = (section, focus=true) => {
     const row=rows.get(Number(section)); if(!row)return;
+    const previousLayer=selectedSection!==null?layers.get(selectedSection):null;
+    if(previousLayer&&geoLayer)geoLayer.resetStyle(previousLayer);
     selectedSection=Number(section);
-    const layer=layers.get(Number(section)); if(focus&&layer){map.fitBounds(layer.getBounds(),{padding:[45,45],maxZoom:15});layer.openTooltip();}
+    const layer=layers.get(Number(section));
+    refreshSelectedLayer();
+    if(focus&&layer){map.fitBounds(layer.getBounds(),{padding:[45,45],maxZoom:15});layer.openTooltip();}
     document.getElementById('emptySection').classList.add('d-none');
     const detail=document.getElementById('sectionDetail'); detail.classList.remove('d-none');
     const h24=row.historial['2024'];
@@ -288,16 +403,29 @@
     fetch(@json(asset('maps/electoral/morelia-secciones.geojson'))).then(response=>response.json())
   ]).then(([dataset,geo])=>{
     rows=new Map(dataset.secciones.map(row=>[Number(row.seccion),row]));
-    geoLayer=L.geoJSON(geo,{style,onEachFeature:(feature,layer)=>{const section=Number(feature.properties.SECCION);layers.set(section,layer);const row=rows.get(section);layer.bindTooltip(`<strong>Sección ${section}</strong><br>${row?`${row.victorias_morena} de ${row.elecciones_observadas} victorias observadas<br>${number.format(row.operacion?.afiliados_si||0)} sí afiliados`:'Sin resultados asociados'}`,{sticky:true,className:'ei-tooltip'});layer.on('click',()=>showSection(section));layer.on('mouseover',function(){this.setStyle({weight:2,color:'#252b34'});this.bringToFront()});layer.on('mouseout',function(){geoLayer.resetStyle(this)})}}).addTo(map);
-    map.fitBounds(geoLayer.getBounds(),{padding:[18,18]}); renderLegend();
+    geoLayer=L.geoJSON(geo,{style,onEachFeature:(feature,layer)=>{const section=Number(feature.properties.SECCION);layers.set(section,layer);const row=rows.get(section);layer.bindTooltip(`<strong>Sección ${section}</strong><br>${row?`${row.victorias_morena} de ${row.elecciones_observadas} victorias observadas<br>${number.format(row.operacion?.afiliados_si||0)} sí afiliados`:'Sin resultados asociados'}`,{sticky:true,className:'ei-tooltip'});layer.on('click',()=>showSection(section));layer.on('mouseover',function(){this.setStyle(section===selectedSection?{weight:6,color:'#ffd43b'}:{weight:2,color:'#252b34'});this.bringToFront()});layer.on('mouseout',function(){if(section===selectedSection)refreshSelectedLayer();else geoLayer.resetStyle(this)})}}).addTo(map);
+    map.fitBounds(geoLayer.getBounds(),{padding:[18,18]}); renderLegend(); renderActionTable();
   }).catch(error=>{console.error(error);document.getElementById('electoralMap').innerHTML='<div class="alert alert-danger m-3">No fue posible cargar el mapa electoral.</div>';});
-  metricSelect.addEventListener('change',()=>{if(geoLayer)geoLayer.setStyle(style);renderLegend()});
-  mobilizationRate.addEventListener('input',()=>{
+  metricSelect.addEventListener('change',()=>{if(geoLayer){geoLayer.setStyle(style);refreshSelectedLayer()}renderLegend()});
+  const updateProjection = () => {
+    const selectedRate=Number(mobilizationRate.value);
+    const projected=Math.round(yesAffiliatesCity*rate());
+    const scenarioNames={60:'cauteloso',75:'probable',90:'meta alta'};
     document.getElementById('mobilizationRateLabel').textContent=`${mobilizationRate.value}%`;
-    document.getElementById('projectedCity').textContent=number.format(Math.round({{ (int) $operation['afiliados_si'] }}*rate()));
+    document.getElementById('projectedCity').textContent=number.format(projected);
+    document.getElementById('projectionSentence').innerHTML=`Con el escenario ${scenarioNames[selectedRate]||`de ${selectedRate}%`}, podrían acudir <strong>${number.format(projected)} personas</strong> de ${number.format(yesAffiliatesCity)} sí afiliados.`;
+    document.querySelectorAll('[data-rate]').forEach(button=>button.classList.toggle('active',Number(button.dataset.rate)===selectedRate));
     if(geoLayer&&metricSelect.value==='mobilizedBase')geoLayer.setStyle(style);
     if(selectedSection!==null)showSection(selectedSection,false);
-  });
+    if(rows.size)renderActionTable();
+  };
+  mobilizationRate.addEventListener('input',updateProjection);
+  document.querySelectorAll('[data-rate]').forEach(button=>button.addEventListener('click',()=>{mobilizationRate.value=button.dataset.rate;updateProjection()}));
+  document.querySelectorAll('[data-action-filter]').forEach(button=>button.addEventListener('click',()=>{
+    actionFilter=button.dataset.actionFilter;
+    document.querySelectorAll('[data-action-filter]').forEach(candidate=>candidate.classList.toggle('active',candidate===button));
+    renderActionTable();
+  }));
   document.getElementById('sectionSearch').addEventListener('change',event=>showSection(event.target.value));
   document.querySelectorAll('[data-section]').forEach(button=>button.addEventListener('click',()=>{showSection(button.dataset.section);document.getElementById('electoralMap').scrollIntoView({behavior:'smooth',block:'center'})}));
 })();
