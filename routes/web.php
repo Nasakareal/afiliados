@@ -17,6 +17,7 @@ use App\Http\Controllers\Settings\SqlBackupController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LonaController;
 use App\Http\Controllers\MetaAvanceController;
+use App\Http\Controllers\ElectoralIntelligenceController;
 
 use App\Http\Controllers\ReferenteMunicipalController;
 use App\Http\Controllers\ReferenteSeccionalController;
@@ -146,6 +147,10 @@ Route::middleware(['auth', 'system.access'])->group(function () {
     // Mapa
     Route::get('/mapa', [MapaController::class,'index'])->name('mapa.index')->middleware('permission:mapa.ver');
     Route::get('/mapa/data', [MapaController::class,'data'])->name('mapa.data')->middleware('permission:mapa.ver');
+
+    // Inteligencia electoral agregada por sección
+    Route::get('/inteligencia-electoral', [ElectoralIntelligenceController::class, 'index'])->name('electoral.index')->middleware('permission:mapa.ver');
+    Route::get('/inteligencia-electoral/data', [ElectoralIntelligenceController::class, 'data'])->name('electoral.data')->middleware('permission:mapa.ver');
 
     // Lonas
     Route::get('/lonas', [LonaController::class, 'index'])->name('lonas.index')->middleware('permission:lonas.ver');

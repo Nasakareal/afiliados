@@ -246,6 +246,11 @@
                           <i class="fa-solid fa-map-location-dot me-1"></i> Mapa
                         </a>
                       </li>
+                      <li class="nav-item">
+                        <a class="nav-link {{ is_active('electoral.*') }}" href="{{ route('electoral.index') }}">
+                          <i class="fa-solid fa-chart-area me-1"></i> Elecciones
+                        </a>
+                      </li>
                       @endcan
 
                         @if(
