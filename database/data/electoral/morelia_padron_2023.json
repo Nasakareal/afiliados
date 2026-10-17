@@ -1,0 +1,1568 @@
+{
+    "metadata": {
+        "fuente": "INE, Datos abiertos del padrón electoral y lista nominal por edad y sexo",
+        "archivo": "DatosAbiertos-derfe-pdln_edms_sexo_20231228.xlsx",
+        "corte": "2023-12-28",
+        "entidad": 16,
+        "municipio": 54,
+        "nota": "El padrón electoral se usa como proxy operativo de población en edad de votar; no equivale a población censal de 18 años y más."
+    },
+    "secciones": {
+        "941": {
+            "padron_electoral": 1263,
+            "lista_nominal": 1254
+        },
+        "942": {
+            "padron_electoral": 2621,
+            "lista_nominal": 2586
+        },
+        "943": {
+            "padron_electoral": 1026,
+            "lista_nominal": 1013
+        },
+        "944": {
+            "padron_electoral": 1336,
+            "lista_nominal": 1322
+        },
+        "945": {
+            "padron_electoral": 1741,
+            "lista_nominal": 1728
+        },
+        "946": {
+            "padron_electoral": 1032,
+            "lista_nominal": 1022
+        },
+        "947": {
+            "padron_electoral": 1304,
+            "lista_nominal": 1295
+        },
+        "948": {
+            "padron_electoral": 1384,
+            "lista_nominal": 1374
+        },
+        "949": {
+            "padron_electoral": 3234,
+            "lista_nominal": 3202
+        },
+        "950": {
+            "padron_electoral": 1282,
+            "lista_nominal": 1269
+        },
+        "951": {
+            "padron_electoral": 1338,
+            "lista_nominal": 1324
+        },
+        "952": {
+            "padron_electoral": 1681,
+            "lista_nominal": 1664
+        },
+        "953": {
+            "padron_electoral": 3816,
+            "lista_nominal": 3778
+        },
+        "954": {
+            "padron_electoral": 1724,
+            "lista_nominal": 1711
+        },
+        "955": {
+            "padron_electoral": 1785,
+            "lista_nominal": 1770
+        },
+        "956": {
+            "padron_electoral": 1464,
+            "lista_nominal": 1453
+        },
+        "957": {
+            "padron_electoral": 811,
+            "lista_nominal": 800
+        },
+        "958": {
+            "padron_electoral": 2957,
+            "lista_nominal": 2934
+        },
+        "959": {
+            "padron_electoral": 1163,
+            "lista_nominal": 1152
+        },
+        "960": {
+            "padron_electoral": 1572,
+            "lista_nominal": 1562
+        },
+        "961": {
+            "padron_electoral": 604,
+            "lista_nominal": 596
+        },
+        "962": {
+            "padron_electoral": 952,
+            "lista_nominal": 939
+        },
+        "963": {
+            "padron_electoral": 1290,
+            "lista_nominal": 1276
+        },
+        "964": {
+            "padron_electoral": 1162,
+            "lista_nominal": 1149
+        },
+        "965": {
+            "padron_electoral": 1087,
+            "lista_nominal": 1069
+        },
+        "966": {
+            "padron_electoral": 1030,
+            "lista_nominal": 1016
+        },
+        "967": {
+            "padron_electoral": 969,
+            "lista_nominal": 965
+        },
+        "968": {
+            "padron_electoral": 989,
+            "lista_nominal": 978
+        },
+        "969": {
+            "padron_electoral": 1262,
+            "lista_nominal": 1240
+        },
+        "970": {
+            "padron_electoral": 1459,
+            "lista_nominal": 1443
+        },
+        "971": {
+            "padron_electoral": 569,
+            "lista_nominal": 563
+        },
+        "972": {
+            "padron_electoral": 1142,
+            "lista_nominal": 1133
+        },
+        "973": {
+            "padron_electoral": 944,
+            "lista_nominal": 935
+        },
+        "974": {
+            "padron_electoral": 481,
+            "lista_nominal": 477
+        },
+        "975": {
+            "padron_electoral": 282,
+            "lista_nominal": 281
+        },
+        "976": {
+            "padron_electoral": 523,
+            "lista_nominal": 519
+        },
+        "977": {
+            "padron_electoral": 588,
+            "lista_nominal": 584
+        },
+        "978": {
+            "padron_electoral": 3163,
+            "lista_nominal": 3139
+        },
+        "979": {
+            "padron_electoral": 1252,
+            "lista_nominal": 1243
+        },
+        "980": {
+            "padron_electoral": 2976,
+            "lista_nominal": 2939
+        },
+        "981": {
+            "padron_electoral": 1086,
+            "lista_nominal": 1078
+        },
+        "982": {
+            "padron_electoral": 1461,
+            "lista_nominal": 1450
+        },
+        "983": {
+            "padron_electoral": 1888,
+            "lista_nominal": 1861
+        },
+        "984": {
+            "padron_electoral": 1628,
+            "lista_nominal": 1604
+        },
+        "985": {
+            "padron_electoral": 1811,
+            "lista_nominal": 1786
+        },
+        "986": {
+            "padron_electoral": 886,
+            "lista_nominal": 877
+        },
+        "987": {
+            "padron_electoral": 644,
+            "lista_nominal": 638
+        },
+        "988": {
+            "padron_electoral": 911,
+            "lista_nominal": 898
+        },
+        "989": {
+            "padron_electoral": 1345,
+            "lista_nominal": 1326
+        },
+        "990": {
+            "padron_electoral": 425,
+            "lista_nominal": 422
+        },
+        "991": {
+            "padron_electoral": 687,
+            "lista_nominal": 676
+        },
+        "992": {
+            "padron_electoral": 801,
+            "lista_nominal": 790
+        },
+        "993": {
+            "padron_electoral": 596,
+            "lista_nominal": 593
+        },
+        "994": {
+            "padron_electoral": 886,
+            "lista_nominal": 877
+        },
+        "995": {
+            "padron_electoral": 759,
+            "lista_nominal": 753
+        },
+        "996": {
+            "padron_electoral": 652,
+            "lista_nominal": 644
+        },
+        "997": {
+            "padron_electoral": 1083,
+            "lista_nominal": 1068
+        },
+        "998": {
+            "padron_electoral": 1282,
+            "lista_nominal": 1268
+        },
+        "999": {
+            "padron_electoral": 1109,
+            "lista_nominal": 1098
+        },
+        "1000": {
+            "padron_electoral": 859,
+            "lista_nominal": 845
+        },
+        "1001": {
+            "padron_electoral": 1077,
+            "lista_nominal": 1064
+        },
+        "1002": {
+            "padron_electoral": 842,
+            "lista_nominal": 829
+        },
+        "1003": {
+            "padron_electoral": 905,
+            "lista_nominal": 893
+        },
+        "1004": {
+            "padron_electoral": 1042,
+            "lista_nominal": 1032
+        },
+        "1005": {
+            "padron_electoral": 1227,
+            "lista_nominal": 1215
+        },
+        "1006": {
+            "padron_electoral": 873,
+            "lista_nominal": 860
+        },
+        "1007": {
+            "padron_electoral": 1052,
+            "lista_nominal": 1040
+        },
+        "1008": {
+            "padron_electoral": 1074,
+            "lista_nominal": 1064
+        },
+        "1009": {
+            "padron_electoral": 1134,
+            "lista_nominal": 1120
+        },
+        "1010": {
+            "padron_electoral": 960,
+            "lista_nominal": 951
+        },
+        "1011": {
+            "padron_electoral": 1296,
+            "lista_nominal": 1280
+        },
+        "1012": {
+            "padron_electoral": 1360,
+            "lista_nominal": 1340
+        },
+        "1013": {
+            "padron_electoral": 1237,
+            "lista_nominal": 1226
+        },
+        "1014": {
+            "padron_electoral": 1360,
+            "lista_nominal": 1349
+        },
+        "1015": {
+            "padron_electoral": 1413,
+            "lista_nominal": 1397
+        },
+        "1016": {
+            "padron_electoral": 790,
+            "lista_nominal": 787
+        },
+        "1017": {
+            "padron_electoral": 673,
+            "lista_nominal": 668
+        },
+        "1018": {
+            "padron_electoral": 820,
+            "lista_nominal": 815
+        },
+        "1019": {
+            "padron_electoral": 936,
+            "lista_nominal": 921
+        },
+        "1020": {
+            "padron_electoral": 1149,
+            "lista_nominal": 1134
+        },
+        "1021": {
+            "padron_electoral": 701,
+            "lista_nominal": 687
+        },
+        "1022": {
+            "padron_electoral": 322,
+            "lista_nominal": 316
+        },
+        "1023": {
+            "padron_electoral": 452,
+            "lista_nominal": 450
+        },
+        "1024": {
+            "padron_electoral": 362,
+            "lista_nominal": 359
+        },
+        "1025": {
+            "padron_electoral": 439,
+            "lista_nominal": 435
+        },
+        "1026": {
+            "padron_electoral": 551,
+            "lista_nominal": 548
+        },
+        "1027": {
+            "padron_electoral": 322,
+            "lista_nominal": 319
+        },
+        "1028": {
+            "padron_electoral": 379,
+            "lista_nominal": 378
+        },
+        "1029": {
+            "padron_electoral": 619,
+            "lista_nominal": 614
+        },
+        "1030": {
+            "padron_electoral": 835,
+            "lista_nominal": 824
+        },
+        "1031": {
+            "padron_electoral": 1039,
+            "lista_nominal": 1031
+        },
+        "1032": {
+            "padron_electoral": 987,
+            "lista_nominal": 974
+        },
+        "1033": {
+            "padron_electoral": 1622,
+            "lista_nominal": 1605
+        },
+        "1034": {
+            "padron_electoral": 1026,
+            "lista_nominal": 1017
+        },
+        "1035": {
+            "padron_electoral": 8668,
+            "lista_nominal": 8585
+        },
+        "1036": {
+            "padron_electoral": 6126,
+            "lista_nominal": 6072
+        },
+        "1037": {
+            "padron_electoral": 2125,
+            "lista_nominal": 2100
+        },
+        "1038": {
+            "padron_electoral": 1506,
+            "lista_nominal": 1494
+        },
+        "1039": {
+            "padron_electoral": 1299,
+            "lista_nominal": 1288
+        },
+        "1040": {
+            "padron_electoral": 1183,
+            "lista_nominal": 1176
+        },
+        "1041": {
+            "padron_electoral": 794,
+            "lista_nominal": 784
+        },
+        "1042": {
+            "padron_electoral": 498,
+            "lista_nominal": 488
+        },
+        "1043": {
+            "padron_electoral": 391,
+            "lista_nominal": 387
+        },
+        "1044": {
+            "padron_electoral": 736,
+            "lista_nominal": 730
+        },
+        "1045": {
+            "padron_electoral": 886,
+            "lista_nominal": 877
+        },
+        "1046": {
+            "padron_electoral": 511,
+            "lista_nominal": 507
+        },
+        "1047": {
+            "padron_electoral": 720,
+            "lista_nominal": 716
+        },
+        "1048": {
+            "padron_electoral": 664,
+            "lista_nominal": 657
+        },
+        "1049": {
+            "padron_electoral": 693,
+            "lista_nominal": 679
+        },
+        "1050": {
+            "padron_electoral": 898,
+            "lista_nominal": 896
+        },
+        "1051": {
+            "padron_electoral": 1091,
+            "lista_nominal": 1075
+        },
+        "1052": {
+            "padron_electoral": 1303,
+            "lista_nominal": 1293
+        },
+        "1053": {
+            "padron_electoral": 2196,
+            "lista_nominal": 2176
+        },
+        "1054": {
+            "padron_electoral": 963,
+            "lista_nominal": 954
+        },
+        "1055": {
+            "padron_electoral": 838,
+            "lista_nominal": 834
+        },
+        "1056": {
+            "padron_electoral": 1194,
+            "lista_nominal": 1181
+        },
+        "1057": {
+            "padron_electoral": 1865,
+            "lista_nominal": 1848
+        },
+        "1058": {
+            "padron_electoral": 1485,
+            "lista_nominal": 1468
+        },
+        "1059": {
+            "padron_electoral": 3892,
+            "lista_nominal": 3864
+        },
+        "1060": {
+            "padron_electoral": 2397,
+            "lista_nominal": 2372
+        },
+        "1061": {
+            "padron_electoral": 349,
+            "lista_nominal": 345
+        },
+        "1062": {
+            "padron_electoral": 980,
+            "lista_nominal": 969
+        },
+        "1063": {
+            "padron_electoral": 1214,
+            "lista_nominal": 1206
+        },
+        "1064": {
+            "padron_electoral": 950,
+            "lista_nominal": 936
+        },
+        "1065": {
+            "padron_electoral": 443,
+            "lista_nominal": 436
+        },
+        "1066": {
+            "padron_electoral": 920,
+            "lista_nominal": 911
+        },
+        "1067": {
+            "padron_electoral": 598,
+            "lista_nominal": 595
+        },
+        "1068": {
+            "padron_electoral": 456,
+            "lista_nominal": 452
+        },
+        "1069": {
+            "padron_electoral": 448,
+            "lista_nominal": 448
+        },
+        "1070": {
+            "padron_electoral": 726,
+            "lista_nominal": 719
+        },
+        "1071": {
+            "padron_electoral": 567,
+            "lista_nominal": 559
+        },
+        "1072": {
+            "padron_electoral": 577,
+            "lista_nominal": 564
+        },
+        "1073": {
+            "padron_electoral": 510,
+            "lista_nominal": 502
+        },
+        "1074": {
+            "padron_electoral": 779,
+            "lista_nominal": 773
+        },
+        "1075": {
+            "padron_electoral": 493,
+            "lista_nominal": 487
+        },
+        "1076": {
+            "padron_electoral": 1236,
+            "lista_nominal": 1218
+        },
+        "1077": {
+            "padron_electoral": 1344,
+            "lista_nominal": 1325
+        },
+        "1078": {
+            "padron_electoral": 1235,
+            "lista_nominal": 1224
+        },
+        "1079": {
+            "padron_electoral": 601,
+            "lista_nominal": 595
+        },
+        "1080": {
+            "padron_electoral": 500,
+            "lista_nominal": 495
+        },
+        "1081": {
+            "padron_electoral": 931,
+            "lista_nominal": 924
+        },
+        "1082": {
+            "padron_electoral": 1040,
+            "lista_nominal": 1029
+        },
+        "1083": {
+            "padron_electoral": 619,
+            "lista_nominal": 613
+        },
+        "1084": {
+            "padron_electoral": 1237,
+            "lista_nominal": 1221
+        },
+        "1085": {
+            "padron_electoral": 1286,
+            "lista_nominal": 1272
+        },
+        "1086": {
+            "padron_electoral": 1264,
+            "lista_nominal": 1246
+        },
+        "1087": {
+            "padron_electoral": 1092,
+            "lista_nominal": 1073
+        },
+        "1088": {
+            "padron_electoral": 749,
+            "lista_nominal": 745
+        },
+        "1089": {
+            "padron_electoral": 900,
+            "lista_nominal": 892
+        },
+        "1090": {
+            "padron_electoral": 524,
+            "lista_nominal": 521
+        },
+        "1091": {
+            "padron_electoral": 616,
+            "lista_nominal": 607
+        },
+        "1092": {
+            "padron_electoral": 1064,
+            "lista_nominal": 1056
+        },
+        "1093": {
+            "padron_electoral": 1414,
+            "lista_nominal": 1396
+        },
+        "1094": {
+            "padron_electoral": 1061,
+            "lista_nominal": 1047
+        },
+        "1095": {
+            "padron_electoral": 702,
+            "lista_nominal": 693
+        },
+        "1096": {
+            "padron_electoral": 1196,
+            "lista_nominal": 1181
+        },
+        "1097": {
+            "padron_electoral": 2098,
+            "lista_nominal": 2078
+        },
+        "1098": {
+            "padron_electoral": 1267,
+            "lista_nominal": 1253
+        },
+        "1099": {
+            "padron_electoral": 2021,
+            "lista_nominal": 2002
+        },
+        "1100": {
+            "padron_electoral": 1895,
+            "lista_nominal": 1877
+        },
+        "1101": {
+            "padron_electoral": 2028,
+            "lista_nominal": 2001
+        },
+        "1102": {
+            "padron_electoral": 1385,
+            "lista_nominal": 1367
+        },
+        "1103": {
+            "padron_electoral": 2143,
+            "lista_nominal": 2120
+        },
+        "1104": {
+            "padron_electoral": 1675,
+            "lista_nominal": 1663
+        },
+        "1105": {
+            "padron_electoral": 1709,
+            "lista_nominal": 1691
+        },
+        "1106": {
+            "padron_electoral": 2055,
+            "lista_nominal": 2038
+        },
+        "1108": {
+            "padron_electoral": 1634,
+            "lista_nominal": 1619
+        },
+        "1109": {
+            "padron_electoral": 935,
+            "lista_nominal": 924
+        },
+        "1110": {
+            "padron_electoral": 1385,
+            "lista_nominal": 1366
+        },
+        "1111": {
+            "padron_electoral": 1102,
+            "lista_nominal": 1085
+        },
+        "1112": {
+            "padron_electoral": 1025,
+            "lista_nominal": 1019
+        },
+        "1113": {
+            "padron_electoral": 774,
+            "lista_nominal": 763
+        },
+        "1114": {
+            "padron_electoral": 836,
+            "lista_nominal": 827
+        },
+        "1115": {
+            "padron_electoral": 923,
+            "lista_nominal": 917
+        },
+        "1116": {
+            "padron_electoral": 860,
+            "lista_nominal": 853
+        },
+        "1117": {
+            "padron_electoral": 880,
+            "lista_nominal": 877
+        },
+        "1118": {
+            "padron_electoral": 679,
+            "lista_nominal": 665
+        },
+        "1119": {
+            "padron_electoral": 710,
+            "lista_nominal": 700
+        },
+        "1120": {
+            "padron_electoral": 918,
+            "lista_nominal": 909
+        },
+        "1121": {
+            "padron_electoral": 1041,
+            "lista_nominal": 1022
+        },
+        "1122": {
+            "padron_electoral": 1072,
+            "lista_nominal": 1054
+        },
+        "1123": {
+            "padron_electoral": 770,
+            "lista_nominal": 760
+        },
+        "1124": {
+            "padron_electoral": 725,
+            "lista_nominal": 715
+        },
+        "1125": {
+            "padron_electoral": 1415,
+            "lista_nominal": 1400
+        },
+        "1126": {
+            "padron_electoral": 1168,
+            "lista_nominal": 1157
+        },
+        "1127": {
+            "padron_electoral": 833,
+            "lista_nominal": 826
+        },
+        "1128": {
+            "padron_electoral": 1325,
+            "lista_nominal": 1315
+        },
+        "1129": {
+            "padron_electoral": 1058,
+            "lista_nominal": 1052
+        },
+        "1130": {
+            "padron_electoral": 769,
+            "lista_nominal": 764
+        },
+        "1131": {
+            "padron_electoral": 1302,
+            "lista_nominal": 1288
+        },
+        "1132": {
+            "padron_electoral": 714,
+            "lista_nominal": 705
+        },
+        "1133": {
+            "padron_electoral": 847,
+            "lista_nominal": 841
+        },
+        "1134": {
+            "padron_electoral": 890,
+            "lista_nominal": 884
+        },
+        "1135": {
+            "padron_electoral": 980,
+            "lista_nominal": 968
+        },
+        "1136": {
+            "padron_electoral": 1061,
+            "lista_nominal": 1049
+        },
+        "1137": {
+            "padron_electoral": 1238,
+            "lista_nominal": 1227
+        },
+        "1138": {
+            "padron_electoral": 1002,
+            "lista_nominal": 993
+        },
+        "1139": {
+            "padron_electoral": 970,
+            "lista_nominal": 959
+        },
+        "1140": {
+            "padron_electoral": 601,
+            "lista_nominal": 586
+        },
+        "1141": {
+            "padron_electoral": 1329,
+            "lista_nominal": 1326
+        },
+        "1142": {
+            "padron_electoral": 1542,
+            "lista_nominal": 1524
+        },
+        "1143": {
+            "padron_electoral": 2091,
+            "lista_nominal": 2060
+        },
+        "1144": {
+            "padron_electoral": 964,
+            "lista_nominal": 958
+        },
+        "1145": {
+            "padron_electoral": 1398,
+            "lista_nominal": 1388
+        },
+        "1146": {
+            "padron_electoral": 1134,
+            "lista_nominal": 1128
+        },
+        "1147": {
+            "padron_electoral": 2005,
+            "lista_nominal": 1991
+        },
+        "1148": {
+            "padron_electoral": 961,
+            "lista_nominal": 952
+        },
+        "1149": {
+            "padron_electoral": 861,
+            "lista_nominal": 853
+        },
+        "1150": {
+            "padron_electoral": 1447,
+            "lista_nominal": 1434
+        },
+        "1151": {
+            "padron_electoral": 1305,
+            "lista_nominal": 1288
+        },
+        "1152": {
+            "padron_electoral": 1186,
+            "lista_nominal": 1173
+        },
+        "1153": {
+            "padron_electoral": 934,
+            "lista_nominal": 926
+        },
+        "1154": {
+            "padron_electoral": 519,
+            "lista_nominal": 511
+        },
+        "1155": {
+            "padron_electoral": 1022,
+            "lista_nominal": 1010
+        },
+        "1156": {
+            "padron_electoral": 473,
+            "lista_nominal": 463
+        },
+        "1157": {
+            "padron_electoral": 586,
+            "lista_nominal": 578
+        },
+        "1158": {
+            "padron_electoral": 2665,
+            "lista_nominal": 2637
+        },
+        "1159": {
+            "padron_electoral": 4627,
+            "lista_nominal": 4570
+        },
+        "1160": {
+            "padron_electoral": 4170,
+            "lista_nominal": 4124
+        },
+        "1161": {
+            "padron_electoral": 1026,
+            "lista_nominal": 1013
+        },
+        "1162": {
+            "padron_electoral": 964,
+            "lista_nominal": 955
+        },
+        "1163": {
+            "padron_electoral": 1518,
+            "lista_nominal": 1497
+        },
+        "1164": {
+            "padron_electoral": 1530,
+            "lista_nominal": 1511
+        },
+        "1165": {
+            "padron_electoral": 1441,
+            "lista_nominal": 1416
+        },
+        "1166": {
+            "padron_electoral": 1726,
+            "lista_nominal": 1706
+        },
+        "1167": {
+            "padron_electoral": 873,
+            "lista_nominal": 867
+        },
+        "1168": {
+            "padron_electoral": 926,
+            "lista_nominal": 916
+        },
+        "1169": {
+            "padron_electoral": 1204,
+            "lista_nominal": 1192
+        },
+        "1170": {
+            "padron_electoral": 1084,
+            "lista_nominal": 1069
+        },
+        "1171": {
+            "padron_electoral": 745,
+            "lista_nominal": 741
+        },
+        "1172": {
+            "padron_electoral": 1069,
+            "lista_nominal": 1056
+        },
+        "1173": {
+            "padron_electoral": 571,
+            "lista_nominal": 565
+        },
+        "1174": {
+            "padron_electoral": 904,
+            "lista_nominal": 898
+        },
+        "1175": {
+            "padron_electoral": 1035,
+            "lista_nominal": 1025
+        },
+        "1176": {
+            "padron_electoral": 607,
+            "lista_nominal": 597
+        },
+        "1177": {
+            "padron_electoral": 1034,
+            "lista_nominal": 1025
+        },
+        "1178": {
+            "padron_electoral": 941,
+            "lista_nominal": 930
+        },
+        "1179": {
+            "padron_electoral": 2214,
+            "lista_nominal": 2194
+        },
+        "1180": {
+            "padron_electoral": 373,
+            "lista_nominal": 366
+        },
+        "1181": {
+            "padron_electoral": 878,
+            "lista_nominal": 871
+        },
+        "1182": {
+            "padron_electoral": 999,
+            "lista_nominal": 989
+        },
+        "1183": {
+            "padron_electoral": 739,
+            "lista_nominal": 735
+        },
+        "1184": {
+            "padron_electoral": 1357,
+            "lista_nominal": 1346
+        },
+        "1185": {
+            "padron_electoral": 1120,
+            "lista_nominal": 1112
+        },
+        "1186": {
+            "padron_electoral": 1049,
+            "lista_nominal": 1032
+        },
+        "1187": {
+            "padron_electoral": 1061,
+            "lista_nominal": 1048
+        },
+        "1188": {
+            "padron_electoral": 1339,
+            "lista_nominal": 1322
+        },
+        "1189": {
+            "padron_electoral": 1322,
+            "lista_nominal": 1307
+        },
+        "1190": {
+            "padron_electoral": 1559,
+            "lista_nominal": 1544
+        },
+        "1191": {
+            "padron_electoral": 13808,
+            "lista_nominal": 13675
+        },
+        "1193": {
+            "padron_electoral": 6902,
+            "lista_nominal": 6836
+        },
+        "1194": {
+            "padron_electoral": 6225,
+            "lista_nominal": 6156
+        },
+        "1195": {
+            "padron_electoral": 1832,
+            "lista_nominal": 1811
+        },
+        "1196": {
+            "padron_electoral": 2463,
+            "lista_nominal": 2433
+        },
+        "1197": {
+            "padron_electoral": 3412,
+            "lista_nominal": 3372
+        },
+        "1198": {
+            "padron_electoral": 4472,
+            "lista_nominal": 4427
+        },
+        "1199": {
+            "padron_electoral": 2974,
+            "lista_nominal": 2946
+        },
+        "1200": {
+            "padron_electoral": 4409,
+            "lista_nominal": 4361
+        },
+        "1201": {
+            "padron_electoral": 2515,
+            "lista_nominal": 2492
+        },
+        "1203": {
+            "padron_electoral": 1983,
+            "lista_nominal": 1969
+        },
+        "1204": {
+            "padron_electoral": 1877,
+            "lista_nominal": 1858
+        },
+        "1205": {
+            "padron_electoral": 949,
+            "lista_nominal": 936
+        },
+        "1206": {
+            "padron_electoral": 2449,
+            "lista_nominal": 2418
+        },
+        "1207": {
+            "padron_electoral": 1387,
+            "lista_nominal": 1376
+        },
+        "1208": {
+            "padron_electoral": 1469,
+            "lista_nominal": 1457
+        },
+        "1209": {
+            "padron_electoral": 1546,
+            "lista_nominal": 1532
+        },
+        "1210": {
+            "padron_electoral": 918,
+            "lista_nominal": 911
+        },
+        "1211": {
+            "padron_electoral": 1640,
+            "lista_nominal": 1615
+        },
+        "1212": {
+            "padron_electoral": 1955,
+            "lista_nominal": 1939
+        },
+        "1213": {
+            "padron_electoral": 1201,
+            "lista_nominal": 1190
+        },
+        "1214": {
+            "padron_electoral": 1605,
+            "lista_nominal": 1593
+        },
+        "1215": {
+            "padron_electoral": 6259,
+            "lista_nominal": 6197
+        },
+        "1216": {
+            "padron_electoral": 9725,
+            "lista_nominal": 9626
+        },
+        "1217": {
+            "padron_electoral": 1758,
+            "lista_nominal": 1740
+        },
+        "1218": {
+            "padron_electoral": 1607,
+            "lista_nominal": 1592
+        },
+        "1219": {
+            "padron_electoral": 1825,
+            "lista_nominal": 1808
+        },
+        "1220": {
+            "padron_electoral": 1977,
+            "lista_nominal": 1950
+        },
+        "1221": {
+            "padron_electoral": 15158,
+            "lista_nominal": 14992
+        },
+        "1222": {
+            "padron_electoral": 3856,
+            "lista_nominal": 3808
+        },
+        "1223": {
+            "padron_electoral": 1589,
+            "lista_nominal": 1572
+        },
+        "1224": {
+            "padron_electoral": 8837,
+            "lista_nominal": 8682
+        },
+        "1225": {
+            "padron_electoral": 2376,
+            "lista_nominal": 2352
+        },
+        "1226": {
+            "padron_electoral": 2065,
+            "lista_nominal": 2040
+        },
+        "1227": {
+            "padron_electoral": 478,
+            "lista_nominal": 475
+        },
+        "1228": {
+            "padron_electoral": 6987,
+            "lista_nominal": 6913
+        },
+        "1229": {
+            "padron_electoral": 1701,
+            "lista_nominal": 1678
+        },
+        "1230": {
+            "padron_electoral": 1810,
+            "lista_nominal": 1798
+        },
+        "1231": {
+            "padron_electoral": 1166,
+            "lista_nominal": 1155
+        },
+        "1232": {
+            "padron_electoral": 4546,
+            "lista_nominal": 4501
+        },
+        "1233": {
+            "padron_electoral": 10245,
+            "lista_nominal": 10094
+        },
+        "1234": {
+            "padron_electoral": 1223,
+            "lista_nominal": 1210
+        },
+        "1235": {
+            "padron_electoral": 1481,
+            "lista_nominal": 1466
+        },
+        "1236": {
+            "padron_electoral": 3212,
+            "lista_nominal": 3180
+        },
+        "1237": {
+            "padron_electoral": 1374,
+            "lista_nominal": 1348
+        },
+        "1238": {
+            "padron_electoral": 1780,
+            "lista_nominal": 1762
+        },
+        "1239": {
+            "padron_electoral": 2496,
+            "lista_nominal": 2484
+        },
+        "1240": {
+            "padron_electoral": 2184,
+            "lista_nominal": 2173
+        },
+        "1241": {
+            "padron_electoral": 1848,
+            "lista_nominal": 1829
+        },
+        "1242": {
+            "padron_electoral": 2421,
+            "lista_nominal": 2401
+        },
+        "1243": {
+            "padron_electoral": 1139,
+            "lista_nominal": 1133
+        },
+        "1244": {
+            "padron_electoral": 1194,
+            "lista_nominal": 1181
+        },
+        "1245": {
+            "padron_electoral": 1658,
+            "lista_nominal": 1642
+        },
+        "1246": {
+            "padron_electoral": 894,
+            "lista_nominal": 882
+        },
+        "1247": {
+            "padron_electoral": 2278,
+            "lista_nominal": 2261
+        },
+        "1248": {
+            "padron_electoral": 806,
+            "lista_nominal": 790
+        },
+        "1249": {
+            "padron_electoral": 879,
+            "lista_nominal": 866
+        },
+        "1250": {
+            "padron_electoral": 2163,
+            "lista_nominal": 2131
+        },
+        "1251": {
+            "padron_electoral": 2000,
+            "lista_nominal": 1970
+        },
+        "1252": {
+            "padron_electoral": 1916,
+            "lista_nominal": 1894
+        },
+        "1253": {
+            "padron_electoral": 916,
+            "lista_nominal": 903
+        },
+        "1254": {
+            "padron_electoral": 583,
+            "lista_nominal": 577
+        },
+        "1255": {
+            "padron_electoral": 1203,
+            "lista_nominal": 1192
+        },
+        "1256": {
+            "padron_electoral": 1571,
+            "lista_nominal": 1564
+        },
+        "1257": {
+            "padron_electoral": 846,
+            "lista_nominal": 835
+        },
+        "1258": {
+            "padron_electoral": 359,
+            "lista_nominal": 357
+        },
+        "1259": {
+            "padron_electoral": 358,
+            "lista_nominal": 354
+        },
+        "1260": {
+            "padron_electoral": 919,
+            "lista_nominal": 909
+        },
+        "1261": {
+            "padron_electoral": 1098,
+            "lista_nominal": 1087
+        },
+        "1262": {
+            "padron_electoral": 6427,
+            "lista_nominal": 6384
+        },
+        "1264": {
+            "padron_electoral": 8043,
+            "lista_nominal": 7957
+        },
+        "1266": {
+            "padron_electoral": 1384,
+            "lista_nominal": 1360
+        },
+        "1269": {
+            "padron_electoral": 1892,
+            "lista_nominal": 1873
+        },
+        "1270": {
+            "padron_electoral": 5010,
+            "lista_nominal": 4961
+        },
+        "1271": {
+            "padron_electoral": 7864,
+            "lista_nominal": 7785
+        },
+        "1272": {
+            "padron_electoral": 3063,
+            "lista_nominal": 3027
+        },
+        "1273": {
+            "padron_electoral": 1340,
+            "lista_nominal": 1329
+        },
+        "1274": {
+            "padron_electoral": 210,
+            "lista_nominal": 208
+        },
+        "1275": {
+            "padron_electoral": 546,
+            "lista_nominal": 534
+        },
+        "1276": {
+            "padron_electoral": 2057,
+            "lista_nominal": 2044
+        },
+        "1277": {
+            "padron_electoral": 2198,
+            "lista_nominal": 2178
+        },
+        "1278": {
+            "padron_electoral": 816,
+            "lista_nominal": 811
+        },
+        "1279": {
+            "padron_electoral": 1128,
+            "lista_nominal": 1120
+        },
+        "1280": {
+            "padron_electoral": 1560,
+            "lista_nominal": 1550
+        },
+        "1281": {
+            "padron_electoral": 358,
+            "lista_nominal": 349
+        },
+        "1282": {
+            "padron_electoral": 959,
+            "lista_nominal": 951
+        },
+        "1283": {
+            "padron_electoral": 6700,
+            "lista_nominal": 6641
+        },
+        "1284": {
+            "padron_electoral": 2881,
+            "lista_nominal": 2853
+        },
+        "1285": {
+            "padron_electoral": 2018,
+            "lista_nominal": 2002
+        },
+        "1286": {
+            "padron_electoral": 3610,
+            "lista_nominal": 3592
+        },
+        "1287": {
+            "padron_electoral": 577,
+            "lista_nominal": 574
+        },
+        "2675": {
+            "padron_electoral": 2980,
+            "lista_nominal": 2953
+        },
+        "2677": {
+            "padron_electoral": 1182,
+            "lista_nominal": 1176
+        },
+        "2692": {
+            "padron_electoral": 6784,
+            "lista_nominal": 6694
+        },
+        "2703": {
+            "padron_electoral": 7068,
+            "lista_nominal": 7007
+        },
+        "2704": {
+            "padron_electoral": 1400,
+            "lista_nominal": 1392
+        },
+        "2705": {
+            "padron_electoral": 1387,
+            "lista_nominal": 1377
+        },
+        "2706": {
+            "padron_electoral": 3326,
+            "lista_nominal": 3288
+        },
+        "2707": {
+            "padron_electoral": 2849,
+            "lista_nominal": 2818
+        },
+        "2708": {
+            "padron_electoral": 2653,
+            "lista_nominal": 2621
+        },
+        "2709": {
+            "padron_electoral": 816,
+            "lista_nominal": 807
+        },
+        "2710": {
+            "padron_electoral": 2559,
+            "lista_nominal": 2536
+        },
+        "2711": {
+            "padron_electoral": 1954,
+            "lista_nominal": 1926
+        },
+        "2712": {
+            "padron_electoral": 3857,
+            "lista_nominal": 3815
+        },
+        "2713": {
+            "padron_electoral": 549,
+            "lista_nominal": 543
+        },
+        "2714": {
+            "padron_electoral": 3091,
+            "lista_nominal": 3062
+        },
+        "2715": {
+            "padron_electoral": 2913,
+            "lista_nominal": 2882
+        },
+        "2716": {
+            "padron_electoral": 4369,
+            "lista_nominal": 4320
+        },
+        "2717": {
+            "padron_electoral": 1345,
+            "lista_nominal": 1334
+        },
+        "2718": {
+            "padron_electoral": 3088,
+            "lista_nominal": 3061
+        },
+        "2719": {
+            "padron_electoral": 1997,
+            "lista_nominal": 1982
+        },
+        "2720": {
+            "padron_electoral": 2046,
+            "lista_nominal": 2023
+        },
+        "2721": {
+            "padron_electoral": 2929,
+            "lista_nominal": 2894
+        },
+        "2722": {
+            "padron_electoral": 3041,
+            "lista_nominal": 3021
+        },
+        "2723": {
+            "padron_electoral": 2837,
+            "lista_nominal": 2803
+        },
+        "2724": {
+            "padron_electoral": 2264,
+            "lista_nominal": 2247
+        },
+        "2729": {
+            "padron_electoral": 892,
+            "lista_nominal": 886
+        },
+        "2730": {
+            "padron_electoral": 3707,
+            "lista_nominal": 3661
+        },
+        "2747": {
+            "padron_electoral": 1921,
+            "lista_nominal": 1903
+        },
+        "2748": {
+            "padron_electoral": 1962,
+            "lista_nominal": 1940
+        },
+        "2749": {
+            "padron_electoral": 1585,
+            "lista_nominal": 1549
+        },
+        "2750": {
+            "padron_electoral": 2636,
+            "lista_nominal": 2600
+        },
+        "2751": {
+            "padron_electoral": 2161,
+            "lista_nominal": 2129
+        },
+        "2752": {
+            "padron_electoral": 2847,
+            "lista_nominal": 2813
+        },
+        "2753": {
+            "padron_electoral": 2037,
+            "lista_nominal": 2012
+        },
+        "2770": {
+            "padron_electoral": 2081,
+            "lista_nominal": 2064
+        },
+        "2771": {
+            "padron_electoral": 1147,
+            "lista_nominal": 1142
+        },
+        "2772": {
+            "padron_electoral": 2042,
+            "lista_nominal": 2026
+        },
+        "2773": {
+            "padron_electoral": 2814,
+            "lista_nominal": 2772
+        },
+        "2774": {
+            "padron_electoral": 2562,
+            "lista_nominal": 2548
+        },
+        "2775": {
+            "padron_electoral": 1974,
+            "lista_nominal": 1962
+        },
+        "2776": {
+            "padron_electoral": 1672,
+            "lista_nominal": 1649
+        },
+        "2777": {
+            "padron_electoral": 1044,
+            "lista_nominal": 1034
+        },
+        "2787": {
+            "padron_electoral": 2098,
+            "lista_nominal": 2072
+        },
+        "2788": {
+            "padron_electoral": 2348,
+            "lista_nominal": 2302
+        },
+        "2789": {
+            "padron_electoral": 1254,
+            "lista_nominal": 1244
+        },
+        "2790": {
+            "padron_electoral": 1942,
+            "lista_nominal": 1915
+        },
+        "2791": {
+            "padron_electoral": 2561,
+            "lista_nominal": 2536
+        },
+        "2792": {
+            "padron_electoral": 1954,
+            "lista_nominal": 1928
+        },
+        "2793": {
+            "padron_electoral": 1811,
+            "lista_nominal": 1788
+        }
+    }
+}

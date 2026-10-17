@@ -16,6 +16,18 @@ No se mezclan resultados de Presidencia de la República, gubernatura, diputacio
 
 Las ligas oficiales permanecen dentro de los metadatos de `database/data/electoral/morelia_municipal_sections.json` y se muestran en el tablero.
 
+## Índice de oferta y demanda electoral
+
+El tablero implementa las siete variables y ponderaciones del documento metodológico entregado:
+
+- IOE: padrón electoral como proxy de población en edad de votar (10%), promedio histórico de votos válidos (10%), lista nominal 2024 (15%) y participación histórica promedio (15%).
+- IDE: votos de referencia necesarios para ganar en 2024 (30%), porcentaje de Morena en 2024 invertido (10%) y variación de participación 2021–2024 invertida (10%).
+- IODE: razón IOE/IDE, expresada finalmente como rango percentil de 0 a 100 para evitar que cocientes extremos dominen la lectura.
+
+Cada variable se transforma primero a un rango percentil entre las secciones comparables. IOE alto representa mayor volumen electoral; IDE alto, mayor exigencia competitiva; IODE alto, una relación más favorable entre oferta y exigencia. Las secciones sin padrón INE o sin resultados en 2021 y 2024 se conservan como `null`: nunca se convierten en cero.
+
+El archivo `database/data/electoral/morelia_padron_2023.json` procede del archivo abierto del INE `DatosAbiertos-derfe-pdln_edms_sexo_20231228.xlsx`. El padrón es un proxy operativo y no debe presentarse como población censal de 18 años y más. El importador reproducible está en `scripts/import_morelia_electoral_roll.php`.
+
 ## Normalización
 
 1. Los resultados por casilla se agregan por sección.

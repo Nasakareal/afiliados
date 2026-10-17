@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\ElectoralOfferDemandIndex;
+use App\Services\SocioeconomicSectionLayer;
 use App\Support\LocalDistrictAccess;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -27,6 +29,10 @@ class ElectoralIntelligenceController extends Controller
             ->where('morena_gano_todas', true)
             ->sortByDesc(fn (array $row) => $row['historial']['2024']['porcentaje_morena'] ?? 0)
             ->values();
+        $indexedSections = $sections
+            ->filter(fn (array $row): bool => $row['indice_electoral'] !== null)
+            ->sortByDesc(fn (array $row): float => $row['indice_electoral']['iode'])
+            ->values();
 
         return view('electoral.index', [
             'metadata' => $dataset['metadata'],
@@ -35,6 +41,9 @@ class ElectoralIntelligenceController extends Controller
             'quality' => $quality,
             'consistentMorena' => $consistentMorena,
             'operation' => $dataset['operacion'],
+            'electoralIndex' => $dataset['indice_electoral'],
+            'topIode' => $indexedSections->take(12),
+            'socioeconomic' => $dataset['socioeconomico'],
         ]);
     }
 
@@ -47,7 +56,8 @@ class ElectoralIntelligenceController extends Controller
 
     private function datasetWithOperation(Request $request): array
     {
-        $dataset = $this->dataset();
+        $dataset = app(ElectoralOfferDemandIndex::class)->enrich($this->dataset());
+        $dataset = app(SocioeconomicSectionLayer::class)->enrich($dataset);
         $validSections = collect($dataset['secciones'])
             ->pluck('seccion')
             ->map(fn ($section): string => (string) $section)

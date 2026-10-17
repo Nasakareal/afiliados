@@ -21,10 +21,12 @@
   .ei .section-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.ei .section-stat{padding:11px;border-radius:12px;background:#f6f7f9}.ei .section-stat span{display:block;font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:800}.ei .section-stat strong{display:block;margin-top:3px;font-size:1rem}.ei .election-card{border:1px solid var(--line);border-radius:14px;padding:13px;margin-top:10px}.ei .election-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}.ei .election-year{font-size:1rem;font-weight:850}.ei .election-row{display:flex;justify-content:space-between;gap:10px;margin-top:7px;font-size:.76rem}.ei .election-row span{color:var(--muted)}.ei .share-track{height:7px;border-radius:999px;background:#edf0f4;overflow:hidden;margin-top:8px}.ei .share-track span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#7a0019,#d91785)}
   .ei .projection-panel{background:linear-gradient(135deg,#fff 0%,#fff8fb 100%);border-color:#f0d7e1}.ei .projection-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.ei .projection-stat{padding:14px;border-radius:14px;background:#fff;border:1px solid #f0e4e9}.ei .projection-stat span{display:block;color:var(--muted);font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em}.ei .projection-stat strong{display:block;font-size:1.35rem;letter-spacing:-.03em;margin-top:4px}.ei .projection-stat.accent{color:#fff;background:linear-gradient(135deg,#7a0019,#d91785);border:0}.ei .projection-stat.accent span{color:rgba(255,255,255,.76)}.ei .projection-note{border-left:3px solid #d91785;padding-left:11px;color:var(--muted);font-size:.76rem}.ei .range-value{min-width:54px;text-align:center;color:var(--wine);font-weight:850}.ei .operation-card{border:1px solid #efd5df;background:#fff8fb;border-radius:14px;padding:13px;margin-bottom:14px}.ei .scenario-box{padding:17px;border-radius:16px;background:#fff;border:1px solid #efdce4}.ei .scenario-buttons{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.ei .scenario-btn{border:1px solid #e4c5d1;background:#fff;color:#6f1835;border-radius:11px;padding:8px 5px;font-size:.73rem;font-weight:800}.ei .scenario-btn:hover,.ei .scenario-btn.active{background:#7a0019;color:#fff;border-color:#7a0019}.ei .projection-result{padding:11px 13px;border-radius:12px;background:#f9edf2;color:#561129;font-size:.82rem}.ei .projection-result strong{font-size:1.05rem}
   .ei .action-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.ei .action-kpi{padding:12px 14px;border-radius:13px;background:#f7f8fa}.ei .action-kpi strong{display:block;font-size:1.3rem}.ei .action-kpi span{display:block;font-size:.68rem;color:var(--muted);font-weight:800;text-transform:uppercase}.ei .action-filters{display:flex;gap:7px;overflow-x:auto;padding-bottom:3px}.ei .action-filter{white-space:nowrap;border:1px solid #dfe4ea;background:#fff;color:#4d5868;border-radius:999px;padding:7px 12px;font-size:.74rem;font-weight:800}.ei .action-filter.active{background:#222b38;color:#fff;border-color:#222b38}.ei .action-table th{font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:#788395;white-space:nowrap}.ei .action-table td{font-size:.78rem;vertical-align:middle}.ei .action-badge{display:inline-flex;padding:5px 8px;border-radius:999px;font-size:.68rem;font-weight:850}.ei .action-open{background:#fff0f2;color:#a32b43}.ei .action-build{background:#fff4dd;color:#8a5a00}.ei .action-close{background:#e8f0fb;color:#23548a}.ei .action-activate{background:#e5f6ef;color:#0b6b54}.ei .action-maintain{background:#eef0f3;color:#505b6a}.ei .action-table tbody tr{cursor:pointer}.ei .action-table tbody tr:hover{background:#fff7fa}.ei .action-table tbody tr.is-selected{background:#fff0f5;box-shadow:inset 4px 0 #d91785}.ei .action-table-wrap{max-height:510px;overflow:auto}.ei .table-help{font-size:.7rem;color:var(--muted)}
+  .ei .index-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.ei .index-box{border:1px solid var(--line);border-radius:15px;padding:15px;background:#fafbfc}.ei .index-box strong{display:block;font-size:1.5rem;line-height:1}.ei .index-box span{display:block;margin-top:6px;font-size:.7rem;color:var(--muted);font-weight:800;text-transform:uppercase}.ei .index-formula{border-left:3px solid #d91785;padding-left:12px;font-size:.77rem;color:var(--muted)}.ei .index-table td,.ei .index-table th{font-size:.74rem;vertical-align:middle}.ei .index-table th{text-transform:uppercase;letter-spacing:.04em;color:#788395;white-space:nowrap}.ei .index-score{font-weight:850;color:var(--wine)}
+  .ei .socio-panel{background:linear-gradient(135deg,#fff 0%,#f6fbfa 100%);border-color:#dcece7}.ei .socio-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.ei .socio-kpi{padding:13px;border-radius:13px;background:#fff;border:1px solid #e0ece8}.ei .socio-kpi strong{display:block;font-size:1.25rem}.ei .socio-kpi span{display:block;font-size:.66rem;color:var(--muted);font-weight:800;text-transform:uppercase}.ei .coverage-chip{display:inline-flex;padding:4px 7px;border-radius:999px;background:#e9f4f0;color:#176b58;font-size:.68rem;font-weight:800}
   .ei .source-list a{color:var(--wine);text-decoration:none}.ei .source-list a:hover{text-decoration:underline}.ei .quality-row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}.ei .quality-row:last-child{border:0}.ei .quality-row span{color:var(--muted);font-size:.78rem}.ei .quality-row strong{font-size:.85rem}
   .ei .stable-table th{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:#7a8494;white-space:nowrap}.ei .stable-table td{font-size:.82rem;vertical-align:middle}.ei .section-link{border:0;background:none;color:var(--wine);font-weight:800;padding:0;text-decoration:underline;text-decoration-color:#e9bdca;text-underline-offset:3px}
   .leaflet-tooltip.ei-tooltip{border:0;border-radius:10px;box-shadow:0 8px 20px rgba(0,0,0,.16);padding:8px 10px;font:12px/1.35 system-ui,sans-serif}
-  @media(max-width:991.98px){.ei #electoralMap{height:520px}.ei .section-panel{min-height:0}.ei .map-toolbar{position:relative;left:auto;right:auto;top:auto;margin-bottom:10px}.ei .map-shell{display:flex;flex-direction:column}.ei .map-toolbar{order:-1}.ei .map-legend{bottom:12px}.ei .hero{padding:23px 20px}.ei .year-grid{grid-template-columns:1fr}.ei .projection-grid,.ei .action-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:991.98px){.ei #electoralMap{height:520px}.ei .section-panel{min-height:0}.ei .map-toolbar{position:relative;left:auto;right:auto;top:auto;margin-bottom:10px}.ei .map-shell{display:flex;flex-direction:column}.ei .map-toolbar{order:-1}.ei .map-legend{bottom:12px}.ei .hero{padding:23px 20px}.ei .year-grid{grid-template-columns:1fr}.ei .projection-grid,.ei .action-kpis,.ei .index-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
 @endpush
 
@@ -115,6 +117,56 @@
     </div>
   </div>
 
+  <div class="card-panel mb-3" id="electoralIndex">
+    <div class="row g-4 align-items-start">
+      <div class="col-xl-5">
+        <div class="eyebrow text-danger">Modelo documental</div>
+        <h2 class="panel-title mt-1">Índice de oferta y demanda electoral</h2>
+        <div class="panel-subtitle mb-3">Convierte las siete variables solicitadas en tres lecturas comparables de 0 a 100 por sección.</div>
+        <div class="index-grid mb-3">
+          <div class="index-box"><strong>IOE</strong><span>Oferta electoral</span></div>
+          <div class="index-box"><strong>IDE</strong><span>Exigencia electoral</span></div>
+          <div class="index-box"><strong>IODE</strong><span>Oportunidad relativa</span></div>
+        </div>
+        <p class="index-formula mb-2"><strong>Lectura rápida:</strong> IOE alto significa mayor volumen y participación; IDE alto significa mayor esfuerzo competitivo; IODE alto identifica una mejor relación entre ambos.</p>
+        <p class="small text-muted mb-2">Calculado en {{ number_format($electoralIndex['secciones_calculadas']) }} secciones con resultado 2021–2024 y padrón INE disponible. {{ number_format($electoralIndex['secciones_sin_indice']) }} quedan como “sin dato comparable”; no se rellenan con ceros.</p>
+        <p class="small text-muted mb-0">{{ $electoralIndex['proxy'] }}</p>
+      </div>
+      <div class="col-xl-7">
+        <div class="d-flex justify-content-between align-items-start gap-2 mb-2"><div><strong class="small">Mayor oportunidad relativa</strong><div class="table-help">No es un pronóstico ni sustituye el criterio territorial.</div></div><span class="soft-pill">IODE · percentil</span></div>
+        <div class="table-responsive">
+          <table class="table index-table align-middle mb-0">
+            <thead><tr><th>Sección</th><th class="text-end">IOE</th><th class="text-end">IDE</th><th class="text-end">IODE</th><th>Lectura</th></tr></thead>
+            <tbody>
+              @foreach($topIode as $row)
+              <tr><td><button class="section-link" data-section="{{ $row['seccion'] }}">{{ $row['seccion'] }}</button></td><td class="text-end">{{ number_format($row['indice_electoral']['ioe'], 1) }}</td><td class="text-end">{{ number_format($row['indice_electoral']['ide'], 1) }}</td><td class="text-end index-score">{{ number_format($row['indice_electoral']['iode'], 1) }}</td><td>{{ $row['indice_electoral']['estrategia'] }}</td></tr>
+              @endforeach
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-panel socio-panel mb-3" id="socioeconomicLayer">
+    <div class="row g-4 align-items-center">
+      <div class="col-xl-7">
+        <div class="eyebrow text-success">Contexto territorial agregado</div>
+        <h2 class="panel-title mt-1">Capa socioeconómica por sección</h2>
+        <div class="panel-subtitle mb-3">Rezago social, educación, salud, vivienda, servicios básicos y conectividad del Censo 2020, trasladados de AGEB urbana a sección mediante intersección espacial.</div>
+        <div class="socio-kpis">
+          <div class="socio-kpi"><strong>{{ number_format($socioeconomic['secciones_con_datos']) }}</strong><span>Secciones con contexto</span></div>
+          <div class="socio-kpi"><strong>{{ number_format($socioeconomic['cobertura_alta']) }}</strong><span>Con ≥80% de cobertura</span></div>
+          <div class="socio-kpi"><strong>2020</strong><span>Año censal</span></div>
+        </div>
+      </div>
+      <div class="col-xl-5">
+        <p class="index-formula mb-2"><strong>Cómo leerla:</strong> selecciona en el mapa “Rezago social”, “Sin internet”, “Educación básica incompleta”, “Sin servicios de salud” o “Hacinamiento”. Al abrir una sección verás sus indicadores y cobertura territorial.</p>
+        <p class="small text-muted mb-0">No mide ingreso ni identifica hogares o personas. No se usa para inferir preferencias políticas ni personalizar mensajes; describe condiciones territoriales agregadas para planeación general.</p>
+      </div>
+    </div>
+  </div>
+
   <div class="card-panel mb-3" id="actionBoard">
     <div class="row g-3 align-items-start mb-3">
       <div class="col-xl-5">
@@ -170,6 +222,14 @@
                 <option value="margin2024">Margen de Morena frente al principal competidor en 2024</option>
                 <option value="trend">Cambio del porcentaje de Morena entre 2021 y 2024</option>
                 <option value="nominal2024">Lista nominal en 2024</option>
+                <option value="ioe">IOE · Oferta electoral</option>
+                <option value="ide">IDE · Exigencia electoral</option>
+                <option value="iode">IODE · Oportunidad relativa</option>
+                <option value="socialLag">Contexto · Grado de rezago social 2020</option>
+                <option value="noInternet">Contexto · Viviendas sin internet 2020</option>
+                <option value="basicEducation">Contexto · Educación básica incompleta 2020</option>
+                <option value="noHealth">Contexto · Población sin derechohabiencia 2020</option>
+                <option value="overcrowding">Contexto · Viviendas con hacinamiento 2020</option>
                 <option value="affiliatesYes">Sí afiliados registrados por sección</option>
                 <option value="operationalCoverage">Cobertura de sí afiliados sobre lista nominal 2024</option>
                 <option value="mobilizedBase">Base movilizada según el escenario</option>
@@ -247,6 +307,14 @@
     margin2024:{title:'Margen de Morena 2024',items:[['Pierde por 20 puntos o más','#982e45'],['Pierde por menos de 20 puntos','#efb2bf'],['Gana por menos de 20 puntos','#9fc9bc'],['Gana por 20 puntos o más','#0e6f57']]},
     trend:{title:'Cambio 2021 a 2024',items:[['Baja más de 5 puntos','#a83a50'],['Entre -5 y 0 puntos','#f0b4c0'],['Entre 0 y 5 puntos','#acd2c6'],['Sube más de 5 puntos','#14745d']]},
     nominal2024:{title:'Lista nominal 2024',items:[['Menos de 1,000','#f0f1f3'],['1,000 a 2,499','#c7d5ea'],['2,500 a 4,999','#789bc8'],['5,000 o más','#284f87']]},
+    ioe:{title:'IOE · Oferta electoral',items:[['Baja · 0 a 24.9','#f2f2f2'],['Media baja · 25 a 49.9','#c7d5ea'],['Media alta · 50 a 74.9','#789bc8'],['Alta · 75 a 100','#284f87']]},
+    ide:{title:'IDE · Exigencia electoral',items:[['Baja · 0 a 24.9','#e5f3ef'],['Media baja · 25 a 49.9','#a9d3c7'],['Media alta · 50 a 74.9','#e3b7a5'],['Alta · 75 a 100','#a84d43']]},
+    iode:{title:'IODE · Oportunidad relativa',items:[['Baja · 0 a 24.9','#f0f1f3'],['Selectiva · 25 a 49.9','#f6c2d6'],['Media · 50 a 74.9','#dd6997'],['Alta · 75 a 100','#790019']]},
+    socialLag:{title:'Grado de rezago social 2020',items:[['Muy bajo','#1b7f69'],['Bajo','#79b99d'],['Medio','#f0c96a'],['Alto','#e17b4f'],['Muy alto','#9b2f43']]},
+    noInternet:{title:'Viviendas sin internet 2020',items:[['Menos de 20%','#dff1e8'],['20% a 39.9%','#9bcdb5'],['40% a 59.9%','#efc66a'],['60% o más','#a8444f']]},
+    basicEducation:{title:'Educación básica incompleta 2020',items:[['Menos de 15%','#dff1e8'],['15% a 24.9%','#9bcdb5'],['25% a 34.9%','#efc66a'],['35% o más','#a8444f']]},
+    noHealth:{title:'Sin derechohabiencia de salud 2020',items:[['Menos de 20%','#dff1e8'],['20% a 29.9%','#9bcdb5'],['30% a 39.9%','#efc66a'],['40% o más','#a8444f']]},
+    overcrowding:{title:'Viviendas con hacinamiento 2020',items:[['Menos de 2%','#dff1e8'],['2% a 4.9%','#9bcdb5'],['5% a 9.9%','#efc66a'],['10% o más','#a8444f']]},
     affiliatesYes:{title:'Sí afiliados registrados',items:[['Sin registros','#f0f1f3'],['1 a 9','#f6c2d6'],['10 a 29','#dd6997'],['30 o más','#790019']]},
     operationalCoverage:{title:'Cobertura sobre lista nominal',items:[['Sin cobertura','#f0f1f3'],['Menos de 2%','#c8dbed'],['2% a 5%','#689ac8'],['5% o más','#214f82']]},
     mobilizedBase:{title:'Base movilizada estimada',items:[['Sin base','#f0f1f3'],['1 a 9','#c9e5dc'],['10 a 24','#66b29b'],['25 o más','#126b55']]},
@@ -263,7 +331,7 @@
     if (!row) return '#d9dde3';
     const y24=row.historial['2024'];
     if(metric==='victories') return ['#edf0f4','#f4bfd2','#d95c8d','#790019'][Math.max(0,Math.min(3,row.victorias_morena))];
-    if(!y24 && !['trend','affiliatesYes','mobilizedBase'].includes(metric)) return '#d9dde3';
+    if(!y24 && !['trend','affiliatesYes','mobilizedBase','socialLag','noInternet','basicEducation','noHealth','overcrowding'].includes(metric)) return '#d9dde3';
     if(metric==='morena2024'){const v=y24.porcentaje_morena;return v>=.45?'#790019':v>=.35?'#db5f91':v>=.25?'#f5b8cf':'#f2f2f2'}
     if(metric==='turnout2024'){const v=y24.participacion;return v>=.65?'#174a73':v>=.55?'#5695bd':v>=.45?'#b8d8ea':'#f0f1f3'}
     if(metric==='invalid2024'){const v=y24.votos_totales>0?(y24.votos_totales-y24.votos_validos)/y24.votos_totales:0;return v>=.06?'#6a285f':v>=.04?'#a96b9c':v>=.02?'#d8c5da':'#f0f1f3'}
@@ -271,6 +339,14 @@
     if(metric==='margin2024'){const v=y24.margen_morena_pct;return v>=.20?'#0e6f57':v>=0?'#9fc9bc':v>=-.20?'#efb2bf':'#982e45'}
     if(metric==='trend'){const v=row.tendencia_morena_2021_2024;if(v===null)return '#d9dde3';return v>.05?'#14745d':v>=0?'#acd2c6':v>=-.05?'#f0b4c0':'#a83a50'}
     if(metric==='nominal2024'){const v=y24.lista_nominal;return v>=5000?'#284f87':v>=2500?'#789bc8':v>=1000?'#c7d5ea':'#f0f1f3'}
+    if(['ioe','ide','iode'].includes(metric)){const index=row.indice_electoral;if(!index)return '#d9dde3';const v=index[metric];if(metric==='ide')return v>=75?'#a84d43':v>=50?'#e3b7a5':v>=25?'#a9d3c7':'#e5f3ef';if(metric==='iode')return v>=75?'#790019':v>=50?'#dd6997':v>=25?'#f6c2d6':'#f0f1f3';return v>=75?'#284f87':v>=50?'#789bc8':v>=25?'#c7d5ea':'#f2f2f2'}
+    if(['socialLag','noInternet','basicEducation','noHealth','overcrowding'].includes(metric)){
+      const socio=row.socioeconomico;if(!socio)return '#d9dde3';
+      if(metric==='socialLag'){const v=socio.grado_rezago_valor;return v>=4.5?'#9b2f43':v>=3.5?'#e17b4f':v>=2.5?'#f0c96a':v>=1.5?'#79b99d':'#1b7f69'}
+      const key={noInternet:'sin_internet',basicEducation:'educacion_basica_incompleta',noHealth:'sin_derechohabiencia',overcrowding:'hacinamiento'}[metric];const v=socio.indicadores[key];
+      const limits={noInternet:[20,40,60],basicEducation:[15,25,35],noHealth:[20,30,40],overcrowding:[2,5,10]}[metric];
+      return v>=limits[2]?'#a8444f':v>=limits[1]?'#efc66a':v>=limits[0]?'#9bcdb5':'#dff1e8';
+    }
     if(metric==='affiliatesYes'){const v=row.operacion?.afiliados_si||0;return v>=30?'#790019':v>=10?'#dd6997':v>=1?'#f6c2d6':'#f0f1f3'}
     if(metric==='operationalCoverage'){const v=y24?.lista_nominal>0?(row.operacion?.afiliados_si||0)/y24.lista_nominal:0;return v>=.05?'#214f82':v>=.02?'#689ac8':v>0?'#c8dbed':'#f0f1f3'}
     if(metric==='mobilizedBase'){const v=mobilized(row);return v>=25?'#126b55':v>=10?'#66b29b':v>=1?'#c9e5dc':'#f0f1f3'}
@@ -354,6 +430,8 @@
     const invalid24=h24?Math.max(0,h24.votos_totales-h24.votos_validos):0;
     const abstention24=h24?Math.max(0,h24.lista_nominal-h24.votos_totales):0;
     const op=row.operacion||{registrados:0,afiliados_si:0,afiliados_no:0};
+    const index=row.indice_electoral;
+    const socio=row.socioeconomico;
     const projected=mobilized(row);
     const listCoverage=h24&&h24.lista_nominal>0?op.afiliados_si/h24.lista_nominal:null;
     const historicalReference=h24&&h24.votos_morena>0?projected/h24.votos_morena:null;
@@ -376,6 +454,28 @@
       <div class="text-muted small text-uppercase fw-bold">Sección</div>
       <div class="section-number">${row.seccion}</div>
       <div class="d-flex flex-wrap gap-2 mb-3"><span class="soft-pill">DL ${row.distrito_local??'n.d.'}</span><span class="soft-pill">DF ${row.distrito_federal??'n.d.'}</span><span class="soft-pill">${row.victorias_morena} de ${row.elecciones_observadas} victorias</span></div>
+      ${index?`<div class="operation-card">
+        <div class="small fw-bold text-uppercase text-muted mb-2">Oferta y demanda electoral</div>
+        <div class="index-grid">
+          <div class="section-stat"><span>IOE · oferta</span><strong>${index.ioe.toFixed(1)}</strong></div>
+          <div class="section-stat"><span>IDE · exigencia</span><strong>${index.ide.toFixed(1)}</strong></div>
+          <div class="section-stat"><span>IODE · oportunidad</span><strong class="text-danger">${index.iode.toFixed(1)}</strong></div>
+        </div>
+        <div class="election-row"><span>Lectura</span><strong>${index.estrategia}</strong></div>
+        <div class="election-row"><span>Padrón INE 2023</span><strong>${number.format(index.variables.padron_electoral_2023)}</strong></div>
+        <div class="election-row"><span>Votos de referencia para ganar</span><strong>${number.format(index.variables.votos_para_ganar_2024)}</strong></div>
+      </div>`:`<div class="alert alert-light border small">Sin IODE comparable: falta padrón INE o una de las elecciones requeridas. No se imputó como cero.</div>`}
+      ${socio?`<div class="operation-card" style="background:#f7fcfa;border-color:#d5e9e2">
+        <div class="d-flex justify-content-between align-items-start gap-2 mb-2"><div class="small fw-bold text-uppercase text-muted">Contexto socioeconómico 2020</div><span class="coverage-chip">${percent(socio.cobertura_territorial)} del territorio</span></div>
+        <div class="election-row"><span>Grado de rezago social</span><strong>${socio.grado_rezago}</strong></div>
+        <div class="election-row"><span>Educación básica incompleta</span><strong>${socio.indicadores.educacion_basica_incompleta.toFixed(1)}%</strong></div>
+        <div class="election-row"><span>Sin derechohabiencia de salud</span><strong>${socio.indicadores.sin_derechohabiencia.toFixed(1)}%</strong></div>
+        <div class="election-row"><span>Viviendas con hacinamiento</span><strong>${socio.indicadores.hacinamiento.toFixed(1)}%</strong></div>
+        <div class="election-row"><span>Viviendas sin internet</span><strong>${socio.indicadores.sin_internet.toFixed(1)}%</strong></div>
+        <div class="election-row"><span>Viviendas sin computadora</span><strong>${socio.indicadores.sin_computadora.toFixed(1)}%</strong></div>
+        <div class="election-row"><span>Población censal representada</span><strong>${number.format(socio.poblacion_representada)}</strong></div>
+        <p class="small text-muted mt-2 mb-0">Promedio territorial de ${number.format(socio.agebs)} AGEB urbanas. No representa ingreso ni preferencias individuales.</p>
+      </div>`:`<div class="alert alert-light border small">Sin contexto socioeconómico comparable: la fuente cubre AGEB urbanas y esta sección no alcanzó cobertura territorial suficiente.</div>`}
       ${h24?`<div class="section-summary mb-3">
         <div class="section-stat"><span>Morena 2024</span><strong>${number.format(h24.votos_morena)}</strong></div>
         <div class="section-stat"><span>Otros válidos</span><strong>${number.format(other24)}</strong></div>
