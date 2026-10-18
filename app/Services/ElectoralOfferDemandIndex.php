@@ -91,7 +91,7 @@ class ElectoralOfferDemandIndex
             'secciones_calculadas' => count($indexes),
             'secciones_sin_indice' => count($dataset['secciones']) - count($indexes),
             'metodo' => 'Variables transformadas a rangos percentiles entre secciones comparables. IOE e IDE se expresan de 0 a 100. IODE es el rango percentil de IOE/IDE.',
-            'proxy' => 'El padrón electoral del INE al 28-12-2023 se usa como proxy operativo de población en edad de votar; no equivale a población censal de 18 años y más.',
+            'proxy' => 'Para saber cuántas personas pueden votar se usa el padrón del INE de diciembre de 2023. Este dato no es un conteo de población.',
             'pesos' => [
                 'ioe' => [
                     'padron_electoral_2023' => 10,
@@ -140,15 +140,15 @@ class ElectoralOfferDemandIndex
     private function strategy(float $offer, float $demand): string
     {
         if ($offer >= 50 && $demand >= 50) {
-            return 'Alto potencial · alta exigencia';
+            return 'Buena oportunidad, pero será difícil competir';
         }
         if ($offer >= 50) {
-            return 'Consolidar y movilizar';
+            return 'Buena oportunidad para organizar el trabajo';
         }
         if ($demand >= 50) {
-            return 'Selectiva · costo alto';
+            return 'Conviene revisar antes de dedicar más esfuerzo';
         }
 
-        return 'Seguimiento eficiente';
+        return 'Dar seguimiento sin dejar de atender otras secciones';
     }
 }

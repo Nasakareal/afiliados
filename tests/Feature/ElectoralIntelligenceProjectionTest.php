@@ -38,6 +38,8 @@ class ElectoralIntelligenceProjectionTest extends TestCase
             ->assertJsonPath('operacion.estructura_minima', 2)
             ->assertJsonPath('indice_electoral.secciones_calculadas', 365)
             ->assertJsonPath('indice_electoral.secciones_sin_indice', 37)
+            ->assertJsonPath('socioeconomico.secciones_con_datos', 373)
+            ->assertJsonPath('socioeconomico.cobertura_alta', 317)
             ->assertHeader('Cache-Control', 'no-store, private');
 
         $section = collect($response->json('secciones'))->firstWhere('seccion', 1118);
@@ -45,17 +47,21 @@ class ElectoralIntelligenceProjectionTest extends TestCase
         $this->assertSame(3, $section['operacion']['registrados']);
         $this->assertSame(2, $section['operacion']['afiliados_si']);
         $this->assertSame(1, $section['operacion']['afiliados_no']);
+        $this->assertNotNull($section['socioeconomico']);
+        $this->assertArrayHasKey('sin_internet', $section['socioeconomico']['indicadores']);
 
         $this->get(route('electoral.index'))
             ->assertOk()
-            ->assertSeeText('Proyección operativa con la base actual')
+            ->assertSeeText('¿Cuántos afiliados podrían acudir?')
             ->assertSeeText('Podrían acudir')
-            ->assertSeeText('Cauteloso · 60%')
-            ->assertSeeText('Dónde fortalecer la estructura')
-            ->assertSeeText('Índice de oferta y demanda electoral')
-            ->assertSeeText('IODE · Oportunidad relativa')
-            ->assertSeeText('Prioridad sugerida')
-            ->assertSee('Sí afiliados registrados por sección');
+            ->assertSeeText('Bajo · 60%')
+            ->assertSeeText('¿En qué secciones hace falta más trabajo?')
+            ->assertSeeText('¿Qué tan favorable se ve cada sección?')
+            ->assertSeeText('IODE · Oportunidad de la sección')
+            ->assertSeeText('¿Cómo son las condiciones de cada sección?')
+            ->assertSeeText('Condiciones de vida · Viviendas sin internet')
+            ->assertSeeText('Ver primero las más importantes')
+            ->assertSee('Afiliados confirmados por sección');
     }
 
     private function insertAffiliate(

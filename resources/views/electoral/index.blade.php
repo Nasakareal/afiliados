@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Inteligencia electoral de Morelia')
+@section('title', 'Elecciones de Morelia por sección')
 
 @push('styles')
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -34,27 +34,27 @@
 <div class="container-xxl ei pb-5">
   <section class="hero mb-4">
     <div class="position-relative" style="z-index:1">
-      <div class="eyebrow">Presidencia municipal de Morelia</div>
-      <h1>Resultados históricos por sección</h1>
-      <p class="mb-0 text-white-50">Comparación homologable de las elecciones de Ayuntamiento 2018, 2021 y 2024 con cómputos oficiales del IEM.</p>
+      <div class="eyebrow">Elección municipal de Morelia</div>
+      <h1>Así ha votado cada sección</h1>
+      <p class="mb-0 text-white-50">Consulta y compara los resultados oficiales de 2018, 2021 y 2024.</p>
     </div>
   </section>
 
   <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-5 g-3 mb-3">
-    <div class="col"><div class="kpi"><div class="kpi-note">Elección 2024</div><div class="kpi-value">{{ number_format($current['lista_nominal']) }}</div><div class="kpi-label">Lista nominal</div></div></div>
-    <div class="col"><div class="kpi"><div class="kpi-note">Elección 2024</div><div class="kpi-value">{{ number_format($current['participacion'] * 100, 1) }}%</div><div class="kpi-label">Participación</div></div></div>
-    <div class="col"><div class="kpi"><div class="kpi-note">Voto válido 2024</div><div class="kpi-value">{{ number_format($current['porcentaje_morena'] * 100, 1) }}%</div><div class="kpi-label">Morena y coalición</div></div></div>
-    <div class="col"><div class="kpi"><div class="kpi-note">De {{ number_format($current['secciones']) }} con resultados</div><div class="kpi-value">{{ number_format($current['secciones_ganadas_morena']) }}</div><div class="kpi-label">Secciones ganadas 2024</div></div></div>
-    <div class="col"><div class="kpi"><div class="kpi-note">Con clave comparable en tres procesos</div><div class="kpi-value">{{ number_format($consistentMorena->count()) }}</div><div class="kpi-label">Ganadas en 2018 2021 y 2024</div></div></div>
+    <div class="col"><div class="kpi"><div class="kpi-note">Elección 2024</div><div class="kpi-value">{{ number_format($current['lista_nominal']) }}</div><div class="kpi-label">Personas que podían votar</div></div></div>
+    <div class="col"><div class="kpi"><div class="kpi-note">Elección 2024</div><div class="kpi-value">{{ number_format($current['participacion'] * 100, 1) }}%</div><div class="kpi-label">Personas que votaron</div></div></div>
+    <div class="col"><div class="kpi"><div class="kpi-note">De los votos válidos de 2024</div><div class="kpi-value">{{ number_format($current['porcentaje_morena'] * 100, 1) }}%</div><div class="kpi-label">Votos para Morena y aliados</div></div></div>
+    <div class="col"><div class="kpi"><div class="kpi-note">De {{ number_format($current['secciones']) }} con resultados</div><div class="kpi-value">{{ number_format($current['secciones_ganadas_morena']) }}</div><div class="kpi-label">Secciones ganadas en 2024</div></div></div>
+    <div class="col"><div class="kpi"><div class="kpi-note">Comparando las tres elecciones</div><div class="kpi-value">{{ number_format($consistentMorena->count()) }}</div><div class="kpi-label">Ganadas las tres veces</div></div></div>
   </div>
 
   <div class="card-panel mb-3">
     <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
-      <div><h2 class="panel-title">Comparativo municipal</h2><div class="panel-subtitle">Composición del voto y participación en elecciones equivalentes de Ayuntamiento.</div></div>
+      <div><h2 class="panel-title">Resultados generales de Morelia</h2><div class="panel-subtitle">Aquí puedes ver cuánta gente votó y cómo se repartieron los votos en cada elección.</div></div>
       <div class="composition-legend">
         <span><i style="background:#a20b51"></i>Morena y coalición</span>
         <span><i style="background:#7da6cc"></i>Otros votos válidos</span>
-        <span><i style="background:#c9ced6"></i>Votos no válidos</span>
+        <span><i style="background:#c9ced6"></i>Votos nulos y no registrados</span>
       </div>
     </div>
     <div class="year-grid">
@@ -75,9 +75,9 @@
           </div>
           <div class="quality-row"><span>Morena y coalición</span><strong>{{ number_format($result['votos_morena']) }} · {{ number_format($result['porcentaje_morena'] * 100, 1) }}%</strong></div>
           <div class="quality-row"><span>Otros votos válidos</span><strong>{{ number_format($otherValid) }}</strong></div>
-          <div class="quality-row"><span>Votos no válidos</span><strong>{{ number_format($invalid) }}</strong></div>
-          <div class="quality-row"><span>Abstención estimada</span><strong>{{ number_format($abstention) }}</strong></div>
-          <div class="quality-row"><span>Secciones ganadas</span><strong>{{ number_format($result['secciones_ganadas_morena']) }}</strong></div>
+          <div class="quality-row"><span>Votos nulos y no registrados</span><strong>{{ number_format($invalid) }}</strong></div>
+          <div class="quality-row"><span>Personas que no votaron (estimado)</span><strong>{{ number_format($abstention) }}</strong></div>
+          <div class="quality-row"><span>Secciones ganadas por Morena y aliados</span><strong>{{ number_format($result['secciones_ganadas_morena']) }}</strong></div>
         </article>
       @endforeach
     </div>
@@ -87,31 +87,31 @@
     <div class="row g-3 align-items-center">
       <div class="col-xl-7">
         <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
-          <div><h2 class="panel-title">Proyección operativa con la base actual</h2><div class="panel-subtitle">Personas registradas en <code>afiliados</code> cuya sección coincide con el mapa vigente.</div></div>
-          @if($operation['alcance_restringido'])<span class="soft-pill"><i class="fa-solid fa-shield-halved me-1"></i>Solo distritos autorizados</span>@endif
+          <div><h2 class="panel-title">¿Cuántos afiliados podrían acudir?</h2><div class="panel-subtitle">El cálculo usa solamente los registros de Morelia que tienen una sección válida.</div></div>
+          @if($operation['alcance_restringido'])<span class="soft-pill"><i class="fa-solid fa-shield-halved me-1"></i>Solo aparecen los distritos que puedes consultar</span>@endif
         </div>
         <div class="projection-grid">
-          <div class="projection-stat"><span>Registros utilizables</span><strong>{{ number_format($operation['registrados']) }}</strong></div>
-          <div class="projection-stat"><span>Sí afiliados</span><strong class="text-success">{{ number_format($operation['afiliados_si']) }}</strong></div>
-          <div class="projection-stat"><span>No afiliados</span><strong class="text-danger">{{ number_format($operation['afiliados_no']) }}</strong></div>
-          <div class="projection-stat"><span>Secciones con base “sí”</span><strong>{{ number_format($operation['secciones_cubiertas']) }}</strong><small class="text-muted"> / {{ number_format($quality['current_sections']) }}</small></div>
+          <div class="projection-stat"><span>Registros que sí se pueden usar</span><strong>{{ number_format($operation['registrados']) }}</strong></div>
+          <div class="projection-stat"><span>Afiliados confirmados</span><strong class="text-success">{{ number_format($operation['afiliados_si']) }}</strong></div>
+          <div class="projection-stat"><span>Personas no afiliadas</span><strong class="text-danger">{{ number_format($operation['afiliados_no']) }}</strong></div>
+          <div class="projection-stat"><span>Secciones con afiliados</span><strong>{{ number_format($operation['secciones_cubiertas']) }}</strong><small class="text-muted"> / {{ number_format($quality['current_sections']) }}</small></div>
           <div class="projection-stat accent"><span>Podrían acudir</span><strong id="projectedCity">{{ number_format(round($operation['afiliados_si'] * $operation['tasa_movilizacion_inicial'])) }}</strong></div>
         </div>
-        @if($operation['registros_fuera_mapa'] > 0)<div class="small text-warning-emphasis mt-2"><i class="fa-solid fa-triangle-exclamation me-1"></i>{{ number_format($operation['registros_fuera_mapa']) }} registros de Morelia no entran en la proyección porque no tienen una sección válida del mapa actual.</div>@endif
+        @if($operation['registros_fuera_mapa'] > 0)<div class="small text-warning-emphasis mt-2"><i class="fa-solid fa-triangle-exclamation me-1"></i>{{ number_format($operation['registros_fuera_mapa']) }} registros no se incluyeron porque su sección no aparece en el mapa actual.</div>@endif
       </div>
       <div class="col-xl-5">
         <div class="scenario-box">
-          <div class="fw-bold">¿Qué porcentaje de los {{ number_format($operation['afiliados_si']) }} “sí afiliados” creemos que acudirá a votar?</div>
-          <div class="small text-muted mt-1 mb-2">Elige una referencia rápida o mueve la barra.</div>
+          <div class="fw-bold">De los {{ number_format($operation['afiliados_si']) }} afiliados confirmados, ¿qué porcentaje creemos que irá a votar?</div>
+          <div class="small text-muted mt-1 mb-2">Elige una opción o mueve la barra para probar otro porcentaje.</div>
           <div class="scenario-buttons mb-3">
-            <button type="button" class="scenario-btn" data-rate="60">Cauteloso · 60%</button>
-            <button type="button" class="scenario-btn active" data-rate="75">Probable · 75%</button>
-            <button type="button" class="scenario-btn" data-rate="90">Meta alta · 90%</button>
+            <button type="button" class="scenario-btn" data-rate="60">Bajo · 60%</button>
+            <button type="button" class="scenario-btn active" data-rate="75">Medio · 75%</button>
+            <button type="button" class="scenario-btn" data-rate="90">Alto · 90%</button>
           </div>
-          <label for="mobilizationRate" class="small fw-bold d-flex justify-content-between align-items-center"><span>Porcentaje que acudiría</span><output id="mobilizationRateLabel" class="range-value">75%</output></label>
+          <label for="mobilizationRate" class="small fw-bold d-flex justify-content-between align-items-center"><span>Porcentaje que podría asistir</span><output id="mobilizationRateLabel" class="range-value">75%</output></label>
           <input id="mobilizationRate" type="range" class="form-range mt-2" min="50" max="100" step="5" value="75" aria-describedby="projectionSentence">
-          <div id="projectionSentence" class="projection-result mt-2">Con el escenario probable, podrían acudir <strong>{{ number_format(round($operation['afiliados_si'] * $operation['tasa_movilizacion_inicial'])) }} personas</strong>.</div>
-          <p class="projection-note mt-3 mb-0">Sirve para planear movilización. No es una encuesta ni se suma al voto de 2024: una persona afiliada pudo haber votado por Morena anteriormente.</p>
+          <div id="projectionSentence" class="projection-result mt-2">Si asiste el 75%, podrían acudir <strong>{{ number_format(round($operation['afiliados_si'] * $operation['tasa_movilizacion_inicial'])) }} personas</strong>.</div>
+          <p class="projection-note mt-3 mb-0">Este cálculo sirve para organizar el trabajo. No predice el resultado ni significa que sean votos nuevos.</p>
         </div>
       </div>
     </div>
@@ -120,23 +120,23 @@
   <div class="card-panel mb-3" id="electoralIndex">
     <div class="row g-4 align-items-start">
       <div class="col-xl-5">
-        <div class="eyebrow text-danger">Modelo documental</div>
-        <h2 class="panel-title mt-1">Índice de oferta y demanda electoral</h2>
-        <div class="panel-subtitle mb-3">Convierte las siete variables solicitadas en tres lecturas comparables de 0 a 100 por sección.</div>
+        <div class="eyebrow text-danger">Resumen por sección</div>
+        <h2 class="panel-title mt-1">¿Qué tan favorable se ve cada sección?</h2>
+        <div class="panel-subtitle mb-3">Tres calificaciones de 0 a 100 ayudan a comparar todas las secciones con la misma regla.</div>
         <div class="index-grid mb-3">
-          <div class="index-box"><strong>IOE</strong><span>Oferta electoral</span></div>
-          <div class="index-box"><strong>IDE</strong><span>Exigencia electoral</span></div>
-          <div class="index-box"><strong>IODE</strong><span>Oportunidad relativa</span></div>
+          <div class="index-box"><strong>IOE</strong><span>Tamaño y participación</span></div>
+          <div class="index-box"><strong>IDE</strong><span>Dificultad para competir</span></div>
+          <div class="index-box"><strong>IODE</strong><span>Oportunidad de la sección</span></div>
         </div>
-        <p class="index-formula mb-2"><strong>Lectura rápida:</strong> IOE alto significa mayor volumen y participación; IDE alto significa mayor esfuerzo competitivo; IODE alto identifica una mejor relación entre ambos.</p>
-        <p class="small text-muted mb-2">Calculado en {{ number_format($electoralIndex['secciones_calculadas']) }} secciones con resultado 2021–2024 y padrón INE disponible. {{ number_format($electoralIndex['secciones_sin_indice']) }} quedan como “sin dato comparable”; no se rellenan con ceros.</p>
-        <p class="small text-muted mb-0">{{ $electoralIndex['proxy'] }}</p>
+        <p class="index-formula mb-2"><strong>En pocas palabras:</strong> IOE muestra dónde hay más electores y participación. IDE muestra dónde sería más difícil competir. IODE combina ambos datos: entre más alto sea, mejor se ve la oportunidad.</p>
+        <p class="small text-muted mb-2">Hay cálculo para {{ number_format($electoralIndex['secciones_calculadas']) }} secciones. En {{ number_format($electoralIndex['secciones_sin_indice']) }} faltan datos y por eso aparece “Sin dato”.</p>
+        <p class="small text-muted mb-0">Para saber cuántas personas pueden votar se usa el padrón del INE de diciembre de 2023. Este dato no es un conteo de población.</p>
       </div>
       <div class="col-xl-7">
-        <div class="d-flex justify-content-between align-items-start gap-2 mb-2"><div><strong class="small">Mayor oportunidad relativa</strong><div class="table-help">No es un pronóstico ni sustituye el criterio territorial.</div></div><span class="soft-pill">IODE · percentil</span></div>
+        <div class="d-flex justify-content-between align-items-start gap-2 mb-2"><div><strong class="small">Secciones con mejor calificación</strong><div class="table-help">Es una guía para comparar, no una predicción del resultado.</div></div><span class="soft-pill">Ordenadas por IODE</span></div>
         <div class="table-responsive">
           <table class="table index-table align-middle mb-0">
-            <thead><tr><th>Sección</th><th class="text-end">IOE</th><th class="text-end">IDE</th><th class="text-end">IODE</th><th>Lectura</th></tr></thead>
+            <thead><tr><th>Sección</th><th class="text-end">Tamaño</th><th class="text-end">Dificultad</th><th class="text-end">Oportunidad</th><th>Qué indica</th></tr></thead>
             <tbody>
               @foreach($topIode as $row)
               <tr><td><button class="section-link" data-section="{{ $row['seccion'] }}">{{ $row['seccion'] }}</button></td><td class="text-end">{{ number_format($row['indice_electoral']['ioe'], 1) }}</td><td class="text-end">{{ number_format($row['indice_electoral']['ide'], 1) }}</td><td class="text-end index-score">{{ number_format($row['indice_electoral']['iode'], 1) }}</td><td>{{ $row['indice_electoral']['estrategia'] }}</td></tr>
@@ -151,18 +151,18 @@
   <div class="card-panel socio-panel mb-3" id="socioeconomicLayer">
     <div class="row g-4 align-items-center">
       <div class="col-xl-7">
-        <div class="eyebrow text-success">Contexto territorial agregado</div>
-        <h2 class="panel-title mt-1">Capa socioeconómica por sección</h2>
-        <div class="panel-subtitle mb-3">Rezago social, educación, salud, vivienda, servicios básicos y conectividad del Censo 2020, trasladados de AGEB urbana a sección mediante intersección espacial.</div>
+        <div class="eyebrow text-success">Datos de las zonas de Morelia</div>
+        <h2 class="panel-title mt-1">¿Cómo son las condiciones de cada sección?</h2>
+        <div class="panel-subtitle mb-3">Muestra datos del Censo 2020 sobre educación, salud, vivienda, servicios e internet.</div>
         <div class="socio-kpis">
-          <div class="socio-kpi"><strong>{{ number_format($socioeconomic['secciones_con_datos']) }}</strong><span>Secciones con contexto</span></div>
-          <div class="socio-kpi"><strong>{{ number_format($socioeconomic['cobertura_alta']) }}</strong><span>Con ≥80% de cobertura</span></div>
-          <div class="socio-kpi"><strong>2020</strong><span>Año censal</span></div>
+          <div class="socio-kpi"><strong>{{ number_format($socioeconomic['secciones_con_datos']) }}</strong><span>Secciones con información</span></div>
+          <div class="socio-kpi"><strong>{{ number_format($socioeconomic['cobertura_alta']) }}</strong><span>Secciones casi completas</span></div>
+          <div class="socio-kpi"><strong>2020</strong><span>Año de los datos</span></div>
         </div>
       </div>
       <div class="col-xl-5">
-        <p class="index-formula mb-2"><strong>Cómo leerla:</strong> selecciona en el mapa “Rezago social”, “Sin internet”, “Educación básica incompleta”, “Sin servicios de salud” o “Hacinamiento”. Al abrir una sección verás sus indicadores y cobertura territorial.</p>
-        <p class="small text-muted mb-0">No mide ingreso ni identifica hogares o personas. No se usa para inferir preferencias políticas ni personalizar mensajes; describe condiciones territoriales agregadas para planeación general.</p>
+        <p class="index-formula mb-2"><strong>Cómo usarla:</strong> elige un tema en el mapa y haz clic en una sección. A la derecha aparecerán sus datos.</p>
+        <p class="small text-muted mb-0">Estos datos describen zonas completas. No muestran cuánto gana una persona, quién vive ahí ni por quién vota.</p>
       </div>
     </div>
   </div>
@@ -170,72 +170,72 @@
   <div class="card-panel mb-3" id="actionBoard">
     <div class="row g-3 align-items-start mb-3">
       <div class="col-xl-5">
-        <div class="eyebrow text-danger">Tablero de acción</div>
-        <h2 class="panel-title mt-1">Dónde fortalecer la estructura</h2>
-        <div class="panel-subtitle">Ordena las secciones con reglas visibles: cobertura actual, margen municipal de 2024 y capacidad de movilización.</div>
+        <div class="eyebrow text-danger">Lista para organizar el trabajo</div>
+        <h2 class="panel-title mt-1">¿En qué secciones hace falta más trabajo?</h2>
+        <div class="panel-subtitle">La lista toma en cuenta los afiliados registrados y la diferencia de votos de 2024.</div>
       </div>
       <div class="col-xl-7">
         <div class="action-kpis">
-          <div class="action-kpi"><strong class="text-danger">{{ number_format($operation['sin_base_si']) }}</strong><span>Sin base “sí”</span></div>
-          <div class="action-kpi"><strong class="text-warning-emphasis">{{ number_format($operation['estructura_minima']) }}</strong><span>Con solo 1–9</span></div>
-          <div class="action-kpi"><strong class="text-primary">{{ number_format($operation['derrotas_margen_corto']) }}</strong><span>Derrotas por ≤100 votos</span></div>
-          <div class="action-kpi"><strong class="text-success">{{ number_format($operation['estructura_fuerte']) }}</strong><span>Con 100 o más</span></div>
+          <div class="action-kpi"><strong class="text-danger">{{ number_format($operation['sin_base_si']) }}</strong><span>Sin afiliados confirmados</span></div>
+          <div class="action-kpi"><strong class="text-warning-emphasis">{{ number_format($operation['estructura_minima']) }}</strong><span>Con 1 a 9 afiliados</span></div>
+          <div class="action-kpi"><strong class="text-primary">{{ number_format($operation['derrotas_margen_corto']) }}</strong><span>Perdidas por 100 votos o menos</span></div>
+          <div class="action-kpi"><strong class="text-success">{{ number_format($operation['estructura_fuerte']) }}</strong><span>Con 100 afiliados o más</span></div>
         </div>
       </div>
     </div>
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
       <div class="action-filters" aria-label="Filtrar prioridades">
-        <button type="button" class="action-filter active" data-action-filter="priority">Prioridad sugerida</button>
-        <button type="button" class="action-filter" data-action-filter="no-base">Sin estructura</button>
-        <button type="button" class="action-filter" data-action-filter="fragile">Base de 1–9</button>
-        <button type="button" class="action-filter" data-action-filter="close-loss">Perdidas por ≤100</button>
-        <button type="button" class="action-filter" data-action-filter="strong">Fortalezas de 100+</button>
+        <button type="button" class="action-filter active" data-action-filter="priority">Ver primero las más importantes</button>
+        <button type="button" class="action-filter" data-action-filter="no-base">Sin afiliados</button>
+        <button type="button" class="action-filter" data-action-filter="fragile">Con 1 a 9 afiliados</button>
+        <button type="button" class="action-filter" data-action-filter="close-loss">Perdidas por 100 votos o menos</button>
+        <button type="button" class="action-filter" data-action-filter="strong">Con 100 afiliados o más</button>
         <button type="button" class="action-filter" data-action-filter="all">Todas</button>
       </div>
       <div id="actionTableCount" class="table-help">Cargando secciones…</div>
     </div>
     <div class="table-responsive action-table-wrap">
       <table class="table action-table align-middle mb-0">
-        <thead class="sticky-top bg-white"><tr><th>Sección</th><th>Resultado 2024</th><th class="text-end">Brecha/ventaja</th><th class="text-end">Sí afiliados</th><th class="text-end">Acudirían</th><th class="text-end">Cobertura LN</th><th>Estructura</th><th>Acción operativa</th></tr></thead>
-        <tbody id="actionTableBody"><tr><td colspan="8" class="text-center text-muted py-4">Preparando diagnóstico…</td></tr></tbody>
+        <thead class="sticky-top bg-white"><tr><th>Sección</th><th>Resultado 2024</th><th class="text-end">Votos de diferencia</th><th class="text-end">Afiliados</th><th class="text-end">Podrían asistir</th><th class="text-end">% de la lista nominal</th><th>Situación actual</th><th>Qué hace falta</th></tr></thead>
+        <tbody id="actionTableBody"><tr><td colspan="8" class="text-center text-muted py-4">Preparando la lista…</td></tr></tbody>
       </table>
     </div>
-    <div class="table-help mt-2"><i class="fa-solid fa-circle-info me-1"></i>“Acudirían” usa el porcentaje elegido arriba. La brecha es histórica y la base puede solaparse con votantes de 2024; por eso no se presentan como votos adicionales. Haz clic en una fila para abrir la sección en el mapa.</div>
+    <div class="table-help mt-2"><i class="fa-solid fa-circle-info me-1"></i>“Podrían asistir” usa el porcentaje que elegiste arriba. No se suman como votos nuevos porque algunas de esas personas pudieron votar en 2024. Haz clic en una fila para ver la sección en el mapa.</div>
   </div>
 
   <div class="row g-3 mb-3">
     <div class="col-xl-8">
       <div class="card-panel h-100">
         <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
-          <div><h2 class="panel-title">Mapa seccional</h2><div class="panel-subtitle">Selecciona una métrica y haz clic en una sección para revisar su serie histórica.</div></div>
-          <span class="soft-pill"><i class="fa-solid fa-database me-1"></i>Datos agregados sin perfiles individuales</span>
+          <div><h2 class="panel-title">Mapa de las secciones</h2><div class="panel-subtitle">Elige qué quieres ver y después haz clic en una sección.</div></div>
+          <span class="soft-pill"><i class="fa-solid fa-database me-1"></i>Información general por zona, no por persona</span>
         </div>
         <div class="map-shell">
           <div class="map-toolbar">
             <div class="row g-2 align-items-center">
-              <div class="col-md-8"><label for="metricSelect" class="visually-hidden">Métrica</label><select id="metricSelect" class="form-select form-select-sm">
-                <option value="victories">Victorias de Morena y coalición en 2018 2021 y 2024</option>
-                <option value="morena2024">Porcentaje de voto de Morena y coalición en 2024</option>
-                <option value="turnout2024">Participación ciudadana en 2024</option>
-                <option value="invalid2024">Porcentaje de votos no válidos en 2024</option>
-                <option value="abstention2024">Abstención estimada en 2024</option>
-                <option value="margin2024">Margen de Morena frente al principal competidor en 2024</option>
-                <option value="trend">Cambio del porcentaje de Morena entre 2021 y 2024</option>
-                <option value="nominal2024">Lista nominal en 2024</option>
-                <option value="ioe">IOE · Oferta electoral</option>
-                <option value="ide">IDE · Exigencia electoral</option>
-                <option value="iode">IODE · Oportunidad relativa</option>
-                <option value="socialLag">Contexto · Grado de rezago social 2020</option>
-                <option value="noInternet">Contexto · Viviendas sin internet 2020</option>
-                <option value="basicEducation">Contexto · Educación básica incompleta 2020</option>
-                <option value="noHealth">Contexto · Población sin derechohabiencia 2020</option>
-                <option value="overcrowding">Contexto · Viviendas con hacinamiento 2020</option>
-                <option value="affiliatesYes">Sí afiliados registrados por sección</option>
-                <option value="operationalCoverage">Cobertura de sí afiliados sobre lista nominal 2024</option>
-                <option value="mobilizedBase">Base movilizada según el escenario</option>
-                <option value="actionPriority">Prioridad operativa sugerida</option>
+              <div class="col-md-8"><label for="metricSelect" class="visually-hidden">Qué quieres ver en el mapa</label><select id="metricSelect" class="form-select form-select-sm">
+                <option value="victories">Cuántas veces ganó Morena y sus aliados</option>
+                <option value="morena2024">Porcentaje de votos de Morena y sus aliados en 2024</option>
+                <option value="turnout2024">Porcentaje de personas que votaron en 2024</option>
+                <option value="invalid2024">Porcentaje de votos nulos y no registrados en 2024</option>
+                <option value="abstention2024">Porcentaje estimado de personas que no votaron en 2024</option>
+                <option value="margin2024">Votos de diferencia frente al principal competidor en 2024</option>
+                <option value="trend">Si el apoyo a Morena subió o bajó de 2021 a 2024</option>
+                <option value="nominal2024">Personas que podían votar en 2024</option>
+                <option value="ioe">IOE · Tamaño y participación</option>
+                <option value="ide">IDE · Dificultad para competir</option>
+                <option value="iode">IODE · Oportunidad de la sección</option>
+                <option value="socialLag">Condiciones de vida · Rezago social</option>
+                <option value="noInternet">Condiciones de vida · Viviendas sin internet</option>
+                <option value="basicEducation">Condiciones de vida · Educación básica incompleta</option>
+                <option value="noHealth">Condiciones de vida · Personas sin acceso a servicios de salud</option>
+                <option value="overcrowding">Condiciones de vida · Viviendas con demasiadas personas</option>
+                <option value="affiliatesYes">Afiliados confirmados por sección</option>
+                <option value="operationalCoverage">Afiliados como porcentaje de la lista nominal</option>
+                <option value="mobilizedBase">Afiliados que podrían asistir</option>
+                <option value="actionPriority">Secciones que necesitan atención primero</option>
               </select></div>
-              <div class="col-md-4"><input id="sectionSearch" class="form-control form-control-sm" inputmode="numeric" placeholder="Ir a sección"></div>
+              <div class="col-md-4"><input id="sectionSearch" class="form-control form-control-sm" inputmode="numeric" placeholder="Escribe una sección"></div>
             </div>
           </div>
           <div id="electoralMap" aria-label="Mapa electoral por sección de Morelia"></div>
@@ -248,7 +248,7 @@
         <div class="text-center py-5 text-muted" id="emptySection">
           <i class="fa-solid fa-arrow-pointer fa-2x mb-3"></i>
           <div class="fw-bold text-dark">Selecciona una sección</div>
-          <div class="small mt-1">Aquí aparecerán sus resultados y cambios entre elecciones.</div>
+          <div class="small mt-1">Aquí verás sus resultados, afiliados y condiciones de vida.</div>
         </div>
         <div id="sectionDetail" class="d-none"></div>
       </div>
@@ -258,31 +258,33 @@
   <div class="row g-3">
     <div class="col-xl-8">
       <div class="card-panel h-100">
-        <div class="d-flex justify-content-between align-items-start mb-3"><div><h2 class="panel-title">Secciones con victoria en los tres procesos</h2><div class="panel-subtitle">Solo se incluyen claves observadas sin interrupción en 2018, 2021 y 2024.</div></div><span class="soft-pill">{{ $consistentMorena->count() }} secciones</span></div>
-        <div class="table-responsive"><table class="table stable-table align-middle mb-0"><thead><tr><th>Sección</th><th>DL</th><th>DF</th><th class="text-end">2018</th><th class="text-end">2021</th><th class="text-end">2024</th><th class="text-end">Participación 2024</th></tr></thead><tbody>
+        <div class="d-flex justify-content-between align-items-start mb-3"><div><h2 class="panel-title">Secciones que Morena y sus aliados ganaron las tres veces</h2><div class="panel-subtitle">Aparecen únicamente las secciones que tienen resultados en 2018, 2021 y 2024.</div></div><span class="soft-pill">{{ $consistentMorena->count() }} secciones</span></div>
+        <div class="table-responsive"><table class="table stable-table align-middle mb-0"><thead><tr><th>Sección</th><th>Distrito local</th><th>Distrito federal</th><th class="text-end">2018</th><th class="text-end">2021</th><th class="text-end">2024</th><th class="text-end">Personas que votaron en 2024</th></tr></thead><tbody>
           @forelse($consistentMorena as $row)
           <tr><td><button class="section-link" data-section="{{ $row['seccion'] }}">{{ $row['seccion'] }}</button></td><td>{{ $row['distrito_local'] }}</td><td>{{ $row['distrito_federal'] }}</td><td class="text-end">{{ number_format($row['historial']['2018']['porcentaje_morena'] * 100, 1) }}%</td><td class="text-end">{{ number_format($row['historial']['2021']['porcentaje_morena'] * 100, 1) }}%</td><td class="text-end fw-bold">{{ number_format($row['historial']['2024']['porcentaje_morena'] * 100, 1) }}%</td><td class="text-end">{{ number_format($row['historial']['2024']['participacion'] * 100, 1) }}%</td></tr>
-          @empty<tr><td colspan="7" class="text-center text-muted py-4">No hay secciones con serie completa.</td></tr>@endforelse
+          @empty<tr><td colspan="7" class="text-center text-muted py-4">No hay secciones con resultados en los tres años.</td></tr>@endforelse
         </tbody></table></div>
       </div>
     </div>
     <div class="col-xl-4">
       <div class="card-panel mb-3">
-        <h2 class="panel-title">Cobertura y comparabilidad</h2><div class="panel-subtitle mb-2">La cartografía vigente puede contener secciones creadas después de una elección.</div>
-        <div class="quality-row"><span>Polígonos seccionales vigentes</span><strong>{{ number_format($quality['current_sections']) }}</strong></div>
-        <div class="quality-row"><span>Con resultado municipal 2024</span><strong>{{ number_format($quality['with_2024_results']) }}</strong></div>
-        <div class="quality-row"><span>Comparables en tres elecciones</span><strong>{{ number_format($quality['three_cycle_sections']) }}</strong></div>
-        <div class="quality-row"><span>Nuevas o reconfiguradas</span><strong>{{ number_format($quality['reconfigured_or_new']) }}</strong></div>
+        <h2 class="panel-title">¿Cuántas secciones tienen información?</h2><div class="panel-subtitle mb-2">Algunas secciones cambiaron o fueron creadas después de una elección.</div>
+        <div class="quality-row"><span>Secciones que existen actualmente</span><strong>{{ number_format($quality['current_sections']) }}</strong></div>
+        <div class="quality-row"><span>Con resultados de 2024</span><strong>{{ number_format($quality['with_2024_results']) }}</strong></div>
+        <div class="quality-row"><span>Con resultados en los tres años</span><strong>{{ number_format($quality['three_cycle_sections']) }}</strong></div>
+        <div class="quality-row"><span>Nuevas o que cambiaron de límites</span><strong>{{ number_format($quality['reconfigured_or_new']) }}</strong></div>
       </div>
       <div class="card-panel">
-        <h2 class="panel-title">Fuentes oficiales</h2><div class="panel-subtitle mb-3">Los resultados proceden de cómputos por casilla y se agregan por sección.</div>
+        <h2 class="panel-title">¿De dónde salen los datos?</h2><div class="panel-subtitle mb-3">Los resultados vienen de fuentes oficiales y se sumaron por sección.</div>
         <div class="source-list small">
           @foreach($metadata['fuentes'] as $source)
           <div class="mb-2"><strong>{{ $source['anio'] }} · {{ $source['institucion'] }}</strong><br><a href="{{ $source['url'] }}" target="_blank" rel="noopener">{{ $source['descripcion'] }}</a></div>
           @endforeach
+          <div class="mb-2"><strong>2020 · CONEVAL</strong><br><a href="https://www.coneval.org.mx/Medicion/IRS/Paginas/Rezago_social_AGEB_2020.aspx" target="_blank" rel="noopener">Grado de Rezago Social por AGEB urbana</a></div>
+          <div class="mb-2"><strong>2020 · INEGI</strong><br><a href="https://www.inegi.org.mx/app/biblioteca/ficha.html?upc=889463807469" target="_blank" rel="noopener">Marco Geoestadístico del Censo 2020</a></div>
         </div>
         <hr>
-        <p class="small text-muted mb-0">{{ $metadata['advertencia_cartografica'] }}</p>
+        <p class="small text-muted mb-0">Las secciones pueden cambiar con el tiempo. Por eso solo se comparan los tres años cuando la misma sección aparece en 2018, 2021 y 2024.</p>
       </div>
     </div>
   </div>
@@ -299,26 +301,26 @@
   const percent = value => value === null || value === undefined ? 'Sin dato' : `${(Number(value)*100).toFixed(1)}%`;
   const winnerLabels = {morena:'Morena y coalición',pan_prd_mc:'PAN PRD MC',pan_prd:'PAN PRD',pan_pri_prd:'PAN PRI PRD',pri:'PRI',pvem:'PVEM',mc:'Movimiento Ciudadano',pes:'PES',pesm:'PES Michoacán',rsp:'RSP',fxm:'Fuerza por México',nueva_alianza:'Nueva Alianza',independiente:'Candidatura independiente',independientes:'Candidaturas independientes',mm:'Más Michoacán',mich1:'Michoacán Primero',tmx:'Tiempo por México'};
   const palettes = {
-    victories:{title:'Victorias en tres elecciones',items:[['0','#edf0f4'],['1','#f4bfd2'],['2','#d95c8d'],['3','#790019']]},
-    morena2024:{title:'Porcentaje de voto 2024',items:[['Menos de 25%','#f2f2f2'],['25% a 35%','#f5b8cf'],['35% a 45%','#db5f91'],['45% o más','#790019']]},
-    turnout2024:{title:'Participación 2024',items:[['Menos de 45%','#f0f1f3'],['45% a 55%','#b8d8ea'],['55% a 65%','#5695bd'],['65% o más','#174a73']]},
-    invalid2024:{title:'Votos no válidos 2024',items:[['Menos de 2%','#f0f1f3'],['2% a 4%','#d8c5da'],['4% a 6%','#a96b9c'],['6% o más','#6a285f']]},
-    abstention2024:{title:'Abstención estimada 2024',items:[['Menos de 35%','#e5f3ef'],['35% a 45%','#a9d3c7'],['45% a 55%','#e3b7a5'],['55% o más','#a84d43']]},
-    margin2024:{title:'Margen de Morena 2024',items:[['Pierde por 20 puntos o más','#982e45'],['Pierde por menos de 20 puntos','#efb2bf'],['Gana por menos de 20 puntos','#9fc9bc'],['Gana por 20 puntos o más','#0e6f57']]},
-    trend:{title:'Cambio 2021 a 2024',items:[['Baja más de 5 puntos','#a83a50'],['Entre -5 y 0 puntos','#f0b4c0'],['Entre 0 y 5 puntos','#acd2c6'],['Sube más de 5 puntos','#14745d']]},
-    nominal2024:{title:'Lista nominal 2024',items:[['Menos de 1,000','#f0f1f3'],['1,000 a 2,499','#c7d5ea'],['2,500 a 4,999','#789bc8'],['5,000 o más','#284f87']]},
-    ioe:{title:'IOE · Oferta electoral',items:[['Baja · 0 a 24.9','#f2f2f2'],['Media baja · 25 a 49.9','#c7d5ea'],['Media alta · 50 a 74.9','#789bc8'],['Alta · 75 a 100','#284f87']]},
-    ide:{title:'IDE · Exigencia electoral',items:[['Baja · 0 a 24.9','#e5f3ef'],['Media baja · 25 a 49.9','#a9d3c7'],['Media alta · 50 a 74.9','#e3b7a5'],['Alta · 75 a 100','#a84d43']]},
-    iode:{title:'IODE · Oportunidad relativa',items:[['Baja · 0 a 24.9','#f0f1f3'],['Selectiva · 25 a 49.9','#f6c2d6'],['Media · 50 a 74.9','#dd6997'],['Alta · 75 a 100','#790019']]},
-    socialLag:{title:'Grado de rezago social 2020',items:[['Muy bajo','#1b7f69'],['Bajo','#79b99d'],['Medio','#f0c96a'],['Alto','#e17b4f'],['Muy alto','#9b2f43']]},
+    victories:{title:'Veces que ganó Morena y sus aliados',items:[['Ninguna','#edf0f4'],['Una vez','#f4bfd2'],['Dos veces','#d95c8d'],['Las tres veces','#790019']]},
+    morena2024:{title:'Votos de Morena y sus aliados en 2024',items:[['Menos de 25%','#f2f2f2'],['25% a 35%','#f5b8cf'],['35% a 45%','#db5f91'],['45% o más','#790019']]},
+    turnout2024:{title:'Personas que votaron en 2024',items:[['Menos de 45%','#f0f1f3'],['45% a 55%','#b8d8ea'],['55% a 65%','#5695bd'],['65% o más','#174a73']]},
+    invalid2024:{title:'Votos nulos y no registrados en 2024',items:[['Menos de 2%','#f0f1f3'],['2% a 4%','#d8c5da'],['4% a 6%','#a96b9c'],['6% o más','#6a285f']]},
+    abstention2024:{title:'Personas que no votaron en 2024',items:[['Menos de 35%','#e5f3ef'],['35% a 45%','#a9d3c7'],['45% a 55%','#e3b7a5'],['55% o más','#a84d43']]},
+    margin2024:{title:'Diferencia de Morena en 2024',items:[['Perdió por 20 puntos o más','#982e45'],['Perdió por menos de 20 puntos','#efb2bf'],['Ganó por menos de 20 puntos','#9fc9bc'],['Ganó por 20 puntos o más','#0e6f57']]},
+    trend:{title:'Cambio de 2021 a 2024',items:[['Bajó más de 5 puntos','#a83a50'],['Bajó hasta 5 puntos','#f0b4c0'],['Subió hasta 5 puntos','#acd2c6'],['Subió más de 5 puntos','#14745d']]},
+    nominal2024:{title:'Personas que podían votar en 2024',items:[['Menos de 1,000','#f0f1f3'],['1,000 a 2,499','#c7d5ea'],['2,500 a 4,999','#789bc8'],['5,000 o más','#284f87']]},
+    ioe:{title:'IOE · Tamaño y participación',items:[['Bajo · 0 a 24.9','#f2f2f2'],['Medio bajo · 25 a 49.9','#c7d5ea'],['Medio alto · 50 a 74.9','#789bc8'],['Alto · 75 a 100','#284f87']]},
+    ide:{title:'IDE · Dificultad para competir',items:[['Baja · 0 a 24.9','#e5f3ef'],['Media baja · 25 a 49.9','#a9d3c7'],['Media alta · 50 a 74.9','#e3b7a5'],['Alta · 75 a 100','#a84d43']]},
+    iode:{title:'IODE · Oportunidad de la sección',items:[['Baja · 0 a 24.9','#f0f1f3'],['Regular · 25 a 49.9','#f6c2d6'],['Buena · 50 a 74.9','#dd6997'],['Muy buena · 75 a 100','#790019']]},
+    socialLag:{title:'Rezago social en 2020',items:[['Muy bajo','#1b7f69'],['Bajo','#79b99d'],['Medio','#f0c96a'],['Alto','#e17b4f'],['Muy alto','#9b2f43']]},
     noInternet:{title:'Viviendas sin internet 2020',items:[['Menos de 20%','#dff1e8'],['20% a 39.9%','#9bcdb5'],['40% a 59.9%','#efc66a'],['60% o más','#a8444f']]},
     basicEducation:{title:'Educación básica incompleta 2020',items:[['Menos de 15%','#dff1e8'],['15% a 24.9%','#9bcdb5'],['25% a 34.9%','#efc66a'],['35% o más','#a8444f']]},
-    noHealth:{title:'Sin derechohabiencia de salud 2020',items:[['Menos de 20%','#dff1e8'],['20% a 29.9%','#9bcdb5'],['30% a 39.9%','#efc66a'],['40% o más','#a8444f']]},
-    overcrowding:{title:'Viviendas con hacinamiento 2020',items:[['Menos de 2%','#dff1e8'],['2% a 4.9%','#9bcdb5'],['5% a 9.9%','#efc66a'],['10% o más','#a8444f']]},
-    affiliatesYes:{title:'Sí afiliados registrados',items:[['Sin registros','#f0f1f3'],['1 a 9','#f6c2d6'],['10 a 29','#dd6997'],['30 o más','#790019']]},
-    operationalCoverage:{title:'Cobertura sobre lista nominal',items:[['Sin cobertura','#f0f1f3'],['Menos de 2%','#c8dbed'],['2% a 5%','#689ac8'],['5% o más','#214f82']]},
-    mobilizedBase:{title:'Base movilizada estimada',items:[['Sin base','#f0f1f3'],['1 a 9','#c9e5dc'],['10 a 24','#66b29b'],['25 o más','#126b55']]},
-    actionPriority:{title:'Prioridad operativa',items:[['Abrir estructura','#b62f48'],['Base mínima (1–9)','#e6a73b'],['Derrota por ≤100 con base','#3f79b5'],['Fortaleza (100+)','#16836a'],['Seguimiento general','#c7cdd5']]}
+    noHealth:{title:'Personas sin acceso a servicios de salud',items:[['Menos de 20%','#dff1e8'],['20% a 29.9%','#9bcdb5'],['30% a 39.9%','#efc66a'],['40% o más','#a8444f']]},
+    overcrowding:{title:'Viviendas con demasiadas personas',items:[['Menos de 2%','#dff1e8'],['2% a 4.9%','#9bcdb5'],['5% a 9.9%','#efc66a'],['10% o más','#a8444f']]},
+    affiliatesYes:{title:'Afiliados confirmados',items:[['Ninguno','#f0f1f3'],['1 a 9','#f6c2d6'],['10 a 29','#dd6997'],['30 o más','#790019']]},
+    operationalCoverage:{title:'Afiliados frente a la lista nominal',items:[['Sin afiliados','#f0f1f3'],['Menos de 2%','#c8dbed'],['2% a 5%','#689ac8'],['5% o más','#214f82']]},
+    mobilizedBase:{title:'Afiliados que podrían asistir',items:[['Ninguno','#f0f1f3'],['1 a 9','#c9e5dc'],['10 a 24','#66b29b'],['25 o más','#126b55']]},
+    actionPriority:{title:'Secciones que necesitan atención',items:[['Sin afiliados','#b62f48'],['Muy pocos afiliados (1–9)','#e6a73b'],['Se perdió por 100 votos o menos','#3f79b5'],['100 afiliados o más','#16836a'],['Seguimiento normal','#c7cdd5']]}
   };
   let rows = new Map(), layers = new Map(), geoLayer, selectedSection = null, actionFilter = 'priority';
   const metricSelect = document.getElementById('metricSelect');
@@ -367,24 +369,24 @@
     selectedLayer.setStyle({color:'#ffd43b',weight:5,fillOpacity:.96,opacity:1});
     selectedLayer.bringToFront();
   };
-  const renderLegend = () => {const p=palettes[metricSelect.value];legend.innerHTML=`<strong>${p.title}</strong>${p.items.map(([label,color])=>`<div class="legend-row"><span class="legend-swatch" style="background:${color}"></span><span>${label}</span></div>`).join('')}<div class="legend-row"><span class="legend-swatch" style="background:#d9dde3"></span><span>Sin dato comparable</span></div>`;};
+  const renderLegend = () => {const p=palettes[metricSelect.value];legend.innerHTML=`<strong>${p.title}</strong>${p.items.map(([label,color])=>`<div class="legend-row"><span class="legend-swatch" style="background:${color}"></span><span>${label}</span></div>`).join('')}<div class="legend-row"><span class="legend-swatch" style="background:#d9dde3"></span><span>Falta información</span></div>`;};
   const diagnose = row => {
     const h24=row.historial['2024'];
     const yes=row.operacion?.afiliados_si||0;
     const gap=h24&&!h24.morena_gano?Math.abs(h24.margen_morena):0;
     const closeLoss=Boolean(h24&&!h24.morena_gano&&gap<=100);
-    let structure='En construcción', structureClass='action-build';
-    if(yes===0){structure='Sin estructura';structureClass='action-open'}
-    else if(yes<=9){structure='Mínima';structureClass='action-build'}
-    else if(yes>=100){structure='Fortaleza';structureClass='action-activate'}
-    else if(yes>=30){structure='Sólida';structureClass='action-maintain'}
-    let action='Reducir brecha', actionClass='action-build', rank=3;
-    if(!h24){action='Validar información';actionClass='action-maintain';rank=6}
-    else if(yes===0){action='Abrir estructura';actionClass='action-open';rank=1}
-    else if(closeLoss){action='Reforzar sección competitiva';actionClass='action-close';rank=0}
-    else if(yes<=9){action='Elevar cobertura';actionClass='action-build';rank=2}
-    else if(yes>=100){action='Activar fortaleza';actionClass='action-activate';rank=h24.morena_gano?4:3}
-    else if(h24.morena_gano){action='Cuidar ventaja';actionClass='action-maintain';rank=5}
+    let structure='En crecimiento', structureClass='action-build';
+    if(yes===0){structure='Sin afiliados';structureClass='action-open'}
+    else if(yes<=9){structure='Muy pocos afiliados';structureClass='action-build'}
+    else if(yes>=100){structure='100 afiliados o más';structureClass='action-activate'}
+    else if(yes>=30){structure='30 afiliados o más';structureClass='action-maintain'}
+    let action='Sumar más afiliados', actionClass='action-build', rank=3;
+    if(!h24){action='Revisar la información';actionClass='action-maintain';rank=6}
+    else if(yes===0){action='Comenzar el registro';actionClass='action-open';rank=1}
+    else if(closeLoss){action='Atender primero';actionClass='action-close';rank=0}
+    else if(yes<=9){action='Sumar más afiliados';actionClass='action-build';rank=2}
+    else if(yes>=100){action='Mantener el contacto';actionClass='action-activate';rank=h24.morena_gano?4:3}
+    else if(h24.morena_gano){action='Cuidar la ventaja';actionClass='action-maintain';rank=5}
     return {h24,yes,gap,closeLoss,structure,structureClass,action,actionClass,rank};
   };
   const renderActionTable = () => {
@@ -437,7 +439,7 @@
     const historicalReference=h24&&h24.votos_morena>0?projected/h24.votos_morena:null;
     const elections=['2018','2021','2024'].map(year=>{
       const h=row.historial[year];
-      if(!h)return `<article class="election-card"><div class="election-card-head"><span class="election-year">${year}</span><span class="soft-pill">Sin clave comparable</span></div></article>`;
+      if(!h)return `<article class="election-card"><div class="election-card-head"><span class="election-year">${year}</span><span class="soft-pill">No hay información para este año</span></div></article>`;
       const other=Math.max(0,h.votos_validos-h.votos_morena);
       const invalid=Math.max(0,h.votos_totales-h.votos_validos);
       return `<article class="election-card">
@@ -445,75 +447,74 @@
         <div class="election-row"><span>Morena y coalición</span><strong>${number.format(h.votos_morena)} · ${percent(h.porcentaje_morena)}</strong></div>
         <div class="share-track"><span style="width:${Math.min(100,Math.max(0,h.porcentaje_morena*100))}%"></span></div>
         <div class="election-row"><span>Otros votos válidos</span><strong>${number.format(other)}</strong></div>
-        <div class="election-row"><span>Votos no válidos</span><strong>${number.format(invalid)}</strong></div>
-        <div class="election-row"><span>Participación</span><strong>${percent(h.participacion)}</strong></div>
-        <div class="election-row"><span>Margen de Morena</span><strong class="${h.margen_morena>=0?'text-success':'text-danger'}">${h.margen_morena>=0?'+':''}${number.format(h.margen_morena)}</strong></div>
+        <div class="election-row"><span>Votos nulos y no registrados</span><strong>${number.format(invalid)}</strong></div>
+        <div class="election-row"><span>Personas que votaron</span><strong>${percent(h.participacion)}</strong></div>
+        <div class="election-row"><span>Votos de diferencia para Morena</span><strong class="${h.margen_morena>=0?'text-success':'text-danger'}">${h.margen_morena>=0?'+':''}${number.format(h.margen_morena)}</strong></div>
       </article>`;
     }).join('');
     detail.innerHTML=`
       <div class="text-muted small text-uppercase fw-bold">Sección</div>
       <div class="section-number">${row.seccion}</div>
-      <div class="d-flex flex-wrap gap-2 mb-3"><span class="soft-pill">DL ${row.distrito_local??'n.d.'}</span><span class="soft-pill">DF ${row.distrito_federal??'n.d.'}</span><span class="soft-pill">${row.victorias_morena} de ${row.elecciones_observadas} victorias</span></div>
+      <div class="d-flex flex-wrap gap-2 mb-3"><span class="soft-pill">Distrito local ${row.distrito_local??'Sin dato'}</span><span class="soft-pill">Distrito federal ${row.distrito_federal??'Sin dato'}</span><span class="soft-pill">Morena ganó ${row.victorias_morena} de ${row.elecciones_observadas}</span></div>
       ${index?`<div class="operation-card">
-        <div class="small fw-bold text-uppercase text-muted mb-2">Oferta y demanda electoral</div>
+        <div class="small fw-bold text-uppercase text-muted mb-2">Calificación de la sección</div>
         <div class="index-grid">
-          <div class="section-stat"><span>IOE · oferta</span><strong>${index.ioe.toFixed(1)}</strong></div>
-          <div class="section-stat"><span>IDE · exigencia</span><strong>${index.ide.toFixed(1)}</strong></div>
+          <div class="section-stat"><span>IOE · tamaño</span><strong>${index.ioe.toFixed(1)}</strong></div>
+          <div class="section-stat"><span>IDE · dificultad</span><strong>${index.ide.toFixed(1)}</strong></div>
           <div class="section-stat"><span>IODE · oportunidad</span><strong class="text-danger">${index.iode.toFixed(1)}</strong></div>
         </div>
-        <div class="election-row"><span>Lectura</span><strong>${index.estrategia}</strong></div>
-        <div class="election-row"><span>Padrón INE 2023</span><strong>${number.format(index.variables.padron_electoral_2023)}</strong></div>
-        <div class="election-row"><span>Votos de referencia para ganar</span><strong>${number.format(index.variables.votos_para_ganar_2024)}</strong></div>
-      </div>`:`<div class="alert alert-light border small">Sin IODE comparable: falta padrón INE o una de las elecciones requeridas. No se imputó como cero.</div>`}
+        <div class="election-row"><span>Qué indica</span><strong>${index.estrategia}</strong></div>
+        <div class="election-row"><span>Personas registradas para votar en 2023</span><strong>${number.format(index.variables.padron_electoral_2023)}</strong></div>
+        <div class="election-row"><span>Votos que habrían sido necesarios para ganar en 2024</span><strong>${number.format(index.variables.votos_para_ganar_2024)}</strong></div>
+      </div>`:`<div class="alert alert-light border small">No se pudo calcular la oportunidad porque falta información del INE o de alguna elección.</div>`}
       ${socio?`<div class="operation-card" style="background:#f7fcfa;border-color:#d5e9e2">
-        <div class="d-flex justify-content-between align-items-start gap-2 mb-2"><div class="small fw-bold text-uppercase text-muted">Contexto socioeconómico 2020</div><span class="coverage-chip">${percent(socio.cobertura_territorial)} del territorio</span></div>
+        <div class="d-flex justify-content-between align-items-start gap-2 mb-2"><div class="small fw-bold text-uppercase text-muted">Condiciones de vida en 2020</div><span class="coverage-chip">Información para ${percent(socio.cobertura_territorial)} de la sección</span></div>
         <div class="election-row"><span>Grado de rezago social</span><strong>${socio.grado_rezago}</strong></div>
         <div class="election-row"><span>Educación básica incompleta</span><strong>${socio.indicadores.educacion_basica_incompleta.toFixed(1)}%</strong></div>
-        <div class="election-row"><span>Sin derechohabiencia de salud</span><strong>${socio.indicadores.sin_derechohabiencia.toFixed(1)}%</strong></div>
-        <div class="election-row"><span>Viviendas con hacinamiento</span><strong>${socio.indicadores.hacinamiento.toFixed(1)}%</strong></div>
+        <div class="election-row"><span>Personas sin acceso a servicios de salud</span><strong>${socio.indicadores.sin_derechohabiencia.toFixed(1)}%</strong></div>
+        <div class="election-row"><span>Viviendas con demasiadas personas</span><strong>${socio.indicadores.hacinamiento.toFixed(1)}%</strong></div>
         <div class="election-row"><span>Viviendas sin internet</span><strong>${socio.indicadores.sin_internet.toFixed(1)}%</strong></div>
         <div class="election-row"><span>Viviendas sin computadora</span><strong>${socio.indicadores.sin_computadora.toFixed(1)}%</strong></div>
-        <div class="election-row"><span>Población censal representada</span><strong>${number.format(socio.poblacion_representada)}</strong></div>
-        <p class="small text-muted mt-2 mb-0">Promedio territorial de ${number.format(socio.agebs)} AGEB urbanas. No representa ingreso ni preferencias individuales.</p>
-      </div>`:`<div class="alert alert-light border small">Sin contexto socioeconómico comparable: la fuente cubre AGEB urbanas y esta sección no alcanzó cobertura territorial suficiente.</div>`}
+        <div class="election-row"><span>Personas incluidas en los datos del Censo</span><strong>${number.format(socio.poblacion_representada)}</strong></div>
+        <p class="small text-muted mt-2 mb-0">El dato se calculó con ${number.format(socio.agebs)} zonas del Censo. No muestra ingresos ni preferencias de personas.</p>
+      </div>`:`<div class="alert alert-light border small">No hay suficiente información del Censo para mostrar las condiciones de vida de esta sección.</div>`}
       ${h24?`<div class="section-summary mb-3">
         <div class="section-stat"><span>Morena 2024</span><strong>${number.format(h24.votos_morena)}</strong></div>
         <div class="section-stat"><span>Otros válidos</span><strong>${number.format(other24)}</strong></div>
-        <div class="section-stat"><span>No válidos</span><strong>${number.format(invalid24)}</strong></div>
-        <div class="section-stat"><span>Abstención est.</span><strong>${number.format(abstention24)}</strong></div>
+        <div class="section-stat"><span>Nulos y no registrados</span><strong>${number.format(invalid24)}</strong></div>
+        <div class="section-stat"><span>No votaron (estimado)</span><strong>${number.format(abstention24)}</strong></div>
       </div>`:''}
       <div class="operation-card">
-        <div class="small fw-bold text-uppercase text-muted mb-2">Base operativa actual</div>
+        <div class="small fw-bold text-uppercase text-muted mb-2">Afiliados registrados actualmente</div>
         <div class="section-summary">
           <div class="section-stat"><span>Registros</span><strong>${number.format(op.registrados)}</strong></div>
-          <div class="section-stat"><span>Sí afiliados</span><strong class="text-success">${number.format(op.afiliados_si)}</strong></div>
-          <div class="section-stat"><span>No afiliados</span><strong class="text-danger">${number.format(op.afiliados_no)}</strong></div>
-          <div class="section-stat"><span>Movilizados al ${mobilizationRate.value}%</span><strong>${number.format(projected)}</strong></div>
+          <div class="section-stat"><span>Afiliados confirmados</span><strong class="text-success">${number.format(op.afiliados_si)}</strong></div>
+          <div class="section-stat"><span>Personas no afiliadas</span><strong class="text-danger">${number.format(op.afiliados_no)}</strong></div>
+          <div class="section-stat"><span>Podrían asistir al ${mobilizationRate.value}%</span><strong>${number.format(projected)}</strong></div>
         </div>
-        <div class="election-row"><span>Cobertura sobre lista nominal 2024</span><strong>${percent(listCoverage)}</strong></div>
-        <div class="election-row"><span>Base movilizada / voto Morena 2024</span><strong>${percent(historicalReference)}</strong></div>
-        <p class="small text-muted mt-2 mb-0">La segunda razón es una referencia de escala; no afirma que sean votos adicionales ni identifica cómo votó una persona.</p>
+        <div class="election-row"><span>Afiliados frente a las personas que podían votar</span><strong>${percent(listCoverage)}</strong></div>
+        <div class="election-row"><span>Posibles asistentes frente a los votos de Morena en 2024</span><strong>${percent(historicalReference)}</strong></div>
+        <p class="small text-muted mt-2 mb-0">Esta comparación solo ayuda a entender el tamaño de la base. No significa que sean votos nuevos ni dice por quién votó cada persona.</p>
       </div>
-      <div class="small fw-bold text-uppercase text-muted">Histórico municipal</div>
+      <div class="small fw-bold text-uppercase text-muted">Resultados anteriores</div>
       ${elections}
-      <p class="small text-muted mt-3 mb-0">Los resultados son agregados. No identifican preferencias individuales ni explican por sí solos la causa de un cambio.</p>`;
+      <p class="small text-muted mt-3 mb-0">Los resultados corresponden a toda la sección. No muestran por quién votó cada persona ni explican por sí solos por qué cambió el resultado.</p>`;
   };
   Promise.all([
     fetch(@json(route('electoral.data'))).then(response=>response.json()),
     fetch(@json(asset('maps/electoral/morelia-secciones.geojson'))).then(response=>response.json())
   ]).then(([dataset,geo])=>{
     rows=new Map(dataset.secciones.map(row=>[Number(row.seccion),row]));
-    geoLayer=L.geoJSON(geo,{style,onEachFeature:(feature,layer)=>{const section=Number(feature.properties.SECCION);layers.set(section,layer);const row=rows.get(section);layer.bindTooltip(`<strong>Sección ${section}</strong><br>${row?`${row.victorias_morena} de ${row.elecciones_observadas} victorias observadas<br>${number.format(row.operacion?.afiliados_si||0)} sí afiliados`:'Sin resultados asociados'}`,{sticky:true,className:'ei-tooltip'});layer.on('click',()=>showSection(section));layer.on('mouseover',function(){this.setStyle(section===selectedSection?{weight:6,color:'#ffd43b'}:{weight:2,color:'#252b34'});this.bringToFront()});layer.on('mouseout',function(){if(section===selectedSection)refreshSelectedLayer();else geoLayer.resetStyle(this)})}}).addTo(map);
+    geoLayer=L.geoJSON(geo,{style,onEachFeature:(feature,layer)=>{const section=Number(feature.properties.SECCION);layers.set(section,layer);const row=rows.get(section);layer.bindTooltip(`<strong>Sección ${section}</strong><br>${row?`Morena ganó ${row.victorias_morena} de ${row.elecciones_observadas}<br>${number.format(row.operacion?.afiliados_si||0)} afiliados confirmados`:'No hay resultados para esta sección'}`,{sticky:true,className:'ei-tooltip'});layer.on('click',()=>showSection(section));layer.on('mouseover',function(){this.setStyle(section===selectedSection?{weight:6,color:'#ffd43b'}:{weight:2,color:'#252b34'});this.bringToFront()});layer.on('mouseout',function(){if(section===selectedSection)refreshSelectedLayer();else geoLayer.resetStyle(this)})}}).addTo(map);
     map.fitBounds(geoLayer.getBounds(),{padding:[18,18]}); renderLegend(); renderActionTable();
   }).catch(error=>{console.error(error);document.getElementById('electoralMap').innerHTML='<div class="alert alert-danger m-3">No fue posible cargar el mapa electoral.</div>';});
   metricSelect.addEventListener('change',()=>{if(geoLayer){geoLayer.setStyle(style);refreshSelectedLayer()}renderLegend()});
   const updateProjection = () => {
     const selectedRate=Number(mobilizationRate.value);
     const projected=Math.round(yesAffiliatesCity*rate());
-    const scenarioNames={60:'cauteloso',75:'probable',90:'meta alta'};
     document.getElementById('mobilizationRateLabel').textContent=`${mobilizationRate.value}%`;
     document.getElementById('projectedCity').textContent=number.format(projected);
-    document.getElementById('projectionSentence').innerHTML=`Con el escenario ${scenarioNames[selectedRate]||`de ${selectedRate}%`}, podrían acudir <strong>${number.format(projected)} personas</strong> de ${number.format(yesAffiliatesCity)} sí afiliados.`;
+    document.getElementById('projectionSentence').innerHTML=`Si asiste el ${selectedRate}%, podrían acudir <strong>${number.format(projected)} personas</strong> de ${number.format(yesAffiliatesCity)} afiliados confirmados.`;
     document.querySelectorAll('[data-rate]').forEach(button=>button.classList.toggle('active',Number(button.dataset.rate)===selectedRate));
     if(geoLayer&&metricSelect.value==='mobilizedBase')geoLayer.setStyle(style);
     if(selectedSection!==null)showSection(selectedSection,false);

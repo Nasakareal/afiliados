@@ -13,6 +13,8 @@ No se mezclan resultados de Presidencia de la República, gubernatura, diputacio
 - Instituto Electoral de Michoacán, resultados de Ayuntamientos de los cómputos municipales por casilla de 2024.
 - Lista nominal de la elección federal concurrente de 2018, usada únicamente para completar el denominador de participación que no aparece en el archivo municipal de ese año.
 - Cartografía seccional vigente incluida en `public/maps/out/SECCION.geojson`.
+- CONEVAL, Grado de Rezago Social a nivel AGEB urbana 2020.
+- INEGI, Marco Geoestadístico del Censo de Población y Vivienda 2020.
 
 Las ligas oficiales permanecen dentro de los metadatos de `database/data/electoral/morelia_municipal_sections.json` y se muestran en el tablero.
 
@@ -27,6 +29,16 @@ El tablero implementa las siete variables y ponderaciones del documento metodol�
 Cada variable se transforma primero a un rango percentil entre las secciones comparables. IOE alto representa mayor volumen electoral; IDE alto, mayor exigencia competitiva; IODE alto, una relación más favorable entre oferta y exigencia. Las secciones sin padrón INE o sin resultados en 2021 y 2024 se conservan como `null`: nunca se convierten en cero.
 
 El archivo `database/data/electoral/morelia_padron_2023.json` procede del archivo abierto del INE `DatosAbiertos-derfe-pdln_edms_sexo_20231228.xlsx`. El padrón es un proxy operativo y no debe presentarse como población censal de 18 años y más. El importador reproducible está en `scripts/import_morelia_electoral_roll.php`.
+
+## Capa socioeconómica
+
+La capa `database/data/electoral/morelia_socioeconomic_sections_2020.json` cruza las AGEB urbanas de CONEVAL e INEGI con la cartografía seccional. Para cada intersección se estima población y viviendas representadas mediante la proporción del área de la AGEB que cae dentro de la sección. Los indicadores de población se ponderan por población estimada y los de vivienda por viviendas estimadas.
+
+Se publican grado de rezago social, analfabetismo, educación básica incompleta, falta de derechohabiencia de salud, hacinamiento, agua, drenaje, electricidad, piso de tierra, refrigerador, computadora e internet. Cada sección informa cobertura territorial, número de AGEB utilizadas y población censal representada.
+
+Se incluyen únicamente secciones con al menos 1% de cobertura territorial y 10 habitantes estimados. El resultado cubre 373 secciones; 317 tienen cobertura territorial de 80% o más. La generación es reproducible con `scripts/build_morelia_socioeconomic_layer.py`.
+
+La asignación por superficie supone una distribución uniforme dentro de cada AGEB. Es una aproximación territorial y no sustituye microdatos. El grado de rezago social tampoco mide ingreso o pobreza, por lo que el tablero no etiqueta secciones como “ricas” o “pobres”.
 
 ## Normalización
 
@@ -53,9 +65,7 @@ El tablero muestra por sección:
 
 ## Lectura responsable
 
-Los resultados describen comportamiento agregado y no permiten inferir la preferencia de una persona. Tampoco constituyen una recomendación de mensaje político.
-
-Una futura capa socioeconómica debe construirse con indicadores públicos agregados de INEGI y una intersección espacial reproducible entre manzanas o AGEB y secciones. Debe publicarse con cobertura, año, variable, denominador y nivel de incertidumbre. No se debe etiquetar una sección como “rica” o “pobre” a partir de proxies opacos ni usar esos datos para perfilar personas o adaptar persuasión política.
+Los resultados describen comportamiento agregado y no permiten inferir la preferencia de una persona. Tampoco constituyen una recomendación de mensaje político. La capa socioeconómica sirve para planeación territorial general; no debe usarse para perfilar personas o adaptar persuasión política a partir de carencias sociales.
 
 ## Hallazgos de control
 
