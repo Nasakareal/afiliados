@@ -26,6 +26,8 @@ El tablero implementa las siete variables y ponderaciones del documento metodol�
 - IDE: votos de referencia necesarios para ganar en 2024 (30%), porcentaje de Morena en 2024 invertido (10%) y variación de participación 2021–2024 invertida (10%).
 - IODE: división directa de IOE entre IDE. Un valor de 1 indica equilibrio. Por debajo de 1 existe déficit y aumenta la prioridad; por encima de 1 existe superávit y disminuye la prioridad.
 
+La presentación agrupa el IODE en tres zonas: Zona A, menor de 0.75, déficit y mayor prioridad; Zona B, de 0.75 a 1.25 inclusive, equilibrio y seguimiento; Zona C, mayor de 1.25, sobreoferta y menor prioridad. El color verde identifica sobreoferta, no una expectativa de victoria electoral.
+
 Cada variable se transforma primero a un rango relativo de 0 a 1 entre las secciones comparables. Después se aplican las ponderaciones originales sin ampliar la escala: IOE suma hasta 0.50 e IDE suma hasta 0.50. IODE se calcula como `IOE / IDE`, sin convertirlo a una escala de 0 a 100. Las secciones sin padrón INE o sin resultados en 2021 y 2024 se conservan como `null`: nunca se convierten en cero.
 
 El archivo `database/data/electoral/morelia_padron_2023.json` procede del archivo abierto del INE `DatosAbiertos-derfe-pdln_edms_sexo_20231228.xlsx`. El padrón es un proxy operativo y no debe presentarse como población censal de 18 años y más. El importador reproducible está en `scripts/import_morelia_electoral_roll.php`.

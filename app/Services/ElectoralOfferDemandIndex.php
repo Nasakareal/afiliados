@@ -140,16 +140,13 @@ class ElectoralOfferDemandIndex
         if ($ratio === null) {
             return 'No se puede calcular';
         }
-        if ($ratio >= 1.25) {
-            return 'Superávit · no prioritaria';
-        }
-        if ($ratio >= 1) {
-            return 'Equilibrio favorable · seguimiento';
+        if ($ratio > 1.25) {
+            return 'Zona C · sobreoferta · no prioritaria';
         }
         if ($ratio >= .75) {
-            return 'Déficit moderado · requiere atención';
+            return 'Zona B · equilibrio · seguimiento';
         }
 
-        return 'Déficit alto · prioritaria';
+        return 'Zona A · déficit · prioritaria';
     }
 }

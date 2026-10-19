@@ -22,12 +22,14 @@
   .ei .projection-panel{background:linear-gradient(135deg,#fff 0%,#fff8fb 100%);border-color:#f0d7e1}.ei .projection-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.ei .projection-stat{padding:14px;border-radius:14px;background:#fff;border:1px solid #f0e4e9}.ei .projection-stat span{display:block;color:var(--muted);font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em}.ei .projection-stat strong{display:block;font-size:1.35rem;letter-spacing:-.03em;margin-top:4px}.ei .projection-stat.accent{color:#fff;background:linear-gradient(135deg,#7a0019,#d91785);border:0}.ei .projection-stat.accent span{color:rgba(255,255,255,.76)}.ei .projection-note{border-left:3px solid #d91785;padding-left:11px;color:var(--muted);font-size:.76rem}.ei .range-value{min-width:54px;text-align:center;color:var(--wine);font-weight:850}.ei .operation-card{border:1px solid #efd5df;background:#fff8fb;border-radius:14px;padding:13px;margin-bottom:14px}.ei .scenario-box{padding:17px;border-radius:16px;background:#fff;border:1px solid #efdce4}.ei .scenario-buttons{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.ei .scenario-btn{border:1px solid #e4c5d1;background:#fff;color:#6f1835;border-radius:11px;padding:8px 5px;font-size:.73rem;font-weight:800}.ei .scenario-btn:hover,.ei .scenario-btn.active{background:#7a0019;color:#fff;border-color:#7a0019}.ei .projection-result{padding:11px 13px;border-radius:12px;background:#f9edf2;color:#561129;font-size:.82rem}.ei .projection-result strong{font-size:1.05rem}
   .ei .action-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.ei .action-kpi{padding:12px 14px;border-radius:13px;background:#f7f8fa}.ei .action-kpi strong{display:block;font-size:1.3rem}.ei .action-kpi span{display:block;font-size:.68rem;color:var(--muted);font-weight:800;text-transform:uppercase}.ei .action-filters{display:flex;gap:7px;overflow-x:auto;padding-bottom:3px}.ei .action-filter{white-space:nowrap;border:1px solid #dfe4ea;background:#fff;color:#4d5868;border-radius:999px;padding:7px 12px;font-size:.74rem;font-weight:800}.ei .action-filter.active{background:#222b38;color:#fff;border-color:#222b38}.ei .action-table th{font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:#788395;white-space:nowrap}.ei .action-table td{font-size:.78rem;vertical-align:middle}.ei .action-badge{display:inline-flex;padding:5px 8px;border-radius:999px;font-size:.68rem;font-weight:850}.ei .action-open{background:#fff0f2;color:#a32b43}.ei .action-build{background:#fff4dd;color:#8a5a00}.ei .action-close{background:#e8f0fb;color:#23548a}.ei .action-activate{background:#e5f6ef;color:#0b6b54}.ei .action-maintain{background:#eef0f3;color:#505b6a}.ei .action-table tbody tr{cursor:pointer}.ei .action-table tbody tr:hover{background:#fff7fa}.ei .action-table tbody tr.is-selected{background:#fff0f5;box-shadow:inset 4px 0 #d91785}.ei .action-table-wrap{max-height:510px;overflow:auto}.ei .table-help{font-size:.7rem;color:var(--muted)}
   .ei .index-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.ei .index-box{border:1px solid var(--line);border-radius:15px;padding:15px;background:#fafbfc}.ei .index-box strong{display:block;font-size:1.5rem;line-height:1}.ei .index-box span{display:block;margin-top:6px;font-size:.7rem;color:var(--muted);font-weight:800;text-transform:uppercase}.ei .index-formula{border-left:3px solid #d91785;padding-left:12px;font-size:.77rem;color:var(--muted)}.ei .index-table td,.ei .index-table th{font-size:.74rem;vertical-align:middle}.ei .index-table th{text-transform:uppercase;letter-spacing:.04em;color:#788395;white-space:nowrap}.ei .index-score{font-weight:850;color:var(--wine)}
+  .ei .iode-chart-shell{border:1px solid var(--line);border-radius:16px;overflow-x:auto;background:#fff}.ei .iode-chart{display:block;min-width:920px;width:100%;height:330px}.ei .zone-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.ei .zone-card{padding:12px 14px;border-radius:13px;border:1px solid rgba(0,0,0,.06)}.ei .zone-card strong{display:block;font-size:1.25rem}.ei .zone-card span{display:block;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em}.ei .zone-a{background:#fff2cc;color:#765b00}.ei .zone-b{background:#d9e8f5;color:#24577e}.ei .zone-c{background:#c9efdf;color:#116a53}.ei .iode-dot{cursor:pointer;transition:r .12s,opacity .12s}.ei .iode-dot:hover{r:7;opacity:1}.ei .iode-dot.is-selected{stroke:#111827;stroke-width:3;r:8;opacity:1}.ei .iode-chart-help{font-size:.72rem;color:var(--muted)}
+  .ei .fullscreen-btn{border:1px solid #dfe4ea;background:#fff;color:#374151;border-radius:10px;padding:7px 10px;font-size:.74rem;font-weight:800}.ei .fullscreen-btn:hover{background:#f4f6f9}.ei .map-card:fullscreen,.ei .map-card.is-map-fullscreen{background:#f4f7fb;padding:18px;border-radius:0}.ei .map-card:fullscreen #electoralMap,.ei .map-card.is-map-fullscreen #electoralMap{height:calc(100vh - 105px)}.ei .map-card.is-map-fullscreen{position:fixed;inset:0;z-index:2000;width:100vw;height:100vh}.ei .map-card:fullscreen .map-heading,.ei .map-card.is-map-fullscreen .map-heading{margin-bottom:10px!important}
   .ei .socio-panel{background:linear-gradient(135deg,#fff 0%,#f6fbfa 100%);border-color:#dcece7}.ei .socio-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.ei .socio-kpi{padding:13px;border-radius:13px;background:#fff;border:1px solid #e0ece8}.ei .socio-kpi strong{display:block;font-size:1.25rem}.ei .socio-kpi span{display:block;font-size:.66rem;color:var(--muted);font-weight:800;text-transform:uppercase}.ei .coverage-chip{display:inline-flex;padding:4px 7px;border-radius:999px;background:#e9f4f0;color:#176b58;font-size:.68rem;font-weight:800}
   .ei .colony-card{border:1px solid #dfe7f0;background:#f8fbff;border-radius:14px;padding:13px;margin-bottom:14px}.ei .colony-list{display:flex;flex-wrap:wrap;gap:6px}.ei .colony-chip{display:inline-flex;align-items:center;padding:6px 9px;border-radius:999px;background:#e8f0fb;color:#264f7b;font-size:.72rem;font-weight:750}.ei .colony-source{font-size:.69rem;color:var(--muted)}
   .ei .source-list a{color:var(--wine);text-decoration:none}.ei .source-list a:hover{text-decoration:underline}.ei .quality-row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}.ei .quality-row:last-child{border:0}.ei .quality-row span{color:var(--muted);font-size:.78rem}.ei .quality-row strong{font-size:.85rem}
   .ei .stable-table th{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:#7a8494;white-space:nowrap}.ei .stable-table td{font-size:.82rem;vertical-align:middle}.ei .section-link{border:0;background:none;color:var(--wine);font-weight:800;padding:0;text-decoration:underline;text-decoration-color:#e9bdca;text-underline-offset:3px}
   .leaflet-tooltip.ei-tooltip{border:0;border-radius:10px;box-shadow:0 8px 20px rgba(0,0,0,.16);padding:8px 10px;font:12px/1.35 system-ui,sans-serif}
-  @media(max-width:991.98px){.ei #electoralMap{height:520px}.ei .section-panel{min-height:0}.ei .map-toolbar{position:relative;left:auto;right:auto;top:auto;margin-bottom:10px}.ei .map-shell{display:flex;flex-direction:column}.ei .map-toolbar{order:-1}.ei .map-legend{bottom:12px}.ei .hero{padding:23px 20px}.ei .year-grid{grid-template-columns:1fr}.ei .projection-grid,.ei .action-kpis,.ei .index-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:991.98px){.ei #electoralMap{height:520px}.ei .section-panel{min-height:0}.ei .map-toolbar{position:relative;left:auto;right:auto;top:auto;margin-bottom:10px}.ei .map-shell{display:flex;flex-direction:column}.ei .map-toolbar{order:-1}.ei .map-legend{bottom:12px}.ei .hero{padding:23px 20px}.ei .year-grid{grid-template-columns:1fr}.ei .projection-grid,.ei .action-kpis,.ei .index-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.ei .zone-summary{grid-template-columns:1fr}}
 </style>
 @endpush
 
@@ -129,7 +131,7 @@
           <div class="index-box"><strong>IDE</strong><span>Dificultad para competir</span></div>
           <div class="index-box"><strong>IODE</strong><span>Déficit o superávit</span></div>
         </div>
-        <p class="index-formula mb-2"><strong>En pocas palabras:</strong> IOE muestra la oferta disponible e IDE la demanda de trabajo. Ambos llegan como máximo a 0.50. Un IODE menor a 1 indica déficit y mayor prioridad. Un valor mayor a 1 indica superávit y menor prioridad.</p>
+        <p class="index-formula mb-2"><strong>En pocas palabras:</strong> IOE muestra la oferta disponible e IDE la demanda de trabajo. Ambos llegan como máximo a 0.50 y el punto exacto de equilibrio es 1. Para organizar el trabajo se usa una franja de tolerancia: menos de 0.75 es déficit, de 0.75 a 1.25 es equilibrio y más de 1.25 es sobreoferta.</p>
         <p class="small text-muted mb-2">Hay cálculo para {{ number_format($electoralIndex['secciones_calculadas']) }} secciones. En {{ number_format($electoralIndex['secciones_sin_indice']) }} faltan datos y por eso aparece “Sin dato”.</p>
         <p class="small text-muted mb-0">Para saber cuántas personas pueden votar se usa el padrón del INE de diciembre de 2023. Este dato no es un conteo de población.</p>
       </div>
@@ -147,6 +149,18 @@
         </div>
       </div>
     </div>
+    <hr class="my-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+      <div><h3 class="panel-title">¿En qué zona está cada sección?</h3><div class="panel-subtitle">Cada punto representa una sección. Haz clic en un punto para verla en el mapa.</div></div>
+      <span class="soft-pill">IODE = oferta ÷ demanda</span>
+    </div>
+    <div class="zone-summary mb-3" aria-label="Resumen de secciones por zona IODE">
+      <div class="zone-card zone-a"><strong id="zoneCountA">—</strong><span>Zona A · déficit · menor de 0.75</span></div>
+      <div class="zone-card zone-b"><strong id="zoneCountB">—</strong><span>Zona B · equilibrio · 0.75 a 1.25</span></div>
+      <div class="zone-card zone-c"><strong id="zoneCountC">—</strong><span>Zona C · sobreoferta · mayor de 1.25</span></div>
+    </div>
+    <div class="iode-chart-shell"><svg id="iodeChart" class="iode-chart" role="img" aria-label="Distribución del IODE de las secciones de Morelia"></svg></div>
+    <p class="iode-chart-help mt-2 mb-0">La altura de los puntos solo sirve para separarlos. El valor que importa es su posición horizontal. Verde significa sobreoferta y menor prioridad; no significa que electoralmente sea una sección favorable.</p>
   </div>
 
   <div class="card-panel socio-panel mb-3" id="socioeconomicLayer">
@@ -206,10 +220,10 @@
 
   <div class="row g-3 mb-3">
     <div class="col-xl-8">
-      <div class="card-panel h-100">
-        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+      <div class="card-panel h-100 map-card" id="mapCard">
+        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3 map-heading">
           <div><h2 class="panel-title">Mapa de las secciones</h2><div class="panel-subtitle">Elige qué quieres ver y después haz clic en una sección.</div></div>
-          <span class="soft-pill"><i class="fa-solid fa-database me-1"></i>Información general por zona, no por persona</span>
+          <div class="d-flex flex-wrap gap-2"><span class="soft-pill"><i class="fa-solid fa-database me-1"></i>Información general por zona, no por persona</span><button type="button" class="fullscreen-btn" id="mapFullscreen"><i class="fa-solid fa-expand me-1"></i><span>Abrir mapa completo</span></button></div>
         </div>
         <div class="map-shell">
           <div class="map-toolbar">
@@ -236,7 +250,7 @@
                 <option value="mobilizedBase">Afiliados que podrían asistir</option>
                 <option value="actionPriority">Secciones que necesitan atención primero</option>
               </select></div>
-              <div class="col-md-4"><input id="sectionSearch" class="form-control form-control-sm" inputmode="numeric" placeholder="Escribe una sección"></div>
+              <div class="col-md-4"><input id="sectionSearch" class="form-control form-control-sm" inputmode="numeric" placeholder="Escribe una sección" aria-describedby="sectionSearchFeedback"><div id="sectionSearchFeedback" class="invalid-feedback">Esa sección no aparece en el mapa vigente.</div></div>
             </div>
           </div>
           <div id="electoralMap" aria-label="Mapa electoral por sección de Morelia"></div>
@@ -313,7 +327,7 @@
     nominal2024:{title:'Personas que podían votar en 2024',items:[['Menos de 1,000','#f0f1f3'],['1,000 a 2,499','#c7d5ea'],['2,500 a 4,999','#789bc8'],['5,000 o más','#284f87']]},
     ioe:{title:'IOE · Tamaño y participación',items:[['Bajo · 0 a 0.124','#f2f2f2'],['Medio bajo · 0.125 a 0.249','#c7d5ea'],['Medio alto · 0.250 a 0.374','#789bc8'],['Alto · 0.375 a 0.500','#284f87']]},
     ide:{title:'IDE · Dificultad para competir',items:[['Baja · 0 a 0.124','#e5f3ef'],['Media baja · 0.125 a 0.249','#a9d3c7'],['Media alta · 0.250 a 0.374','#e3b7a5'],['Alta · 0.375 a 0.500','#a84d43']]},
-    iode:{title:'IODE · Prioridad según déficit',items:[['Menor de 0.75 · prioridad alta','#982e45'],['0.75 a 0.99 · requiere atención','#e17b4f'],['1.00 a 1.24 · equilibrio favorable','#79b99d'],['1.25 o más · superávit, no prioritaria','#1b7f69']]},
+    iode:{title:'IODE · Tres zonas de trabajo',items:[['Zona A · menor de 0.75 · déficit','#f2c94c'],['Zona B · 0.75 a 1.25 · equilibrio','#8cb8da'],['Zona C · mayor de 1.25 · sobreoferta','#74c9ac']]},
     socialLag:{title:'Rezago social en 2020',items:[['Muy bajo','#1b7f69'],['Bajo','#79b99d'],['Medio','#f0c96a'],['Alto','#e17b4f'],['Muy alto','#9b2f43']]},
     noInternet:{title:'Viviendas sin internet 2020',items:[['Menos de 20%','#dff1e8'],['20% a 39.9%','#9bcdb5'],['40% a 59.9%','#efc66a'],['60% o más','#a8444f']]},
     basicEducation:{title:'Educación básica incompleta 2020',items:[['Menos de 15%','#dff1e8'],['15% a 24.9%','#9bcdb5'],['25% a 34.9%','#efc66a'],['35% o más','#a8444f']]},
@@ -343,7 +357,7 @@
     if(metric==='margin2024'){const v=y24.margen_morena_pct;return v>=.20?'#0e6f57':v>=0?'#9fc9bc':v>=-.20?'#efb2bf':'#982e45'}
     if(metric==='trend'){const v=row.tendencia_morena_2021_2024;if(v===null)return '#d9dde3';return v>.05?'#14745d':v>=0?'#acd2c6':v>=-.05?'#f0b4c0':'#a83a50'}
     if(metric==='nominal2024'){const v=y24.lista_nominal;return v>=5000?'#284f87':v>=2500?'#789bc8':v>=1000?'#c7d5ea':'#f0f1f3'}
-    if(['ioe','ide','iode'].includes(metric)){const index=row.indice_electoral;if(!index)return '#d9dde3';const v=index[metric];if(v===null||v===undefined)return '#d9dde3';if(metric==='ide')return v>=.375?'#a84d43':v>=.25?'#e3b7a5':v>=.125?'#a9d3c7':'#e5f3ef';if(metric==='iode')return v>=1.25?'#1b7f69':v>=1?'#79b99d':v>=.75?'#e17b4f':'#982e45';return v>=.375?'#284f87':v>=.25?'#789bc8':v>=.125?'#c7d5ea':'#f2f2f2'}
+    if(['ioe','ide','iode'].includes(metric)){const index=row.indice_electoral;if(!index)return '#d9dde3';const v=index[metric];if(v===null||v===undefined)return '#d9dde3';if(metric==='ide')return v>=.375?'#a84d43':v>=.25?'#e3b7a5':v>=.125?'#a9d3c7':'#e5f3ef';if(metric==='iode')return v>1.25?'#74c9ac':v>=.75?'#8cb8da':'#f2c94c';return v>=.375?'#284f87':v>=.25?'#789bc8':v>=.125?'#c7d5ea':'#f2f2f2'}
     if(['socialLag','noInternet','basicEducation','noHealth','overcrowding'].includes(metric)){
       const socio=row.socioeconomico;if(!socio)return '#d9dde3';
       if(metric==='socialLag'){const v=socio.grado_rezago_valor;return v>=4.5?'#9b2f43':v>=3.5?'#e17b4f':v>=2.5?'#f0c96a':v>=1.5?'#79b99d':'#1b7f69'}
@@ -364,6 +378,7 @@
   const style = feature => {const row=rows.get(Number(feature.properties.SECCION));return {color:'#fff',weight:.8,fillColor:colorFor(row,metricSelect.value),fillOpacity:.86};};
   const refreshSelectedLayer = () => {
     document.querySelectorAll('[data-action-section]').forEach(tableRow=>tableRow.classList.toggle('is-selected',Number(tableRow.dataset.actionSection)===selectedSection));
+    document.querySelectorAll('[data-iode-section]').forEach(dot=>dot.classList.toggle('is-selected',Number(dot.dataset.iodeSection)===selectedSection));
     if(selectedSection===null||!geoLayer)return;
     const selectedLayer=layers.get(selectedSection);
     if(!selectedLayer)return;
@@ -372,6 +387,28 @@
     selectedLayer.bringToFront();
   };
   const renderLegend = () => {const p=palettes[metricSelect.value];legend.innerHTML=`<strong>${p.title}</strong>${p.items.map(([label,color])=>`<div class="legend-row"><span class="legend-swatch" style="background:${color}"></span><span>${label}</span></div>`).join('')}<div class="legend-row"><span class="legend-swatch" style="background:#d9dde3"></span><span>Falta información</span></div>`;};
+  const renderIodeChart = () => {
+    const svg=document.getElementById('iodeChart');
+    const indexed=[...rows.values()].filter(row=>row.indice_electoral?.iode!==null&&row.indice_electoral?.iode!==undefined);
+    const zones={a:indexed.filter(row=>row.indice_electoral.iode<.75),b:indexed.filter(row=>row.indice_electoral.iode>=.75&&row.indice_electoral.iode<=1.25),c:indexed.filter(row=>row.indice_electoral.iode>1.25)};
+    document.getElementById('zoneCountA').textContent=number.format(zones.a.length);
+    document.getElementById('zoneCountB').textContent=number.format(zones.b.length);
+    document.getElementById('zoneCountC').textContent=number.format(zones.c.length);
+    const width=1100,height=330,left=55,right=30,top=54,bottom=54,plotWidth=width-left-right,plotHeight=height-top-bottom;
+    const observedMax=Math.max(1.5,...indexed.map(row=>row.indice_electoral.iode));
+    const axisMax=Math.max(1.5,Math.ceil(observedMax*4)/4);
+    const x=value=>left+(Math.min(value,axisMax)/axisMax)*plotWidth;
+    const rect=(start,end,fill)=>`<rect x="${x(start)}" y="${top}" width="${Math.max(0,x(Math.min(end,axisMax))-x(start))}" height="${plotHeight}" fill="${fill}"/>`;
+    const ticks=[];for(let value=0;value<=axisMax+.001;value+=.25){if(value<=1.5||Math.abs(value-Math.round(value))<.001||Math.abs(value-axisMax)<.01)ticks.push(Number(value.toFixed(2)))}
+    const zoneLabels=`<text x="${(x(0)+x(.75))/2}" y="29" text-anchor="middle" font-size="14" font-weight="800" fill="#765b00">ZONA A · DÉFICIT</text><text x="${(x(.75)+x(1.25))/2}" y="29" text-anchor="middle" font-size="14" font-weight="800" fill="#24577e">ZONA B · EQUILIBRIO</text><text x="${(x(1.25)+x(axisMax))/2}" y="29" text-anchor="middle" font-size="14" font-weight="800" fill="#116a53">ZONA C · SOBREOFERTA</text>`;
+    const backgrounds=rect(0,.75,'#fff2cc')+rect(.75,1.25,'#d9e8f5')+rect(1.25,axisMax,'#c9efdf');
+    const guides=`<line x1="${x(.75)}" y1="${top}" x2="${x(.75)}" y2="${top+plotHeight}" stroke="#475569" stroke-dasharray="4 4"/><line x1="${x(1.25)}" y1="${top}" x2="${x(1.25)}" y2="${top+plotHeight}" stroke="#475569" stroke-dasharray="4 4"/>`;
+    const axis=ticks.map(value=>`<line x1="${x(value)}" y1="${top+plotHeight}" x2="${x(value)}" y2="${top+plotHeight+8}" stroke="#111827"/><text x="${x(value)}" y="${height-20}" text-anchor="middle" font-size="12" fill="#374151">${value.toFixed(2)}</text>`).join('')+`<line x1="${left}" y1="${top+plotHeight}" x2="${width-right}" y2="${top+plotHeight}" stroke="#111827" stroke-width="2"/>`;
+    const dots=indexed.map(row=>{const value=row.indice_electoral.iode;const zone=value<.75?'a':value<=1.25?'b':'c';const colors={a:'#9a7600',b:'#285f88',c:'#13765c'};const y=top+18+((Number(row.seccion)*37)%Math.max(1,plotHeight-36));return `<circle class="iode-dot" data-iode-section="${row.seccion}" cx="${x(value)}" cy="${y}" r="4.5" fill="${colors[zone]}" opacity=".74" tabindex="0" role="button" aria-label="Sección ${row.seccion}, IODE ${value.toFixed(2)}"><title>Sección ${row.seccion} · IODE ${value.toFixed(2)} · ${escapeHtml(row.indice_electoral.estrategia)}</title></circle>`}).join('');
+    svg.setAttribute('viewBox',`0 0 ${width} ${height}`);svg.innerHTML=backgrounds+zoneLabels+guides+dots+axis;
+    svg.querySelectorAll('[data-iode-section]').forEach(dot=>{const open=()=>{metricSelect.value='iode';if(geoLayer)geoLayer.setStyle(style);renderLegend();showSection(dot.dataset.iodeSection);document.getElementById('mapCard').scrollIntoView({behavior:'smooth',block:'center'})};dot.addEventListener('click',open);dot.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();open()}})});
+    refreshSelectedLayer();
+  };
   const diagnose = row => {
     const h24=row.historial['2024'];
     const yes=row.operacion?.afiliados_si||0;
@@ -421,6 +458,7 @@
   };
   const showSection = (section, focus=true) => {
     const row=rows.get(Number(section)); if(!row)return;
+    const sectionSearch=document.getElementById('sectionSearch');sectionSearch.value=row.seccion;sectionSearch.classList.remove('is-invalid');
     const previousLayer=selectedSection!==null?layers.get(selectedSection):null;
     if(previousLayer&&geoLayer)geoLayer.resetStyle(previousLayer);
     selectedSection=Number(section);
@@ -440,6 +478,7 @@
     const projected=mobilized(row);
     const listCoverage=h24&&h24.lista_nominal>0?op.afiliados_si/h24.lista_nominal:null;
     const historicalReference=h24&&h24.votos_morena>0?projected/h24.votos_morena:null;
+    const indexZone=index&&index.iode!==null?(index.iode<.75?{label:'Zona A · déficit',color:'#765b00',background:'#fff2cc'}:index.iode<=1.25?{label:'Zona B · equilibrio',color:'#24577e',background:'#d9e8f5'}:{label:'Zona C · sobreoferta',color:'#116a53',background:'#c9efdf'}):{label:'Sin dato',color:'#667085',background:'#eef0f3'};
     const elections=['2018','2021','2024'].map(year=>{
       const h=row.historial[year];
       if(!h)return `<article class="election-card"><div class="election-card-head"><span class="election-year">${year}</span><span class="soft-pill">No hay información para este año</span></div></article>`;
@@ -472,8 +511,9 @@
         <div class="index-grid">
           <div class="section-stat"><span>IOE · oferta</span><strong>${index.ioe.toFixed(3)}</strong></div>
           <div class="section-stat"><span>IDE · demanda</span><strong>${index.ide.toFixed(3)}</strong></div>
-          <div class="section-stat"><span>IODE · balance</span><strong class="text-danger">${index.iode===null?'Sin dato':index.iode.toFixed(2)}</strong></div>
+          <div class="section-stat"><span>IODE · balance</span><strong style="color:${indexZone.color}">${index.iode===null?'Sin dato':index.iode.toFixed(2)}</strong></div>
         </div>
+        <div class="soft-pill mb-1" style="color:${indexZone.color};background:${indexZone.background}">${indexZone.label}</div>
         <div class="election-row"><span>Qué indica</span><strong>${index.estrategia}</strong></div>
         <div class="election-row"><span>Personas registradas para votar en 2023</span><strong>${number.format(index.variables.padron_electoral_2023)}</strong></div>
         <div class="election-row"><span>Votos que habrían sido necesarios para ganar en 2024</span><strong>${number.format(index.variables.votos_para_ganar_2024)}</strong></div>
@@ -517,7 +557,7 @@
   ]).then(([dataset,geo])=>{
     rows=new Map(dataset.secciones.map(row=>[Number(row.seccion),row]));
     geoLayer=L.geoJSON(geo,{style,onEachFeature:(feature,layer)=>{const section=Number(feature.properties.SECCION);layers.set(section,layer);const row=rows.get(section);const colonyNames=row?.colonias?.nombres||[];const colonyLine=colonyNames.length?`<br><span class="text-muted">${colonyNames.slice(0,3).map(escapeHtml).join(' · ')}${colonyNames.length>3?` · +${colonyNames.length-3}`:''}</span>`:'<br><span class="text-muted">Sin colonias registradas</span>';layer.bindTooltip(`<strong>Sección ${section}</strong>${colonyLine}<br>${row?`Morena ganó ${row.victorias_morena} de ${row.elecciones_observadas}<br>${number.format(row.operacion?.afiliados_si||0)} afiliados confirmados`:'No hay resultados para esta sección'}`,{sticky:true,className:'ei-tooltip'});layer.on('click',()=>showSection(section));layer.on('mouseover',function(){this.setStyle(section===selectedSection?{weight:6,color:'#ffd43b'}:{weight:2,color:'#252b34'});this.bringToFront()});layer.on('mouseout',function(){if(section===selectedSection)refreshSelectedLayer();else geoLayer.resetStyle(this)})}}).addTo(map);
-    map.fitBounds(geoLayer.getBounds(),{padding:[18,18]}); renderLegend(); renderActionTable();
+    map.fitBounds(geoLayer.getBounds(),{padding:[18,18]}); renderLegend(); renderActionTable(); renderIodeChart();
   }).catch(error=>{console.error(error);document.getElementById('electoralMap').innerHTML='<div class="alert alert-danger m-3">No fue posible cargar el mapa electoral.</div>';});
   metricSelect.addEventListener('change',()=>{if(geoLayer){geoLayer.setStyle(style);refreshSelectedLayer()}renderLegend()});
   const updateProjection = () => {
@@ -538,7 +578,12 @@
     document.querySelectorAll('[data-action-filter]').forEach(candidate=>candidate.classList.toggle('active',candidate===button));
     renderActionTable();
   }));
-  document.getElementById('sectionSearch').addEventListener('change',event=>showSection(event.target.value));
+  document.getElementById('sectionSearch').addEventListener('change',event=>{const requested=Number(event.target.value);if(!rows.has(requested)){const previousLayer=selectedSection!==null?layers.get(selectedSection):null;if(previousLayer&&geoLayer)geoLayer.resetStyle(previousLayer);selectedSection=null;refreshSelectedLayer();document.getElementById('sectionDetail').classList.add('d-none');document.getElementById('emptySection').classList.remove('d-none');event.target.classList.add('is-invalid');document.getElementById('sectionSearchFeedback').textContent=`La sección ${event.target.value||'indicada'} no aparece en el mapa vigente; pudo cambiar de clave o de límites.`;return}showSection(requested)});
+  const mapCard=document.getElementById('mapCard'),fullscreenButton=document.getElementById('mapFullscreen');
+  const updateFullscreenButton=()=>{const active=document.fullscreenElement===mapCard||mapCard.classList.contains('is-map-fullscreen');fullscreenButton.querySelector('i').className=`fa-solid ${active?'fa-compress':'fa-expand'} me-1`;fullscreenButton.querySelector('span').textContent=active?'Cerrar pantalla completa':'Abrir mapa completo';setTimeout(()=>map.invalidateSize(),120)};
+  fullscreenButton.addEventListener('click',async()=>{if(document.fullscreenEnabled&&mapCard.requestFullscreen){if(document.fullscreenElement===mapCard)await document.exitFullscreen();else await mapCard.requestFullscreen()}else{mapCard.classList.toggle('is-map-fullscreen');document.body.style.overflow=mapCard.classList.contains('is-map-fullscreen')?'hidden':'';updateFullscreenButton()}});
+  document.addEventListener('fullscreenchange',updateFullscreenButton);
+  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&mapCard.classList.contains('is-map-fullscreen')){mapCard.classList.remove('is-map-fullscreen');document.body.style.overflow='';updateFullscreenButton()}});
   document.querySelectorAll('[data-section]').forEach(button=>button.addEventListener('click',()=>{showSection(button.dataset.section);document.getElementById('electoralMap').scrollIntoView({behavior:'smooth',block:'center'})}));
 })();
 </script>
