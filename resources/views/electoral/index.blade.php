@@ -26,6 +26,7 @@
   .ei .iode-chart-shell{border:1px solid var(--line);border-radius:16px;overflow-x:auto;background:#fff}.ei .iode-chart{display:block;min-width:920px;width:100%;height:330px}.ei .zone-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.ei .zone-card{padding:12px 14px;border-radius:13px;border:1px solid rgba(0,0,0,.06)}.ei .zone-card strong{display:block;font-size:1.25rem}.ei .zone-card span{display:block;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em}.ei .zone-a{background:#fff2cc;color:#765b00}.ei .zone-b{background:#d9e8f5;color:#24577e}.ei .zone-c{background:#c9efdf;color:#116a53}.ei .iode-dot{cursor:pointer;transition:r .12s,opacity .12s}.ei .iode-dot:hover{r:7;opacity:1}.ei .iode-dot.is-selected{stroke:#111827;stroke-width:3;r:8;opacity:1}.ei .iode-chart-help{font-size:.72rem;color:var(--muted)}
   .ei .fullscreen-btn{border:1px solid #dfe4ea;background:#fff;color:#374151;border-radius:10px;padding:7px 10px;font-size:.74rem;font-weight:800}.ei .fullscreen-btn:hover{background:#f4f6f9}.ei .map-card:fullscreen,.ei .map-card.is-map-fullscreen{background:#f4f7fb;padding:18px;border-radius:0}.ei .map-card:fullscreen #electoralMap,.ei .map-card.is-map-fullscreen #electoralMap{height:calc(100vh - 105px)}.ei .map-card.is-map-fullscreen{position:fixed;inset:0;z-index:2000;width:100vw;height:100vh}.ei .map-card:fullscreen .map-heading,.ei .map-card.is-map-fullscreen .map-heading{margin-bottom:10px!important}
   .ei .socio-panel{background:linear-gradient(135deg,#fff 0%,#f6fbfa 100%);border-color:#dcece7}.ei .socio-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.ei .socio-kpi{padding:13px;border-radius:13px;background:#fff;border:1px solid #e0ece8}.ei .socio-kpi strong{display:block;font-size:1.25rem}.ei .socio-kpi span{display:block;font-size:.66rem;color:var(--muted);font-weight:800;text-transform:uppercase}.ei .coverage-chip{display:inline-flex;padding:4px 7px;border-radius:999px;background:#e9f4f0;color:#176b58;font-size:.68rem;font-weight:800}
+  .ei .context-card{border:1px solid #d9e3ef;background:linear-gradient(135deg,#fbfdff 0%,#f5f8fc 100%);border-radius:14px;padding:14px;margin-bottom:14px}.ei .context-heading{font-size:.74rem;font-weight:850;text-transform:uppercase;letter-spacing:.05em;color:#3f4d61;margin-bottom:8px}.ei .context-list{margin:0;padding-left:1.1rem;color:#344054}.ei .context-list li{font-size:.78rem;line-height:1.45;margin-bottom:6px}.ei .context-list li:last-child{margin-bottom:0}.ei .context-block{padding:11px 12px;border-radius:12px;background:#fff;border:1px solid #e6ebf1;margin-top:9px}.ei .context-note{font-size:.7rem;line-height:1.45;color:var(--muted);margin-top:9px}
   .ei .colony-card{border:1px solid #dfe7f0;background:#f8fbff;border-radius:14px;padding:13px;margin-bottom:14px}.ei .colony-list{display:flex;flex-wrap:wrap;gap:6px}.ei .colony-chip{display:inline-flex;align-items:center;padding:6px 9px;border-radius:999px;background:#e8f0fb;color:#264f7b;font-size:.72rem;font-weight:750}.ei .colony-source{font-size:.69rem;color:var(--muted)}
   .ei .source-list a{color:var(--wine);text-decoration:none}.ei .source-list a:hover{text-decoration:underline}.ei .quality-row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}.ei .quality-row:last-child{border:0}.ei .quality-row span{color:var(--muted);font-size:.78rem}.ei .quality-row strong{font-size:.85rem}
   .ei .stable-table th{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:#7a8494;white-space:nowrap}.ei .stable-table td{font-size:.82rem;vertical-align:middle}.ei .section-link{border:0;background:none;color:var(--wine);font-weight:800;padding:0;text-decoration:underline;text-decoration-color:#e9bdca;text-underline-offset:3px}
@@ -458,6 +459,63 @@
     }));
     refreshSelectedLayer();
   };
+  const sectionContext = row => {
+    const history=['2018','2021','2024'].map(year=>({year,data:row.historial[year]})).filter(item=>item.data);
+    const latest=history.length?history[history.length-1]:null;
+    const first=history.length?history[0]:null;
+    const facts=[];
+    const fieldNotes=[];
+    const questions=[];
+    const pointChange = value => `${value>=0?'+':''}${value.toFixed(1)} puntos`;
+
+    if(history.length){
+      facts.push(`Hay resultados comparables de ${history.length} elección${history.length===1?'':'es'}: ${history.map(item=>item.year).join(', ')}. Morena y sus aliados ganaron ${row.victorias_morena} de ${row.elecciones_observadas}.`);
+    }else{
+      facts.push('No hay resultados electorales comparables para esta sección.');
+    }
+    if(first&&latest&&first.year!==latest.year){
+      const turnoutChange=(latest.data.participacion-first.data.participacion)*100;
+      const morenaChange=(latest.data.porcentaje_morena-first.data.porcentaje_morena)*100;
+      facts.push(`Entre ${first.year} y ${latest.year}, la participación cambió ${pointChange(turnoutChange)} y la proporción de votos de Morena cambió ${pointChange(morenaChange)}.`);
+    }
+    if(latest){
+      const margin=Math.abs(latest.data.margen_morena);
+      facts.push(`En ${latest.year}, ${latest.data.morena_gano?'Morena tuvo una ventaja':'Morena quedó abajo'} por ${number.format(margin)} voto${margin===1?'':'s'}; votó ${percent(latest.data.participacion)} de la lista nominal.`);
+    }
+
+    const socio=row.socioeconomico;
+    if(socio){
+      const indicators=[
+        {key:'sin_internet',label:'viviendas sin internet',value:Number(socio.indicadores.sin_internet),question:'¿Qué problemas de conexión a internet existen y en qué colonias son más frecuentes?'},
+        {key:'educacion_basica_incompleta',label:'educación básica incompleta',value:Number(socio.indicadores.educacion_basica_incompleta),question:'¿Qué apoyos educativos o de capacitación hacen falta en la zona?'},
+        {key:'sin_derechohabiencia',label:'personas sin acceso a servicios de salud',value:Number(socio.indicadores.sin_derechohabiencia),question:'¿Qué obstáculos encuentran las familias para recibir atención de salud?'},
+        {key:'hacinamiento',label:'viviendas con demasiadas personas',value:Number(socio.indicadores.hacinamiento),question:'¿Qué problemas de vivienda, servicios o espacios públicos se presentan aquí?'}
+      ].filter(item=>Number.isFinite(item.value)).sort((a,b)=>b.value-a.value);
+      if(indicators.length){
+        const highest=indicators[0];
+        facts.push(`De las condiciones mostradas por el Censo, la cifra más alta es ${highest.label}: ${highest.value.toFixed(1)}%.`);
+        questions.push(...indicators.slice(0,2).map(item=>item.question));
+      }
+      if(socio.cobertura_territorial<.8){
+        fieldNotes.push(`Los datos del Censo cubren ${percent(socio.cobertura_territorial)} de la sección. Conviene confirmar en campo lo que ocurre en las áreas no representadas.`);
+      }
+      if(Number(socio.indicadores.sin_internet)>=40){
+        fieldNotes.push('Para encuestas o registro de necesidades, llevar una opción en papel o que funcione sin internet.');
+      }
+      if(Number(socio.indicadores.educacion_basica_incompleta)>=25){
+        fieldNotes.push('Usar preguntas breves, ejemplos cotidianos y lectura en voz alta cuando alguien la solicite.');
+      }
+    }else{
+      fieldNotes.push('No hay suficiente información del Censo; primero se necesita una verificación básica de la sección.');
+    }
+    if(row.colonias?.nombres?.length){
+      fieldNotes.push(`Confirmar las necesidades por colonia; esta sección incluye referencias como ${row.colonias.nombres.slice(0,2).map(escapeHtml).join(' y ')}.`);
+    }
+    questions.push('¿Cuáles son los tres problemas más urgentes de esta sección y desde cuándo existen?');
+    questions.push('¿Qué solución se ha intentado y qué impidió que funcionara?');
+
+    return {facts,fieldNotes:[...new Set(fieldNotes)].slice(0,4),questions:[...new Set(questions)].slice(0,4)};
+  };
   const showSection = (section, focus=true) => {
     const row=rows.get(Number(section)); if(!row)return;
     const sectionSearch=document.getElementById('sectionSearch');sectionSearch.value=row.seccion;sectionSearch.classList.remove('is-invalid');
@@ -481,6 +539,7 @@
     const listCoverage=h24&&h24.lista_nominal>0?op.afiliados_si/h24.lista_nominal:null;
     const historicalReference=h24&&h24.votos_morena>0?projected/h24.votos_morena:null;
     const indexZone=index&&index.iode!==null?(index.iode<.75?{label:'Zona A · déficit',color:'#765b00',background:'#fff2cc'}:index.iode<=1.25?{label:'Zona B · equilibrio',color:'#24577e',background:'#d9e8f5'}:{label:'Zona C · sobreoferta',color:'#116a53',background:'#c9efdf'}):{label:'Sin dato',color:'#667085',background:'#eef0f3'};
+    const context=sectionContext(row);
     const elections=['2018','2021','2024'].map(year=>{
       const h=row.historial[year];
       if(!h)return `<article class="election-card"><div class="election-card-head"><span class="election-year">${year}</span><span class="soft-pill">No hay información para este año</span></div></article>`;
@@ -500,6 +559,19 @@
       <div class="text-muted small text-uppercase fw-bold">Sección</div>
       <div class="section-number">${row.seccion}</div>
       <div class="d-flex flex-wrap gap-2 mb-3"><span class="soft-pill">Distrito local ${row.distrito_local??'Sin dato'}</span><span class="soft-pill">Distrito federal ${row.distrito_federal??'Sin dato'}</span><span class="soft-pill">Morena ganó ${row.victorias_morena} de ${row.elecciones_observadas}</span></div>
+      <div class="context-card">
+        <div class="context-heading">Contexto rápido de la sección</div>
+        <ul class="context-list">${context.facts.map(item=>`<li>${item}</li>`).join('')}</ul>
+        <div class="context-block">
+          <div class="context-heading">Antes de levantar información</div>
+          <ul class="context-list">${context.fieldNotes.map(item=>`<li>${item}</li>`).join('')||'<li>No hay alertas especiales; aun así, conviene verificar los datos con habitantes de distintas colonias.</li>'}</ul>
+        </div>
+        <div class="context-block">
+          <div class="context-heading">Preguntas para escuchar a la comunidad</div>
+          <ul class="context-list">${context.questions.map(item=>`<li>${item}</li>`).join('')}</ul>
+        </div>
+        <div class="context-note">Esta guía resume datos de toda la sección. Sirve para preparar una conversación abierta y comprobar necesidades; no describe a cada persona ni permite suponer sus preferencias.</div>
+      </div>
       <div class="colony-card">
         <div class="small fw-bold text-uppercase text-muted mb-2">Colonias relacionadas con la sección</div>
         ${colonies.nombres.length

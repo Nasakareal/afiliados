@@ -75,6 +75,10 @@ class ElectoralIntelligenceProjectionTest extends TestCase
             ->assertSeeText('¿Cómo son las condiciones de cada sección?')
             ->assertSeeText('Condiciones de vida · Viviendas sin internet')
             ->assertSeeText('Aquí verás sus colonias, resultados, afiliados y condiciones de vida.')
+            ->assertSeeText('Contexto rápido de la sección')
+            ->assertSeeText('Antes de levantar información')
+            ->assertSeeText('Preguntas para escuchar a la comunidad')
+            ->assertSeeText('no describe a cada persona ni permite suponer sus preferencias')
             ->assertSeeText('Ver primero las más importantes')
             ->assertSee('Afiliados confirmados por sección');
     }
