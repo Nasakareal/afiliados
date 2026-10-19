@@ -27,11 +27,12 @@ class ElectoralOfferDemandIndexTest extends TestCase
 
         foreach ($indexes as $index) {
             $this->assertGreaterThanOrEqual(0, $index['ioe']);
-            $this->assertLessThanOrEqual(100, $index['ioe']);
+            $this->assertLessThanOrEqual(.50, $index['ioe']);
             $this->assertGreaterThanOrEqual(0, $index['ide']);
-            $this->assertLessThanOrEqual(100, $index['ide']);
-            $this->assertGreaterThanOrEqual(0, $index['iode']);
-            $this->assertLessThanOrEqual(100, $index['iode']);
+            $this->assertLessThanOrEqual(.50, $index['ide']);
+            if ($index['iode'] !== null) {
+                $this->assertGreaterThanOrEqual(0, $index['iode']);
+            }
         }
     }
 }

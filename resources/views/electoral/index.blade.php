@@ -122,13 +122,13 @@
       <div class="col-xl-5">
         <div class="eyebrow text-danger">Resumen por sección</div>
         <h2 class="panel-title mt-1">¿Qué tan favorable se ve cada sección?</h2>
-        <div class="panel-subtitle mb-3">Tres calificaciones de 0 a 100 ayudan a comparar todas las secciones con la misma regla.</div>
+        <div class="panel-subtitle mb-3">El IOE y el IDE conservan la ponderación original de 0 a 0.50. El IODE resulta de dividir IOE entre IDE.</div>
         <div class="index-grid mb-3">
           <div class="index-box"><strong>IOE</strong><span>Tamaño y participación</span></div>
           <div class="index-box"><strong>IDE</strong><span>Dificultad para competir</span></div>
           <div class="index-box"><strong>IODE</strong><span>Oportunidad de la sección</span></div>
         </div>
-        <p class="index-formula mb-2"><strong>En pocas palabras:</strong> IOE muestra dónde hay más electores y participación. IDE muestra dónde sería más difícil competir. IODE combina ambos datos: entre más alto sea, mejor se ve la oportunidad.</p>
+        <p class="index-formula mb-2"><strong>En pocas palabras:</strong> IOE muestra dónde hay más electores y participación. IDE muestra dónde sería más difícil competir. Ambos llegan como máximo a 0.50. En el IODE, un resultado mayor a 1 indica que la oferta supera a la dificultad.</p>
         <p class="small text-muted mb-2">Hay cálculo para {{ number_format($electoralIndex['secciones_calculadas']) }} secciones. En {{ number_format($electoralIndex['secciones_sin_indice']) }} faltan datos y por eso aparece “Sin dato”.</p>
         <p class="small text-muted mb-0">Para saber cuántas personas pueden votar se usa el padrón del INE de diciembre de 2023. Este dato no es un conteo de población.</p>
       </div>
@@ -139,7 +139,7 @@
             <thead><tr><th>Sección</th><th class="text-end">Tamaño</th><th class="text-end">Dificultad</th><th class="text-end">Oportunidad</th><th>Qué indica</th></tr></thead>
             <tbody>
               @foreach($topIode as $row)
-              <tr><td><button class="section-link" data-section="{{ $row['seccion'] }}">{{ $row['seccion'] }}</button></td><td class="text-end">{{ number_format($row['indice_electoral']['ioe'], 1) }}</td><td class="text-end">{{ number_format($row['indice_electoral']['ide'], 1) }}</td><td class="text-end index-score">{{ number_format($row['indice_electoral']['iode'], 1) }}</td><td>{{ $row['indice_electoral']['estrategia'] }}</td></tr>
+              <tr><td><button class="section-link" data-section="{{ $row['seccion'] }}">{{ $row['seccion'] }}</button></td><td class="text-end">{{ number_format($row['indice_electoral']['ioe'], 3) }}</td><td class="text-end">{{ number_format($row['indice_electoral']['ide'], 3) }}</td><td class="text-end index-score">{{ $row['indice_electoral']['iode'] === null ? 'Sin dato' : number_format($row['indice_electoral']['iode'], 2) }}</td><td>{{ $row['indice_electoral']['estrategia'] }}</td></tr>
               @endforeach
             </tbody>
           </table>
@@ -309,9 +309,9 @@
     margin2024:{title:'Diferencia de Morena en 2024',items:[['Perdió por 20 puntos o más','#982e45'],['Perdió por menos de 20 puntos','#efb2bf'],['Ganó por menos de 20 puntos','#9fc9bc'],['Ganó por 20 puntos o más','#0e6f57']]},
     trend:{title:'Cambio de 2021 a 2024',items:[['Bajó más de 5 puntos','#a83a50'],['Bajó hasta 5 puntos','#f0b4c0'],['Subió hasta 5 puntos','#acd2c6'],['Subió más de 5 puntos','#14745d']]},
     nominal2024:{title:'Personas que podían votar en 2024',items:[['Menos de 1,000','#f0f1f3'],['1,000 a 2,499','#c7d5ea'],['2,500 a 4,999','#789bc8'],['5,000 o más','#284f87']]},
-    ioe:{title:'IOE · Tamaño y participación',items:[['Bajo · 0 a 24.9','#f2f2f2'],['Medio bajo · 25 a 49.9','#c7d5ea'],['Medio alto · 50 a 74.9','#789bc8'],['Alto · 75 a 100','#284f87']]},
-    ide:{title:'IDE · Dificultad para competir',items:[['Baja · 0 a 24.9','#e5f3ef'],['Media baja · 25 a 49.9','#a9d3c7'],['Media alta · 50 a 74.9','#e3b7a5'],['Alta · 75 a 100','#a84d43']]},
-    iode:{title:'IODE · Oportunidad de la sección',items:[['Baja · 0 a 24.9','#f0f1f3'],['Regular · 25 a 49.9','#f6c2d6'],['Buena · 50 a 74.9','#dd6997'],['Muy buena · 75 a 100','#790019']]},
+    ioe:{title:'IOE · Tamaño y participación',items:[['Bajo · 0 a 0.124','#f2f2f2'],['Medio bajo · 0.125 a 0.249','#c7d5ea'],['Medio alto · 0.250 a 0.374','#789bc8'],['Alto · 0.375 a 0.500','#284f87']]},
+    ide:{title:'IDE · Dificultad para competir',items:[['Baja · 0 a 0.124','#e5f3ef'],['Media baja · 0.125 a 0.249','#a9d3c7'],['Media alta · 0.250 a 0.374','#e3b7a5'],['Alta · 0.375 a 0.500','#a84d43']]},
+    iode:{title:'IODE · IOE dividido entre IDE',items:[['Menor de 0.75','#f0f1f3'],['0.75 a 0.99','#f6c2d6'],['1.00 a 1.24','#dd6997'],['1.25 o más','#790019']]},
     socialLag:{title:'Rezago social en 2020',items:[['Muy bajo','#1b7f69'],['Bajo','#79b99d'],['Medio','#f0c96a'],['Alto','#e17b4f'],['Muy alto','#9b2f43']]},
     noInternet:{title:'Viviendas sin internet 2020',items:[['Menos de 20%','#dff1e8'],['20% a 39.9%','#9bcdb5'],['40% a 59.9%','#efc66a'],['60% o más','#a8444f']]},
     basicEducation:{title:'Educación básica incompleta 2020',items:[['Menos de 15%','#dff1e8'],['15% a 24.9%','#9bcdb5'],['25% a 34.9%','#efc66a'],['35% o más','#a8444f']]},
@@ -341,7 +341,7 @@
     if(metric==='margin2024'){const v=y24.margen_morena_pct;return v>=.20?'#0e6f57':v>=0?'#9fc9bc':v>=-.20?'#efb2bf':'#982e45'}
     if(metric==='trend'){const v=row.tendencia_morena_2021_2024;if(v===null)return '#d9dde3';return v>.05?'#14745d':v>=0?'#acd2c6':v>=-.05?'#f0b4c0':'#a83a50'}
     if(metric==='nominal2024'){const v=y24.lista_nominal;return v>=5000?'#284f87':v>=2500?'#789bc8':v>=1000?'#c7d5ea':'#f0f1f3'}
-    if(['ioe','ide','iode'].includes(metric)){const index=row.indice_electoral;if(!index)return '#d9dde3';const v=index[metric];if(metric==='ide')return v>=75?'#a84d43':v>=50?'#e3b7a5':v>=25?'#a9d3c7':'#e5f3ef';if(metric==='iode')return v>=75?'#790019':v>=50?'#dd6997':v>=25?'#f6c2d6':'#f0f1f3';return v>=75?'#284f87':v>=50?'#789bc8':v>=25?'#c7d5ea':'#f2f2f2'}
+    if(['ioe','ide','iode'].includes(metric)){const index=row.indice_electoral;if(!index)return '#d9dde3';const v=index[metric];if(v===null||v===undefined)return '#d9dde3';if(metric==='ide')return v>=.375?'#a84d43':v>=.25?'#e3b7a5':v>=.125?'#a9d3c7':'#e5f3ef';if(metric==='iode')return v>=1.25?'#790019':v>=1?'#dd6997':v>=.75?'#f6c2d6':'#f0f1f3';return v>=.375?'#284f87':v>=.25?'#789bc8':v>=.125?'#c7d5ea':'#f2f2f2'}
     if(['socialLag','noInternet','basicEducation','noHealth','overcrowding'].includes(metric)){
       const socio=row.socioeconomico;if(!socio)return '#d9dde3';
       if(metric==='socialLag'){const v=socio.grado_rezago_valor;return v>=4.5?'#9b2f43':v>=3.5?'#e17b4f':v>=2.5?'#f0c96a':v>=1.5?'#79b99d':'#1b7f69'}
@@ -459,9 +459,9 @@
       ${index?`<div class="operation-card">
         <div class="small fw-bold text-uppercase text-muted mb-2">Calificación de la sección</div>
         <div class="index-grid">
-          <div class="section-stat"><span>IOE · tamaño</span><strong>${index.ioe.toFixed(1)}</strong></div>
-          <div class="section-stat"><span>IDE · dificultad</span><strong>${index.ide.toFixed(1)}</strong></div>
-          <div class="section-stat"><span>IODE · oportunidad</span><strong class="text-danger">${index.iode.toFixed(1)}</strong></div>
+          <div class="section-stat"><span>IOE · tamaño</span><strong>${index.ioe.toFixed(3)}</strong></div>
+          <div class="section-stat"><span>IDE · dificultad</span><strong>${index.ide.toFixed(3)}</strong></div>
+          <div class="section-stat"><span>IODE · oportunidad</span><strong class="text-danger">${index.iode===null?'Sin dato':index.iode.toFixed(2)}</strong></div>
         </div>
         <div class="election-row"><span>Qué indica</span><strong>${index.estrategia}</strong></div>
         <div class="election-row"><span>Personas registradas para votar en 2023</span><strong>${number.format(index.variables.padron_electoral_2023)}</strong></div>

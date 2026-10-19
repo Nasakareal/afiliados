@@ -45,22 +45,24 @@ class ElectoralOfferDemandIndex
                 fn (array $ranks, string $variable): array => [$variable => $ranks[$section]]
             )->all();
 
-            $offer = 100 * (
+            $offer = (
                 .10 * $scores['padron_electoral_2023']
                 + .10 * $scores['votos_validos_promedio']
                 + .15 * $scores['lista_nominal_2024']
                 + .15 * $scores['participacion_historica']
-            ) / .50;
-            $demand = 100 * (
+            );
+            $demand = (
                 .30 * $scores['votos_para_ganar_2024']
                 + .10 * (1 - $scores['porcentaje_morena_2024'])
                 + .10 * (1 - $scores['variacion_participacion_2021_2024'])
-            ) / .50;
+            );
+
+            $ratio = $demand > 0 ? $offer / $demand : null;
 
             $indexes[$section] = [
-                'ioe' => round($offer, 1),
-                'ide' => round($demand, 1),
-                'iode_razon' => round($offer / max($demand, 1), 4),
+                'ioe' => round($offer, 4),
+                'ide' => round($demand, 4),
+                'iode' => $ratio === null ? null : round($ratio, 4),
                 'variables' => [
                     'padron_electoral_2023' => (int) $values['padron_electoral_2023'],
                     'votos_validos_promedio' => (int) round($values['votos_validos_promedio']),
@@ -73,11 +75,7 @@ class ElectoralOfferDemandIndex
             ];
         }
 
-        $iodeRanks = $this->percentileRanks(
-            collect($indexes)->mapWithKeys(fn (array $index, $section): array => [$section => $index['iode_razon']])
-        );
-        foreach ($indexes as $section => &$index) {
-            $index['iode'] = round(100 * $iodeRanks[$section], 1);
+        foreach ($indexes as &$index) {
             $index['estrategia'] = $this->strategy($index['ioe'], $index['ide']);
         }
         unset($index);
@@ -90,7 +88,7 @@ class ElectoralOfferDemandIndex
         $dataset['indice_electoral'] = [
             'secciones_calculadas' => count($indexes),
             'secciones_sin_indice' => count($dataset['secciones']) - count($indexes),
-            'metodo' => 'Variables transformadas a rangos percentiles entre secciones comparables. IOE e IDE se expresan de 0 a 100. IODE es el rango percentil de IOE/IDE.',
+            'metodo' => 'Cada variable se convierte a un rango relativo de 0 a 1 entre secciones comparables. Se aplican directamente las ponderaciones: IOE suma hasta 0.50 e IDE suma hasta 0.50. IODE es la división directa IOE/IDE.',
             'proxy' => 'Para saber cuántas personas pueden votar se usa el padrón del INE de diciembre de 2023. Este dato no es un conteo de población.',
             'pesos' => [
                 'ioe' => [
@@ -139,13 +137,13 @@ class ElectoralOfferDemandIndex
 
     private function strategy(float $offer, float $demand): string
     {
-        if ($offer >= 50 && $demand >= 50) {
+        if ($offer >= .25 && $demand >= .25) {
             return 'Buena oportunidad, pero será difícil competir';
         }
-        if ($offer >= 50) {
+        if ($offer >= .25) {
             return 'Buena oportunidad para organizar el trabajo';
         }
-        if ($demand >= 50) {
+        if ($demand >= .25) {
             return 'Conviene revisar antes de dedicar más esfuerzo';
         }
 
