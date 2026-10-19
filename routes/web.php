@@ -151,6 +151,7 @@ Route::middleware(['auth', 'system.access'])->group(function () {
     // Inteligencia electoral agregada por sección
     Route::get('/inteligencia-electoral', [ElectoralIntelligenceController::class, 'index'])->name('electoral.index')->middleware('permission:mapa.ver');
     Route::get('/inteligencia-electoral/data', [ElectoralIntelligenceController::class, 'data'])->name('electoral.data')->middleware('permission:mapa.ver');
+    Route::get('/inteligencia-electoral/export.xlsx', [ElectoralIntelligenceController::class, 'export'])->name('electoral.export.xlsx')->middleware('permission:mapa.ver');
 
     // Lonas
     Route::get('/lonas', [LonaController::class, 'index'])->name('lonas.index')->middleware('permission:lonas.ver');

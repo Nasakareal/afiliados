@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\ElectoralOfferDemandIndex;
+use App\Services\ElectoralIntelligenceExcelExporter;
 use App\Services\ElectoralSectionColonies;
 use App\Services\SocioeconomicSectionLayer;
 use App\Support\LocalDistrictAccess;
@@ -10,6 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ElectoralIntelligenceController extends Controller
 {
@@ -53,6 +55,18 @@ class ElectoralIntelligenceController extends Controller
         return response()
             ->json($this->datasetWithOperation($request), 200, [], JSON_UNESCAPED_UNICODE)
             ->header('Cache-Control', 'private, no-store');
+    }
+
+    public function export(Request $request, ElectoralIntelligenceExcelExporter $exporter): BinaryFileResponse
+    {
+        $rate = min(100, max(50, (int) $request->query('tasa', 75)));
+        $path = $exporter->create($this->datasetWithOperation($request), $rate);
+
+        return response()->download(
+            $path,
+            'inteligencia-electoral-morelia-'.now('America/Mexico_City')->format('Y-m-d-His').'.xlsx',
+            ['Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']
+        )->deleteFileAfterSend(true);
     }
 
     private function datasetWithOperation(Request $request): array

@@ -10,6 +10,7 @@
   .ei .hero:after{content:"";position:absolute;width:340px;height:340px;border:64px solid rgba(255,255,255,.055);border-radius:50%;right:-90px;top:-175px}
   .ei .eyebrow{font-size:.72rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;opacity:.75}
   .ei .hero h1{font-size:clamp(1.75rem,3vw,2.65rem);font-weight:850;letter-spacing:-.035em;margin:.4rem 0}
+  .ei .export-btn{position:relative;z-index:2;display:inline-flex;align-items:center;gap:7px;padding:10px 14px;border-radius:12px;background:#fff;color:#6f1835;text-decoration:none;font-size:.78rem;font-weight:850;box-shadow:0 8px 22px rgba(28,10,18,.16)}.ei .export-btn:hover{background:#fff4f8;color:#5c102b}
   .ei .card-panel,.ei .kpi{background:#fff;border:1px solid rgba(226,231,239,.95);border-radius:19px;box-shadow:0 10px 34px rgba(21,31,48,.055)}
   .ei .kpi{padding:19px;min-height:142px}.ei .kpi-value{font-size:1.9rem;line-height:1;font-weight:850;letter-spacing:-.04em;margin-top:18px}.ei .kpi-label{font-size:.72rem;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-top:8px}.ei .kpi-note{font-size:.72rem;color:var(--muted)}
   .ei .card-panel{padding:22px}.ei .panel-title{font-size:1rem;font-weight:800;margin:0}.ei .panel-subtitle{font-size:.78rem;color:var(--muted);margin-top:3px}
@@ -36,10 +37,9 @@
 @section('content')
 <div class="container-xxl ei pb-5">
   <section class="hero mb-4">
-    <div class="position-relative" style="z-index:1">
-      <div class="eyebrow">Elección municipal de Morelia</div>
-      <h1>Así ha votado cada sección</h1>
-      <p class="mb-0 text-white-50">Consulta y compara los resultados oficiales de 2018, 2021 y 2024.</p>
+    <div class="position-relative d-flex flex-wrap justify-content-between align-items-start gap-3" style="z-index:1">
+      <div><div class="eyebrow">Elección municipal de Morelia</div><h1>Así ha votado cada sección</h1><p class="mb-0 text-white-50">Consulta y compara los resultados oficiales de 2018, 2021 y 2024.</p></div>
+      <a id="exportExcel" class="export-btn" data-base-url="{{ route('electoral.export.xlsx') }}" href="{{ route('electoral.export.xlsx', ['tasa' => 75]) }}"><i class="fa-solid fa-file-excel"></i>Exportar todo a Excel</a>
     </div>
   </section>
 
@@ -187,7 +187,7 @@
       <div class="col-xl-5">
         <div class="eyebrow text-danger">Lista para organizar el trabajo</div>
         <h2 class="panel-title mt-1">¿En qué secciones hace falta más trabajo?</h2>
-        <div class="panel-subtitle">La lista toma en cuenta los afiliados registrados y la diferencia de votos de 2024.</div>
+        <div class="panel-subtitle">La lista toma en cuenta el IODE, los afiliados registrados y la diferencia de votos de 2024.</div>
       </div>
       <div class="col-xl-7">
         <div class="action-kpis">
@@ -211,8 +211,8 @@
     </div>
     <div class="table-responsive action-table-wrap">
       <table class="table action-table align-middle mb-0">
-        <thead class="sticky-top bg-white"><tr><th>Sección</th><th>Resultado 2024</th><th class="text-end">Votos de diferencia</th><th class="text-end">Afiliados</th><th class="text-end">Podrían asistir</th><th class="text-end">% de la lista nominal</th><th>Situación actual</th><th>Qué hace falta</th></tr></thead>
-        <tbody id="actionTableBody"><tr><td colspan="8" class="text-center text-muted py-4">Preparando la lista…</td></tr></tbody>
+        <thead class="sticky-top bg-white"><tr><th>Sección</th><th>Resultado 2024</th><th class="text-end">Votos de diferencia</th><th class="text-end">IODE</th><th>Zona</th><th class="text-end">Afiliados</th><th class="text-end">Podrían asistir</th><th class="text-end">Lista nominal</th><th>Situación actual</th><th>Qué hace falta</th></tr></thead>
+        <tbody id="actionTableBody"><tr><td colspan="10" class="text-center text-muted py-4">Preparando la lista…</td></tr></tbody>
       </table>
     </div>
     <div class="table-help mt-2"><i class="fa-solid fa-circle-info me-1"></i>“Podrían asistir” usa el porcentaje que elegiste arriba. No se suman como votos nuevos porque algunas de esas personas pudieron votar en 2024. Haz clic en una fila para ver la sección en el mapa.</div>
@@ -426,7 +426,10 @@
     else if(yes<=9){action='Sumar más afiliados';actionClass='action-build';rank=2}
     else if(yes>=100){action='Mantener el contacto';actionClass='action-activate';rank=h24.morena_gano?4:3}
     else if(h24.morena_gano){action='Cuidar la ventaja';actionClass='action-maintain';rank=5}
-    return {h24,yes,gap,closeLoss,structure,structureClass,action,actionClass,rank};
+    const iode=row.indice_electoral?.iode??null;
+    const zone=iode===null?'Sin dato':iode<.75?'Zona A':iode<=1.25?'Zona B':'Zona C';
+    const zoneClass=iode===null?'':iode<.75?'zone-a':iode<=1.25?'zone-b':'zone-c';
+    return {h24,yes,gap,closeLoss,structure,structureClass,action,actionClass,rank,iode,zone,zoneClass};
   };
   const renderActionTable = () => {
     let diagnosed=[...rows.values()].map(row=>({row,...diagnose(row)}));
@@ -440,16 +443,15 @@
     document.getElementById('actionTableCount').textContent=`${number.format(diagnosed.length)} secciones mostradas`;
     const body=document.getElementById('actionTableBody');
     body.innerHTML=diagnosed.map(item=>{
-      const {row,h24,yes,gap,structure,structureClass,action,actionClass}=item;
-      const coverage=h24&&h24.lista_nominal>0?yes/h24.lista_nominal:null;
+      const {row,h24,yes,gap,structure,structureClass,action,actionClass,iode,zone,zoneClass}=item;
       const result=h24?(h24.morena_gano?'Victoria':'Derrota'):'Sin resultado';
       const margin=h24?(h24.morena_gano?`+${number.format(h24.margen_morena)}`:`-${number.format(gap)}`):'—';
       return `<tr data-action-section="${row.seccion}">
-        <td><strong>${row.seccion}</strong></td><td>${result}</td><td class="text-end ${h24?.morena_gano?'text-success':'text-danger'}">${margin}</td>
-        <td class="text-end fw-bold">${number.format(yes)}</td><td class="text-end">${number.format(mobilized(row))}</td><td class="text-end">${percent(coverage)}</td>
+        <td><strong>${row.seccion}</strong></td><td>${result}</td><td class="text-end ${h24?.morena_gano?'text-success':'text-danger'}">${margin}</td><td class="text-end fw-bold">${iode===null?'—':iode.toFixed(2)}</td><td><span class="action-badge ${zoneClass}">${zone}</span></td>
+        <td class="text-end fw-bold">${number.format(yes)}</td><td class="text-end">${number.format(mobilized(row))}</td><td class="text-end">${h24?number.format(h24.lista_nominal):'—'}</td>
         <td><span class="action-badge ${structureClass}">${structure}</span></td><td><span class="action-badge ${actionClass}">${action}</span></td>
       </tr>`;
-    }).join('')||'<tr><td colspan="8" class="text-center text-muted py-4">No hay secciones en este filtro.</td></tr>';
+    }).join('')||'<tr><td colspan="10" class="text-center text-muted py-4">No hay secciones en este filtro.</td></tr>';
     body.querySelectorAll('[data-action-section]').forEach(tableRow=>tableRow.addEventListener('click',()=>{
       showSection(tableRow.dataset.actionSection);
       document.getElementById('electoralMap').scrollIntoView({behavior:'smooth',block:'center'});
@@ -566,6 +568,7 @@
     document.getElementById('mobilizationRateLabel').textContent=`${mobilizationRate.value}%`;
     document.getElementById('projectedCity').textContent=number.format(projected);
     document.getElementById('projectionSentence').innerHTML=`Si asiste el ${selectedRate}%, podrían acudir <strong>${number.format(projected)} personas</strong> de ${number.format(yesAffiliatesCity)} afiliados confirmados.`;
+    const exportExcel=document.getElementById('exportExcel');exportExcel.href=`${exportExcel.dataset.baseUrl}?tasa=${selectedRate}`;
     document.querySelectorAll('[data-rate]').forEach(button=>button.classList.toggle('active',Number(button.dataset.rate)===selectedRate));
     if(geoLayer&&metricSelect.value==='mobilizedBase')geoLayer.setStyle(style);
     if(selectedSection!==null)showSection(selectedSection,false);

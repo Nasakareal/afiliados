@@ -6,6 +6,7 @@ use App\Models\User;
 use Database\Seeders\PermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use Tests\TestCase;
 
 class ElectoralIntelligenceProjectionTest extends TestCase
@@ -68,11 +69,48 @@ class ElectoralIntelligenceProjectionTest extends TestCase
             ->assertSeeText('Zona C · sobreoferta · mayor de 1.25')
             ->assertSeeText('Abrir mapa completo')
             ->assertSeeText('Esa sección no aparece en el mapa vigente.')
+            ->assertSeeText('Exportar todo a Excel')
+            ->assertSeeText('Lista nominal')
+            ->assertDontSeeText('% de la lista nominal')
             ->assertSeeText('¿Cómo son las condiciones de cada sección?')
             ->assertSeeText('Condiciones de vida · Viviendas sin internet')
             ->assertSeeText('Aquí verás sus colonias, resultados, afiliados y condiciones de vida.')
             ->assertSeeText('Ver primero las más importantes')
             ->assertSee('Afiliados confirmados por sección');
+    }
+
+    public function test_complete_electoral_intelligence_can_be_exported_to_excel(): void
+    {
+        $this->seed(PermissionsSeeder::class);
+
+        $user = User::factory()->create(['must_change_password' => false]);
+        $user->assignRole('Admin');
+
+        $response = $this->actingAs($user)
+            ->get(route('electoral.export.xlsx', ['tasa' => 80]))
+            ->assertOk()
+            ->assertHeader('content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+
+        $workbook = IOFactory::load($response->baseResponse->getFile()->getPathname());
+
+        $this->assertSame([
+            'Resumen',
+            'Indice IODE',
+            'Prioridades',
+            'Historial electoral',
+            'Movilizacion',
+            'Condiciones 2020',
+            'Colonias',
+            'Fuentes y metodo',
+        ], $workbook->getSheetNames());
+
+        $priorities = $workbook->getSheetByName('Prioridades');
+        $this->assertSame('IODE', $priorities->getCell('D4')->getValue());
+        $this->assertSame('Lista nominal', $priorities->getCell('H4')->getValue());
+        $this->assertSame('Tasa usada', $workbook->getSheetByName('Movilizacion')->getCell('G4')->getValue());
+        $this->assertSame(80, $workbook->getSheetByName('Movilizacion')->getCell('G5')->getValue());
+
+        $workbook->disconnectWorksheets();
     }
 
     private function insertAffiliate(
