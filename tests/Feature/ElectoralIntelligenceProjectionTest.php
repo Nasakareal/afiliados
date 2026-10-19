@@ -20,7 +20,7 @@ class ElectoralIntelligenceProjectionTest extends TestCase
         $user->assignRole('Admin');
 
         $this->insertAffiliate($user->id, '1118', 'validado');
-        $this->insertAffiliate($user->id, '1118', 'validado');
+        $this->insertAffiliate($user->id, '1118', 'validado', 'Morelia', '053', 'Chapultepec Sur');
         $this->insertAffiliate($user->id, '1118', 'descartado');
         $this->insertAffiliate($user->id, '1200', 'validado');
         $this->insertAffiliate($user->id, '9999', 'validado', 'Morelos', '054');
@@ -49,6 +49,12 @@ class ElectoralIntelligenceProjectionTest extends TestCase
         $this->assertSame(1, $section['operacion']['afiliados_no']);
         $this->assertNotNull($section['socioeconomico']);
         $this->assertArrayHasKey('sin_internet', $section['socioeconomico']['indicadores']);
+        $this->assertContains('Chapultepec Sur', $section['colonias']['nombres']);
+        $this->assertFalse($section['colonias']['es_catalogo_completo']);
+
+        $section1188 = collect($response->json('secciones'))->firstWhere('seccion', 1188);
+        $this->assertSame(['Cinco de Diciembre'], $section1188['colonias']['nombres']);
+        $this->assertSame('IEM, listado de ubicación de casillas 2025', $section1188['colonias']['fuente']);
 
         $this->get(route('electoral.index'))
             ->assertOk()
@@ -60,6 +66,7 @@ class ElectoralIntelligenceProjectionTest extends TestCase
             ->assertSeeText('IODE · Déficit o superávit de la sección')
             ->assertSeeText('¿Cómo son las condiciones de cada sección?')
             ->assertSeeText('Condiciones de vida · Viviendas sin internet')
+            ->assertSeeText('Aquí verás sus colonias, resultados, afiliados y condiciones de vida.')
             ->assertSeeText('Ver primero las más importantes')
             ->assertSee('Afiliados confirmados por sección');
     }
@@ -69,7 +76,8 @@ class ElectoralIntelligenceProjectionTest extends TestCase
         string $section,
         string $status,
         string $municipality = 'Morelia',
-        string $municipalityKey = '053'
+        string $municipalityKey = '053',
+        ?string $colony = null
     ): void
     {
         DB::table('afiliados')->insert([
@@ -80,6 +88,7 @@ class ElectoralIntelligenceProjectionTest extends TestCase
             'seccion' => $section,
             'distrito_local' => 17,
             'distrito_federal' => 10,
+            'colonia' => $colony,
             'estatus' => $status,
             'created_at' => now(),
             'updated_at' => now(),

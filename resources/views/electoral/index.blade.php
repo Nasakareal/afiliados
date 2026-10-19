@@ -23,6 +23,7 @@
   .ei .action-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.ei .action-kpi{padding:12px 14px;border-radius:13px;background:#f7f8fa}.ei .action-kpi strong{display:block;font-size:1.3rem}.ei .action-kpi span{display:block;font-size:.68rem;color:var(--muted);font-weight:800;text-transform:uppercase}.ei .action-filters{display:flex;gap:7px;overflow-x:auto;padding-bottom:3px}.ei .action-filter{white-space:nowrap;border:1px solid #dfe4ea;background:#fff;color:#4d5868;border-radius:999px;padding:7px 12px;font-size:.74rem;font-weight:800}.ei .action-filter.active{background:#222b38;color:#fff;border-color:#222b38}.ei .action-table th{font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:#788395;white-space:nowrap}.ei .action-table td{font-size:.78rem;vertical-align:middle}.ei .action-badge{display:inline-flex;padding:5px 8px;border-radius:999px;font-size:.68rem;font-weight:850}.ei .action-open{background:#fff0f2;color:#a32b43}.ei .action-build{background:#fff4dd;color:#8a5a00}.ei .action-close{background:#e8f0fb;color:#23548a}.ei .action-activate{background:#e5f6ef;color:#0b6b54}.ei .action-maintain{background:#eef0f3;color:#505b6a}.ei .action-table tbody tr{cursor:pointer}.ei .action-table tbody tr:hover{background:#fff7fa}.ei .action-table tbody tr.is-selected{background:#fff0f5;box-shadow:inset 4px 0 #d91785}.ei .action-table-wrap{max-height:510px;overflow:auto}.ei .table-help{font-size:.7rem;color:var(--muted)}
   .ei .index-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.ei .index-box{border:1px solid var(--line);border-radius:15px;padding:15px;background:#fafbfc}.ei .index-box strong{display:block;font-size:1.5rem;line-height:1}.ei .index-box span{display:block;margin-top:6px;font-size:.7rem;color:var(--muted);font-weight:800;text-transform:uppercase}.ei .index-formula{border-left:3px solid #d91785;padding-left:12px;font-size:.77rem;color:var(--muted)}.ei .index-table td,.ei .index-table th{font-size:.74rem;vertical-align:middle}.ei .index-table th{text-transform:uppercase;letter-spacing:.04em;color:#788395;white-space:nowrap}.ei .index-score{font-weight:850;color:var(--wine)}
   .ei .socio-panel{background:linear-gradient(135deg,#fff 0%,#f6fbfa 100%);border-color:#dcece7}.ei .socio-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.ei .socio-kpi{padding:13px;border-radius:13px;background:#fff;border:1px solid #e0ece8}.ei .socio-kpi strong{display:block;font-size:1.25rem}.ei .socio-kpi span{display:block;font-size:.66rem;color:var(--muted);font-weight:800;text-transform:uppercase}.ei .coverage-chip{display:inline-flex;padding:4px 7px;border-radius:999px;background:#e9f4f0;color:#176b58;font-size:.68rem;font-weight:800}
+  .ei .colony-card{border:1px solid #dfe7f0;background:#f8fbff;border-radius:14px;padding:13px;margin-bottom:14px}.ei .colony-list{display:flex;flex-wrap:wrap;gap:6px}.ei .colony-chip{display:inline-flex;align-items:center;padding:6px 9px;border-radius:999px;background:#e8f0fb;color:#264f7b;font-size:.72rem;font-weight:750}.ei .colony-source{font-size:.69rem;color:var(--muted)}
   .ei .source-list a{color:var(--wine);text-decoration:none}.ei .source-list a:hover{text-decoration:underline}.ei .quality-row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}.ei .quality-row:last-child{border:0}.ei .quality-row span{color:var(--muted);font-size:.78rem}.ei .quality-row strong{font-size:.85rem}
   .ei .stable-table th{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:#7a8494;white-space:nowrap}.ei .stable-table td{font-size:.82rem;vertical-align:middle}.ei .section-link{border:0;background:none;color:var(--wine);font-weight:800;padding:0;text-decoration:underline;text-decoration-color:#e9bdca;text-underline-offset:3px}
   .leaflet-tooltip.ei-tooltip{border:0;border-radius:10px;box-shadow:0 8px 20px rgba(0,0,0,.16);padding:8px 10px;font:12px/1.35 system-ui,sans-serif}
@@ -248,7 +249,7 @@
         <div class="text-center py-5 text-muted" id="emptySection">
           <i class="fa-solid fa-arrow-pointer fa-2x mb-3"></i>
           <div class="fw-bold text-dark">Selecciona una sección</div>
-          <div class="small mt-1">Aquí verás sus resultados, afiliados y condiciones de vida.</div>
+          <div class="small mt-1">Aquí verás sus colonias, resultados, afiliados y condiciones de vida.</div>
         </div>
         <div id="sectionDetail" class="d-none"></div>
       </div>
@@ -299,6 +300,7 @@
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'}).addTo(map);
   const number = new Intl.NumberFormat('es-MX');
   const percent = value => value === null || value === undefined ? 'Sin dato' : `${(Number(value)*100).toFixed(1)}%`;
+  const escapeHtml = value => String(value).replace(/[&<>'"]/g, character => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','"':'&quot;'}[character]));
   const winnerLabels = {morena:'Morena y coalición',pan_prd_mc:'PAN PRD MC',pan_prd:'PAN PRD',pan_pri_prd:'PAN PRI PRD',pri:'PRI',pvem:'PVEM',mc:'Movimiento Ciudadano',pes:'PES',pesm:'PES Michoacán',rsp:'RSP',fxm:'Fuerza por México',nueva_alianza:'Nueva Alianza',independiente:'Candidatura independiente',independientes:'Candidaturas independientes',mm:'Más Michoacán',mich1:'Michoacán Primero',tmx:'Tiempo por México'};
   const palettes = {
     victories:{title:'Veces que ganó Morena y sus aliados',items:[['Ninguna','#edf0f4'],['Una vez','#f4bfd2'],['Dos veces','#d95c8d'],['Las tres veces','#790019']]},
@@ -434,6 +436,7 @@
     const op=row.operacion||{registrados:0,afiliados_si:0,afiliados_no:0};
     const index=row.indice_electoral;
     const socio=row.socioeconomico;
+    const colonies=row.colonias||{nombres:[],total_encontradas:0,fuente:null};
     const projected=mobilized(row);
     const listCoverage=h24&&h24.lista_nominal>0?op.afiliados_si/h24.lista_nominal:null;
     const historicalReference=h24&&h24.votos_morena>0?projected/h24.votos_morena:null;
@@ -456,6 +459,14 @@
       <div class="text-muted small text-uppercase fw-bold">Sección</div>
       <div class="section-number">${row.seccion}</div>
       <div class="d-flex flex-wrap gap-2 mb-3"><span class="soft-pill">Distrito local ${row.distrito_local??'Sin dato'}</span><span class="soft-pill">Distrito federal ${row.distrito_federal??'Sin dato'}</span><span class="soft-pill">Morena ganó ${row.victorias_morena} de ${row.elecciones_observadas}</span></div>
+      <div class="colony-card">
+        <div class="small fw-bold text-uppercase text-muted mb-2">Colonias relacionadas con la sección</div>
+        ${colonies.nombres.length
+          ? `<div class="colony-list">${colonies.nombres.map(name=>`<span class="colony-chip">${escapeHtml(name)}</span>`).join('')}</div>
+             ${colonies.total_encontradas>colonies.nombres.length?`<div class="small text-muted mt-2">Hay ${number.format(colonies.total_encontradas-colonies.nombres.length)} nombres adicionales en la base.</div>`:''}
+             <div class="colony-source mt-2">Fuente: ${escapeHtml(colonies.fuente)}. Son nombres de referencia; una colonia puede abarcar más de una sección.</div>`
+          : '<div class="small text-muted">Todavía no hay nombres de colonia relacionados con esta sección.</div>'}
+      </div>
       ${index?`<div class="operation-card">
         <div class="small fw-bold text-uppercase text-muted mb-2">Calificación de la sección</div>
         <div class="index-grid">
@@ -505,7 +516,7 @@
     fetch(@json(asset('maps/electoral/morelia-secciones.geojson'))).then(response=>response.json())
   ]).then(([dataset,geo])=>{
     rows=new Map(dataset.secciones.map(row=>[Number(row.seccion),row]));
-    geoLayer=L.geoJSON(geo,{style,onEachFeature:(feature,layer)=>{const section=Number(feature.properties.SECCION);layers.set(section,layer);const row=rows.get(section);layer.bindTooltip(`<strong>Sección ${section}</strong><br>${row?`Morena ganó ${row.victorias_morena} de ${row.elecciones_observadas}<br>${number.format(row.operacion?.afiliados_si||0)} afiliados confirmados`:'No hay resultados para esta sección'}`,{sticky:true,className:'ei-tooltip'});layer.on('click',()=>showSection(section));layer.on('mouseover',function(){this.setStyle(section===selectedSection?{weight:6,color:'#ffd43b'}:{weight:2,color:'#252b34'});this.bringToFront()});layer.on('mouseout',function(){if(section===selectedSection)refreshSelectedLayer();else geoLayer.resetStyle(this)})}}).addTo(map);
+    geoLayer=L.geoJSON(geo,{style,onEachFeature:(feature,layer)=>{const section=Number(feature.properties.SECCION);layers.set(section,layer);const row=rows.get(section);const colonyNames=row?.colonias?.nombres||[];const colonyLine=colonyNames.length?`<br><span class="text-muted">${colonyNames.slice(0,3).map(escapeHtml).join(' · ')}${colonyNames.length>3?` · +${colonyNames.length-3}`:''}</span>`:'<br><span class="text-muted">Sin colonias registradas</span>';layer.bindTooltip(`<strong>Sección ${section}</strong>${colonyLine}<br>${row?`Morena ganó ${row.victorias_morena} de ${row.elecciones_observadas}<br>${number.format(row.operacion?.afiliados_si||0)} afiliados confirmados`:'No hay resultados para esta sección'}`,{sticky:true,className:'ei-tooltip'});layer.on('click',()=>showSection(section));layer.on('mouseover',function(){this.setStyle(section===selectedSection?{weight:6,color:'#ffd43b'}:{weight:2,color:'#252b34'});this.bringToFront()});layer.on('mouseout',function(){if(section===selectedSection)refreshSelectedLayer();else geoLayer.resetStyle(this)})}}).addTo(map);
     map.fitBounds(geoLayer.getBounds(),{padding:[18,18]}); renderLegend(); renderActionTable();
   }).catch(error=>{console.error(error);document.getElementById('electoralMap').innerHTML='<div class="alert alert-danger m-3">No fue posible cargar el mapa electoral.</div>';});
   metricSelect.addEventListener('change',()=>{if(geoLayer){geoLayer.setStyle(style);refreshSelectedLayer()}renderLegend()});

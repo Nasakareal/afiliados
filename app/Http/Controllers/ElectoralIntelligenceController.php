@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\ElectoralOfferDemandIndex;
+use App\Services\ElectoralSectionColonies;
 use App\Services\SocioeconomicSectionLayer;
 use App\Support\LocalDistrictAccess;
 use Illuminate\Http\JsonResponse;
@@ -58,6 +59,7 @@ class ElectoralIntelligenceController extends Controller
     {
         $dataset = app(ElectoralOfferDemandIndex::class)->enrich($this->dataset());
         $dataset = app(SocioeconomicSectionLayer::class)->enrich($dataset);
+        $dataset = app(ElectoralSectionColonies::class)->enrich($dataset, $request->user());
         $validSections = collect($dataset['secciones'])
             ->pluck('seccion')
             ->map(fn ($section): string => (string) $section)
