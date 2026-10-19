@@ -24,6 +24,7 @@
   .ei .action-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.ei .action-kpi{padding:12px 14px;border-radius:13px;background:#f7f8fa}.ei .action-kpi strong{display:block;font-size:1.3rem}.ei .action-kpi span{display:block;font-size:.68rem;color:var(--muted);font-weight:800;text-transform:uppercase}.ei .action-filters{display:flex;gap:7px;overflow-x:auto;padding-bottom:3px}.ei .action-filter{white-space:nowrap;border:1px solid #dfe4ea;background:#fff;color:#4d5868;border-radius:999px;padding:7px 12px;font-size:.74rem;font-weight:800}.ei .action-filter.active{background:#222b38;color:#fff;border-color:#222b38}.ei .action-table th{font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:#788395;white-space:nowrap}.ei .action-table td{font-size:.78rem;vertical-align:middle}.ei .action-badge{display:inline-flex;padding:5px 8px;border-radius:999px;font-size:.68rem;font-weight:850}.ei .action-open{background:#fff0f2;color:#a32b43}.ei .action-build{background:#fff4dd;color:#8a5a00}.ei .action-close{background:#e8f0fb;color:#23548a}.ei .action-activate{background:#e5f6ef;color:#0b6b54}.ei .action-maintain{background:#eef0f3;color:#505b6a}.ei .action-table tbody tr{cursor:pointer}.ei .action-table tbody tr:hover{background:#fff7fa}.ei .action-table tbody tr.is-selected{background:#fff0f5;box-shadow:inset 4px 0 #d91785}.ei .action-table-wrap{max-height:510px;overflow:auto}.ei .table-help{font-size:.7rem;color:var(--muted)}
   .ei .index-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.ei .index-box{border:1px solid var(--line);border-radius:15px;padding:15px;background:#fafbfc}.ei .index-box strong{display:block;font-size:1.5rem;line-height:1}.ei .index-box span{display:block;margin-top:6px;font-size:.7rem;color:var(--muted);font-weight:800;text-transform:uppercase}.ei .index-formula{border-left:3px solid #d91785;padding-left:12px;font-size:.77rem;color:var(--muted)}.ei .index-table td,.ei .index-table th{font-size:.74rem;vertical-align:middle}.ei .index-table th{text-transform:uppercase;letter-spacing:.04em;color:#788395;white-space:nowrap}.ei .index-score{font-weight:850;color:var(--wine)}
   .ei .iode-chart-shell{border:1px solid var(--line);border-radius:16px;overflow-x:auto;background:#fff}.ei .iode-chart{display:block;min-width:920px;width:100%;height:330px}.ei .zone-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.ei .zone-card{padding:12px 14px;border-radius:13px;border:1px solid rgba(0,0,0,.06)}.ei .zone-card strong{display:block;font-size:1.25rem}.ei .zone-card span{display:block;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em}.ei .zone-a{background:#fff2cc;color:#765b00}.ei .zone-b{background:#d9e8f5;color:#24577e}.ei .zone-c{background:#c9efdf;color:#116a53}.ei .iode-dot{cursor:pointer;transition:r .12s,opacity .12s}.ei .iode-dot:hover{r:7;opacity:1}.ei .iode-dot.is-selected{stroke:#111827;stroke-width:3;r:8;opacity:1}.ei .iode-chart-help{font-size:.72rem;color:var(--muted)}
+  .ei .zone-matrix-shell{border:1px solid #cfd5dc;border-radius:15px;overflow:auto;background:#fff}.ei .zone-matrix-table{min-width:980px;margin:0}.ei .zone-matrix-table th{padding:9px 12px;background:#e4e6e9;border-color:#aeb5be;color:#202733;font-size:.7rem;text-transform:uppercase;letter-spacing:.04em;text-align:center}.ei .zone-matrix-table td{padding:13px 14px;border-color:#aeb5be;vertical-align:middle}.ei .zone-matrix-table .matrix-zone{width:125px;text-align:center}.ei .zone-matrix-table .matrix-threshold{width:170px;text-align:center;font-size:.9rem;font-weight:800}.ei .zone-matrix-table .matrix-reading{width:225px;text-align:center;font-size:.78rem;line-height:1.45}.ei .zone-matrix-table .matrix-a td{background:#fff8df}.ei .zone-matrix-table .matrix-b td{background:#e9f1f8}.ei .zone-matrix-table .matrix-c td{background:#e1f5ed}.ei .matrix-zone strong{display:block;font-size:1rem}.ei .matrix-zone span{display:block;margin-top:3px;font-size:.7rem;line-height:1.3}.ei .matrix-section-list{columns:4 145px;column-gap:20px;max-height:330px;overflow-y:auto}.ei .matrix-section-link{display:block;width:100%;border:0;background:transparent;color:#27364a;padding:2px 3px;text-align:left;font-size:.72rem;line-height:1.25;break-inside:avoid}.ei .matrix-section-link:hover,.ei .matrix-section-link:focus{background:rgba(255,255,255,.8);color:var(--wine);border-radius:5px;outline:none}.ei .matrix-section-link.is-selected{background:#fff;color:var(--wine);font-weight:850;border-radius:5px;box-shadow:0 0 0 2px #ffd43b}.ei .matrix-empty{font-size:.76rem;color:var(--muted)}
   .ei .fullscreen-btn{border:1px solid #dfe4ea;background:#fff;color:#374151;border-radius:10px;padding:7px 10px;font-size:.74rem;font-weight:800}.ei .fullscreen-btn:hover{background:#f4f6f9}.ei .map-card:fullscreen,.ei .map-card.is-map-fullscreen{background:#f4f7fb;padding:18px;border-radius:0}.ei .map-card:fullscreen #electoralMap,.ei .map-card.is-map-fullscreen #electoralMap{height:calc(100vh - 105px)}.ei .map-card.is-map-fullscreen{position:fixed;inset:0;z-index:2000;width:100vw;height:100vh}.ei .map-card:fullscreen .map-heading,.ei .map-card.is-map-fullscreen .map-heading{margin-bottom:10px!important}
   .ei .socio-panel{background:linear-gradient(135deg,#fff 0%,#f6fbfa 100%);border-color:#dcece7}.ei .socio-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.ei .socio-kpi{padding:13px;border-radius:13px;background:#fff;border:1px solid #e0ece8}.ei .socio-kpi strong{display:block;font-size:1.25rem}.ei .socio-kpi span{display:block;font-size:.66rem;color:var(--muted);font-weight:800;text-transform:uppercase}.ei .coverage-chip{display:inline-flex;padding:4px 7px;border-radius:999px;background:#e9f4f0;color:#176b58;font-size:.68rem;font-weight:800}
   .ei .context-card{border:1px solid #d9e3ef;background:linear-gradient(135deg,#fbfdff 0%,#f5f8fc 100%);border-radius:14px;padding:14px;margin-bottom:14px}.ei .context-heading{font-size:.74rem;font-weight:850;text-transform:uppercase;letter-spacing:.05em;color:#3f4d61;margin-bottom:8px}.ei .context-list{margin:0;padding-left:1.1rem;color:#344054}.ei .context-list li{font-size:.78rem;line-height:1.45;margin-bottom:6px}.ei .context-list li:last-child{margin-bottom:0}.ei .context-block{padding:11px 12px;border-radius:12px;background:#fff;border:1px solid #e6ebf1;margin-top:9px}.ei .context-note{font-size:.7rem;line-height:1.45;color:var(--muted);margin-top:9px}
@@ -162,6 +163,18 @@
     </div>
     <div class="iode-chart-shell"><svg id="iodeChart" class="iode-chart" role="img" aria-label="Distribución del IODE de las secciones de Morelia"></svg></div>
     <p class="iode-chart-help mt-2 mb-0">La altura de los puntos solo sirve para separarlos. El valor que importa es su posición horizontal. Verde significa sobreoferta y menor prioridad; no significa que electoralmente sea una sección favorable.</p>
+    <hr class="my-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+      <div><h3 class="panel-title">Matriz de secciones por zona IODE</h3><div class="panel-subtitle">Adaptación de la tabla del estudio: aquí aparecen las secciones de Morelia y el valor calculado para cada una.</div></div>
+      <span class="soft-pill">Haz clic en una sección para verla en el mapa</span>
+    </div>
+    <div class="zone-matrix-shell">
+      <table class="table table-bordered zone-matrix-table" aria-label="Matriz de secciones de Morelia por zona IODE">
+        <thead><tr><th>Zona</th><th>Umbral</th><th>Secciones de Morelia</th><th>Lectura y seguimiento</th></tr></thead>
+        <tbody id="zoneMatrixBody"><tr><td colspan="4" class="text-center text-muted py-4">Cargando secciones…</td></tr></tbody>
+      </table>
+    </div>
+    <p class="iode-chart-help mt-2 mb-0">La matriz utiliza el IODE calculado en este tablero. La zona describe el equilibrio entre oferta y demanda del índice; no equivale a una preferencia electoral.</p>
   </div>
 
   <div class="card-panel socio-panel mb-3" id="socioeconomicLayer">
@@ -380,6 +393,7 @@
   const refreshSelectedLayer = () => {
     document.querySelectorAll('[data-action-section]').forEach(tableRow=>tableRow.classList.toggle('is-selected',Number(tableRow.dataset.actionSection)===selectedSection));
     document.querySelectorAll('[data-iode-section]').forEach(dot=>dot.classList.toggle('is-selected',Number(dot.dataset.iodeSection)===selectedSection));
+    document.querySelectorAll('[data-zone-section]').forEach(button=>button.classList.toggle('is-selected',Number(button.dataset.zoneSection)===selectedSection));
     if(selectedSection===null||!geoLayer)return;
     const selectedLayer=layers.get(selectedSection);
     if(!selectedLayer)return;
@@ -408,6 +422,29 @@
     const dots=indexed.map(row=>{const value=row.indice_electoral.iode;const zone=value<.75?'a':value<=1.25?'b':'c';const colors={a:'#9a7600',b:'#285f88',c:'#13765c'};const y=top+18+((Number(row.seccion)*37)%Math.max(1,plotHeight-36));return `<circle class="iode-dot" data-iode-section="${row.seccion}" cx="${x(value)}" cy="${y}" r="4.5" fill="${colors[zone]}" opacity=".74" tabindex="0" role="button" aria-label="Sección ${row.seccion}, IODE ${value.toFixed(2)}"><title>Sección ${row.seccion} · IODE ${value.toFixed(2)} · ${escapeHtml(row.indice_electoral.estrategia)}</title></circle>`}).join('');
     svg.setAttribute('viewBox',`0 0 ${width} ${height}`);svg.innerHTML=backgrounds+zoneLabels+guides+dots+axis;
     svg.querySelectorAll('[data-iode-section]').forEach(dot=>{const open=()=>{metricSelect.value='iode';if(geoLayer)geoLayer.setStyle(style);renderLegend();showSection(dot.dataset.iodeSection);document.getElementById('mapCard').scrollIntoView({behavior:'smooth',block:'center'})};dot.addEventListener('click',open);dot.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();open()}})});
+    refreshSelectedLayer();
+  };
+  const renderZoneMatrix = () => {
+    const indexed=[...rows.values()].filter(row=>row.indice_electoral?.iode!==null&&row.indice_electoral?.iode!==undefined);
+    const zones=[
+      {key:'a',name:'Zona A',description:'Déficit',threshold:'IODE < 0.75',rows:indexed.filter(row=>row.indice_electoral.iode<.75),reading:'Déficit según el índice. Conviene revisar primero las causas y la cobertura disponible.'},
+      {key:'b',name:'Zona B',description:'Equilibrio técnico',threshold:'0.75 ≤ IODE ≤ 1.25',rows:indexed.filter(row=>row.indice_electoral.iode>=.75&&row.indice_electoral.iode<=1.25),reading:'La oferta y la demanda están dentro de la franja de equilibrio. Requiere seguimiento periódico.'},
+      {key:'c',name:'Zona C',description:'Sobreoferta',threshold:'IODE > 1.25',rows:indexed.filter(row=>row.indice_electoral.iode>1.25),reading:'La oferta supera la demanda del índice. Conviene revisar si existe concentración o margen de redistribución.'}
+    ];
+    const body=document.getElementById('zoneMatrixBody');
+    body.innerHTML=zones.map(zone=>{
+      const sectionLinks=zone.rows.sort((a,b)=>b.indice_electoral.iode-a.indice_electoral.iode||a.seccion-b.seccion).map(row=>`<button type="button" class="matrix-section-link" data-zone-section="${row.seccion}">Sección ${row.seccion} · ${row.indice_electoral.iode.toFixed(2)}</button>`).join('');
+      return `<tr class="matrix-${zone.key}">
+        <td class="matrix-zone"><strong>${zone.name}</strong><span>${zone.description}</span><span>${number.format(zone.rows.length)} secciones</span></td>
+        <td class="matrix-threshold">${zone.threshold}</td>
+        <td><div class="matrix-section-list">${sectionLinks||'<span class="matrix-empty">No hay secciones en esta zona.</span>'}</div></td>
+        <td class="matrix-reading">${zone.reading}</td>
+      </tr>`;
+    }).join('');
+    body.querySelectorAll('[data-zone-section]').forEach(button=>button.addEventListener('click',()=>{
+      showSection(button.dataset.zoneSection);
+      document.getElementById('mapCard').scrollIntoView({behavior:'smooth',block:'center'});
+    }));
     refreshSelectedLayer();
   };
   const diagnose = row => {
@@ -631,7 +668,7 @@
   ]).then(([dataset,geo])=>{
     rows=new Map(dataset.secciones.map(row=>[Number(row.seccion),row]));
     geoLayer=L.geoJSON(geo,{style,onEachFeature:(feature,layer)=>{const section=Number(feature.properties.SECCION);layers.set(section,layer);const row=rows.get(section);const colonyNames=row?.colonias?.nombres||[];const colonyLine=colonyNames.length?`<br><span class="text-muted">${colonyNames.slice(0,3).map(escapeHtml).join(' · ')}${colonyNames.length>3?` · +${colonyNames.length-3}`:''}</span>`:'<br><span class="text-muted">Sin colonias registradas</span>';layer.bindTooltip(`<strong>Sección ${section}</strong>${colonyLine}<br>${row?`Morena ganó ${row.victorias_morena} de ${row.elecciones_observadas}<br>${number.format(row.operacion?.afiliados_si||0)} afiliados confirmados`:'No hay resultados para esta sección'}`,{sticky:true,className:'ei-tooltip'});layer.on('click',()=>showSection(section));layer.on('mouseover',function(){this.setStyle(section===selectedSection?{weight:6,color:'#ffd43b'}:{weight:2,color:'#252b34'});this.bringToFront()});layer.on('mouseout',function(){if(section===selectedSection)refreshSelectedLayer();else geoLayer.resetStyle(this)})}}).addTo(map);
-    map.fitBounds(geoLayer.getBounds(),{padding:[18,18]}); renderLegend(); renderActionTable(); renderIodeChart();
+    map.fitBounds(geoLayer.getBounds(),{padding:[18,18]}); renderLegend(); renderActionTable(); renderIodeChart(); renderZoneMatrix();
   }).catch(error=>{console.error(error);document.getElementById('electoralMap').innerHTML='<div class="alert alert-danger m-3">No fue posible cargar el mapa electoral.</div>';});
   metricSelect.addEventListener('change',()=>{if(geoLayer){geoLayer.setStyle(style);refreshSelectedLayer()}renderLegend()});
   const updateProjection = () => {
