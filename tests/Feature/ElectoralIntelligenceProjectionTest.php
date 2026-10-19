@@ -57,7 +57,7 @@ class ElectoralIntelligenceProjectionTest extends TestCase
             ->assertSeeText('Bajo · 60%')
             ->assertSeeText('¿En qué secciones hace falta más trabajo?')
             ->assertSeeText('¿Qué tan favorable se ve cada sección?')
-            ->assertSeeText('IODE · Oportunidad de la sección')
+            ->assertSeeText('IODE · Déficit o superávit de la sección')
             ->assertSeeText('¿Cómo son las condiciones de cada sección?')
             ->assertSeeText('Condiciones de vida · Viviendas sin internet')
             ->assertSeeText('Ver primero las más importantes')

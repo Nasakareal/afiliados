@@ -76,7 +76,7 @@ class ElectoralOfferDemandIndex
         }
 
         foreach ($indexes as &$index) {
-            $index['estrategia'] = $this->strategy($index['ioe'], $index['ide']);
+            $index['estrategia'] = $this->strategy($index['iode']);
         }
         unset($index);
 
@@ -135,18 +135,21 @@ class ElectoralOfferDemandIndex
         })->all();
     }
 
-    private function strategy(float $offer, float $demand): string
+    private function strategy(?float $ratio): string
     {
-        if ($offer >= .25 && $demand >= .25) {
-            return 'Buena oportunidad, pero será difícil competir';
+        if ($ratio === null) {
+            return 'No se puede calcular';
         }
-        if ($offer >= .25) {
-            return 'Buena oportunidad para organizar el trabajo';
+        if ($ratio >= 1.25) {
+            return 'Superávit · no prioritaria';
         }
-        if ($demand >= .25) {
-            return 'Conviene revisar antes de dedicar más esfuerzo';
+        if ($ratio >= 1) {
+            return 'Equilibrio favorable · seguimiento';
+        }
+        if ($ratio >= .75) {
+            return 'Déficit moderado · requiere atención';
         }
 
-        return 'Dar seguimiento sin dejar de atender otras secciones';
+        return 'Déficit alto · prioritaria';
     }
 }

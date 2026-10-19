@@ -31,7 +31,7 @@ class ElectoralIntelligenceController extends Controller
             ->values();
         $indexedSections = $sections
             ->filter(fn (array $row): bool => $row['indice_electoral'] !== null)
-            ->sortByDesc(fn (array $row): float => (float) ($row['indice_electoral']['iode'] ?? -INF))
+            ->sortBy(fn (array $row): float => $row['indice_electoral']['iode'] ?? INF)
             ->values();
 
         return view('electoral.index', [
