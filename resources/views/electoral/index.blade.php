@@ -92,21 +92,19 @@
     <div class="row g-3 align-items-center">
       <div class="col-xl-7">
         <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
-          <div><h2 class="panel-title">¿Cuántos afiliados podrían acudir?</h2><div class="panel-subtitle">El cálculo usa solamente los registros de Morelia que tienen una sección válida.</div></div>
-          @if($operation['alcance_restringido'])<span class="soft-pill"><i class="fa-solid fa-shield-halved me-1"></i>Solo aparecen los distritos que puedes consultar</span>@endif
+          <div><h2 class="panel-title">¿Cuántas personas de la lista nominal podrían acudir?</h2><div class="panel-subtitle">El cálculo usa toda la lista nominal de Morelia correspondiente a la elección de 2024.</div></div>
         </div>
         <div class="projection-grid">
-          <div class="projection-stat"><span>Registros que sí se pueden usar</span><strong>{{ number_format($operation['registrados']) }}</strong></div>
-          <div class="projection-stat"><span>Afiliados confirmados</span><strong class="text-success">{{ number_format($operation['afiliados_si']) }}</strong></div>
-          <div class="projection-stat"><span>Personas no afiliadas</span><strong class="text-danger">{{ number_format($operation['afiliados_no']) }}</strong></div>
-          <div class="projection-stat"><span>Secciones con afiliados</span><strong>{{ number_format($operation['secciones_cubiertas']) }}</strong><small class="text-muted"> / {{ number_format($quality['current_sections']) }}</small></div>
-          <div class="projection-stat accent"><span>Podrían acudir</span><strong id="projectedCity">{{ number_format(round($operation['afiliados_si'] * $operation['tasa_movilizacion_inicial'])) }}</strong></div>
+          <div class="projection-stat"><span>Lista nominal 2024</span><strong>{{ number_format($operation['lista_nominal']) }}</strong></div>
+          <div class="projection-stat"><span>Votos emitidos en 2024</span><strong class="text-success">{{ number_format($operation['votos_emitidos']) }}</strong></div>
+          <div class="projection-stat"><span>No votaron (estimado)</span><strong>{{ number_format(max(0, $operation['lista_nominal'] - $operation['votos_emitidos'])) }}</strong></div>
+          <div class="projection-stat"><span>Secciones con lista nominal</span><strong>{{ number_format($operation['secciones_lista_nominal']) }}</strong><small class="text-muted"> / {{ number_format($quality['current_sections']) }}</small></div>
+          <div class="projection-stat accent"><span>Podrían acudir</span><strong id="projectedCity">{{ number_format(round($operation['lista_nominal'] * $operation['tasa_movilizacion_inicial'])) }}</strong></div>
         </div>
-        @if($operation['registros_fuera_mapa'] > 0)<div class="small text-warning-emphasis mt-2"><i class="fa-solid fa-triangle-exclamation me-1"></i>{{ number_format($operation['registros_fuera_mapa']) }} registros no se incluyeron porque su sección no aparece en el mapa actual.</div>@endif
       </div>
       <div class="col-xl-5">
         <div class="scenario-box">
-          <div class="fw-bold">De los {{ number_format($operation['afiliados_si']) }} afiliados confirmados, ¿qué porcentaje creemos que irá a votar?</div>
+          <div class="fw-bold">De las {{ number_format($operation['lista_nominal']) }} personas de la lista nominal, ¿qué porcentaje creemos que irá a votar?</div>
           <div class="small text-muted mt-1 mb-2">Elige una opción o mueve la barra para probar otro porcentaje.</div>
           <div class="scenario-buttons mb-3">
             <button type="button" class="scenario-btn" data-rate="60">Bajo · 60%</button>
@@ -115,8 +113,8 @@
           </div>
           <label for="mobilizationRate" class="small fw-bold d-flex justify-content-between align-items-center"><span>Porcentaje que podría asistir</span><output id="mobilizationRateLabel" class="range-value">75%</output></label>
           <input id="mobilizationRate" type="range" class="form-range mt-2" min="50" max="100" step="5" value="75" aria-describedby="projectionSentence">
-          <div id="projectionSentence" class="projection-result mt-2">Si asiste el 75%, podrían acudir <strong>{{ number_format(round($operation['afiliados_si'] * $operation['tasa_movilizacion_inicial'])) }} personas</strong>.</div>
-          <p class="projection-note mt-3 mb-0">Este cálculo sirve para organizar el trabajo. No predice el resultado ni significa que sean votos nuevos.</p>
+          <div id="projectionSentence" class="projection-result mt-2">Si asiste el 75%, podrían acudir <strong>{{ number_format(round($operation['lista_nominal'] * $operation['tasa_movilizacion_inicial'])) }} personas</strong> de la lista nominal.</div>
+          <p class="projection-note mt-3 mb-0">Este cálculo es un escenario de participación sobre toda la lista nominal. No predice el resultado ni la preferencia electoral.</p>
         </div>
       </div>
     </div>
@@ -202,6 +200,7 @@
         <div class="eyebrow text-danger">Lista para organizar el trabajo</div>
         <h2 class="panel-title mt-1">¿En qué secciones hace falta más trabajo?</h2>
         <div class="panel-subtitle">La lista toma en cuenta el IODE, los afiliados registrados y la diferencia de votos de 2024.</div>
+        @if($operation['alcance_restringido'])<span class="soft-pill mt-2"><i class="fa-solid fa-shield-halved me-1"></i>Solo aparecen los distritos que puedes consultar</span>@endif
       </div>
       <div class="col-xl-7">
         <div class="action-kpis">
@@ -229,7 +228,8 @@
         <tbody id="actionTableBody"><tr><td colspan="10" class="text-center text-muted py-4">Preparando la lista…</td></tr></tbody>
       </table>
     </div>
-    <div class="table-help mt-2"><i class="fa-solid fa-circle-info me-1"></i>“Podrían asistir” usa el porcentaje que elegiste arriba. No se suman como votos nuevos porque algunas de esas personas pudieron votar en 2024. Haz clic en una fila para ver la sección en el mapa.</div>
+    <div class="table-help mt-2"><i class="fa-solid fa-circle-info me-1"></i>“Podrían asistir” usa el porcentaje que elegiste arriba sobre la lista nominal 2024 de cada sección. Es un escenario de participación, no una predicción de votos. Haz clic en una fila para ver la sección en el mapa.</div>
+    @if($operation['registros_fuera_mapa'] > 0)<div class="small text-warning-emphasis mt-2"><i class="fa-solid fa-triangle-exclamation me-1"></i>{{ number_format($operation['registros_fuera_mapa']) }} registros de afiliación no se incluyeron en esta lista porque su sección no aparece en el mapa actual.</div>@endif
   </div>
 
   <div class="row g-3 mb-3">
@@ -261,7 +261,7 @@
                 <option value="overcrowding">Condiciones de vida · Viviendas con demasiadas personas</option>
                 <option value="affiliatesYes">Afiliados confirmados por sección</option>
                 <option value="operationalCoverage">Afiliados como porcentaje de la lista nominal</option>
-                <option value="mobilizedBase">Afiliados que podrían asistir</option>
+                <option value="mobilizedBase">Personas de la lista nominal que podrían asistir</option>
                 <option value="actionPriority">Secciones que necesitan atención primero</option>
               </select></div>
               <div class="col-md-4"><input id="sectionSearch" class="form-control form-control-sm" inputmode="numeric" placeholder="Escribe una sección" aria-describedby="sectionSearchFeedback"><div id="sectionSearchFeedback" class="invalid-feedback">Esa sección no aparece en el mapa vigente.</div></div>
@@ -349,16 +349,16 @@
     overcrowding:{title:'Viviendas con demasiadas personas',items:[['Menos de 2%','#dff1e8'],['2% a 4.9%','#9bcdb5'],['5% a 9.9%','#efc66a'],['10% o más','#a8444f']]},
     affiliatesYes:{title:'Afiliados confirmados',items:[['Ninguno','#f0f1f3'],['1 a 9','#f6c2d6'],['10 a 29','#dd6997'],['30 o más','#790019']]},
     operationalCoverage:{title:'Afiliados frente a la lista nominal',items:[['Sin afiliados','#f0f1f3'],['Menos de 2%','#c8dbed'],['2% a 5%','#689ac8'],['5% o más','#214f82']]},
-    mobilizedBase:{title:'Afiliados que podrían asistir',items:[['Ninguno','#f0f1f3'],['1 a 9','#c9e5dc'],['10 a 24','#66b29b'],['25 o más','#126b55']]},
+    mobilizedBase:{title:'Personas de la lista nominal que podrían asistir',items:[['Menos de 750','#f0f1f3'],['750 a 1,499','#c9e5dc'],['1,500 a 2,999','#66b29b'],['3,000 o más','#126b55']]},
     actionPriority:{title:'Secciones que necesitan atención',items:[['Sin afiliados','#b62f48'],['Muy pocos afiliados (1–9)','#e6a73b'],['Se perdió por 100 votos o menos','#3f79b5'],['100 afiliados o más','#16836a'],['Seguimiento normal','#c7cdd5']]}
   };
   let rows = new Map(), layers = new Map(), geoLayer, selectedSection = null, actionFilter = 'priority';
   const metricSelect = document.getElementById('metricSelect');
   const legend = document.getElementById('mapLegend');
   const mobilizationRate = document.getElementById('mobilizationRate');
-  const yesAffiliatesCity = {{ (int) $operation['afiliados_si'] }};
+  const nominalRollCity = {{ (int) $operation['lista_nominal'] }};
   const rate = () => Number(mobilizationRate.value) / 100;
-  const mobilized = row => Math.round((row?.operacion?.afiliados_si || 0) * rate());
+  const mobilized = row => Math.round((row?.historial?.['2024']?.lista_nominal || 0) * rate());
   const colorFor = (row, metric) => {
     if (!row) return '#d9dde3';
     const y24=row.historial['2024'];
@@ -381,7 +381,7 @@
     }
     if(metric==='affiliatesYes'){const v=row.operacion?.afiliados_si||0;return v>=30?'#790019':v>=10?'#dd6997':v>=1?'#f6c2d6':'#f0f1f3'}
     if(metric==='operationalCoverage'){const v=y24?.lista_nominal>0?(row.operacion?.afiliados_si||0)/y24.lista_nominal:0;return v>=.05?'#214f82':v>=.02?'#689ac8':v>0?'#c8dbed':'#f0f1f3'}
-    if(metric==='mobilizedBase'){const v=mobilized(row);return v>=25?'#126b55':v>=10?'#66b29b':v>=1?'#c9e5dc':'#f0f1f3'}
+    if(metric==='mobilizedBase'){const v=mobilized(row);return v>=3000?'#126b55':v>=1500?'#66b29b':v>=750?'#c9e5dc':'#f0f1f3'}
     if(metric==='actionPriority'){
       const yes=row.operacion?.afiliados_si||0;
       const closeLoss=y24&&!y24.morena_gano&&Math.abs(y24.margen_morena)<=100;
@@ -647,16 +647,17 @@
         <div class="section-stat"><span>No votaron (estimado)</span><strong>${number.format(abstention24)}</strong></div>
       </div>`:''}
       <div class="operation-card">
-        <div class="small fw-bold text-uppercase text-muted mb-2">Afiliados registrados actualmente</div>
+        <div class="small fw-bold text-uppercase text-muted mb-2">Registros y escenario de asistencia</div>
         <div class="section-summary">
           <div class="section-stat"><span>Registros</span><strong>${number.format(op.registrados)}</strong></div>
           <div class="section-stat"><span>Afiliados confirmados</span><strong class="text-success">${number.format(op.afiliados_si)}</strong></div>
           <div class="section-stat"><span>Personas no afiliadas</span><strong class="text-danger">${number.format(op.afiliados_no)}</strong></div>
-          <div class="section-stat"><span>Podrían asistir al ${mobilizationRate.value}%</span><strong>${number.format(projected)}</strong></div>
+          <div class="section-stat"><span>Lista nominal 2024</span><strong>${h24?number.format(h24.lista_nominal):'Sin dato'}</strong></div>
         </div>
         <div class="election-row"><span>Afiliados frente a las personas que podían votar</span><strong>${percent(listCoverage)}</strong></div>
-        <div class="election-row"><span>Posibles asistentes frente a los votos de Morena en 2024</span><strong>${percent(historicalReference)}</strong></div>
-        <p class="small text-muted mt-2 mb-0">Esta comparación solo ayuda a entender el tamaño de la base. No significa que sean votos nuevos ni dice por quién votó cada persona.</p>
+        <div class="election-row"><span>Podrían asistir al ${mobilizationRate.value}% de la lista nominal</span><strong>${number.format(projected)}</strong></div>
+        <div class="election-row"><span>Asistencia estimada frente a los votos de Morena en 2024</span><strong>${percent(historicalReference)}</strong></div>
+        <p class="small text-muted mt-2 mb-0">La asistencia se estima sobre toda la lista nominal. Es un escenario de participación y no indica por quién votaría cada persona.</p>
       </div>
       <div class="small fw-bold text-uppercase text-muted">Resultados anteriores</div>
       ${elections}
@@ -673,10 +674,10 @@
   metricSelect.addEventListener('change',()=>{if(geoLayer){geoLayer.setStyle(style);refreshSelectedLayer()}renderLegend()});
   const updateProjection = () => {
     const selectedRate=Number(mobilizationRate.value);
-    const projected=Math.round(yesAffiliatesCity*rate());
+    const projected=Math.round(nominalRollCity*rate());
     document.getElementById('mobilizationRateLabel').textContent=`${mobilizationRate.value}%`;
     document.getElementById('projectedCity').textContent=number.format(projected);
-    document.getElementById('projectionSentence').innerHTML=`Si asiste el ${selectedRate}%, podrían acudir <strong>${number.format(projected)} personas</strong> de ${number.format(yesAffiliatesCity)} afiliados confirmados.`;
+    document.getElementById('projectionSentence').innerHTML=`Si asiste el ${selectedRate}%, podrían acudir <strong>${number.format(projected)} personas</strong> de las ${number.format(nominalRollCity)} incluidas en la lista nominal.`;
     const exportExcel=document.getElementById('exportExcel');exportExcel.href=`${exportExcel.dataset.baseUrl}?tasa=${selectedRate}`;
     document.querySelectorAll('[data-rate]').forEach(button=>button.classList.toggle('active',Number(button.dataset.rate)===selectedRate));
     if(geoLayer&&metricSelect.value==='mobilizedBase')geoLayer.setStyle(style);

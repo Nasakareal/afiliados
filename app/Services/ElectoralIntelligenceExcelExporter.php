@@ -91,16 +91,17 @@ class ElectoralIntelligenceExcelExporter
         );
 
         $operation = $dataset['operacion'];
+        $nominalRoll = (int) ($dataset['resumen_municipal']['2024']['lista_nominal'] ?? 0);
         $indexed = collect($dataset['secciones'])->pluck('indice_electoral.iode')->filter(fn ($value) => $value !== null);
         $start = 11;
-        $sheet->setCellValue("A{$start}", 'Base operativa y zonas IODE');
+        $sheet->setCellValue("A{$start}", 'Base operativa, participación y zonas IODE');
         $sheet->getStyle("A{$start}:D{$start}")->applyFromArray($this->sectionHeaderStyle());
         $sheet->mergeCells("A{$start}:D{$start}");
         $metrics = [
             ['Registros utilizables', (int) $operation['registrados']],
             ['Afiliados confirmados', (int) $operation['afiliados_si']],
             ['Personas no afiliadas', (int) $operation['afiliados_no']],
-            ["Podrían asistir al {$rate}%", (int) round($operation['afiliados_si'] * ($rate / 100))],
+            ["Podrían asistir al {$rate}% de la lista nominal", (int) round($nominalRoll * ($rate / 100))],
             ['Zona A · déficit', $indexed->filter(fn ($value) => $value < .75)->count()],
             ['Zona B · equilibrio', $indexed->filter(fn ($value) => $value >= .75 && $value <= 1.25)->count()],
             ['Zona C · sobreoferta', $indexed->filter(fn ($value) => $value > 1.25)->count()],
@@ -168,7 +169,7 @@ class ElectoralIntelligenceExcelExporter
                 $index['iode'] ?? null,
                 $index ? $this->zone($index['iode']) : 'Sin dato',
                 (int) $operation['afiliados_si'],
-                (int) round($operation['afiliados_si'] * ($rate / 100)),
+                (int) round(($result['lista_nominal'] ?? 0) * ($rate / 100)),
                 $result['lista_nominal'] ?? null,
                 $situation,
                 $action,
@@ -183,7 +184,7 @@ class ElectoralIntelligenceExcelExporter
             $sheet,
             'Prioridades',
             'Secciones para organizar el trabajo',
-            "Se muestran números completos. La proyección de asistencia usa {$rate}% de los afiliados confirmados.",
+            "Se muestran números completos. La proyección de asistencia usa {$rate}% de la lista nominal 2024.",
             ['Sección', 'Resultado 2024', 'Votos de diferencia', 'IODE', 'Zona IODE', 'Afiliados', 'Podrían asistir', 'Lista nominal', 'Situación actual', 'Qué hace falta'],
             $rows,
             [11, 18, 20, 12, 24, 14, 18, 17, 25, 23]
@@ -245,7 +246,7 @@ class ElectoralIntelligenceExcelExporter
                 (int) $operation['afiliados_si'],
                 (int) $operation['afiliados_no'],
                 $rate,
-                (int) round($operation['afiliados_si'] * ($rate / 100)),
+                (int) round(($result['lista_nominal'] ?? 0) * ($rate / 100)),
                 $result['lista_nominal'] ?? null,
                 $result['votos_morena'] ?? null,
             ];
@@ -254,8 +255,8 @@ class ElectoralIntelligenceExcelExporter
         $this->writeTable(
             $sheet,
             'Movilizacion',
-            'Base operativa y escenario de movilización',
-            "Escenario elegido: {$rate}% de los afiliados confirmados.",
+            'Lista nominal y escenario de participación',
+            "Escenario elegido: {$rate}% de la lista nominal 2024.",
             ['Sección', 'Distrito local', 'Distrito federal', 'Registros', 'Afiliados confirmados', 'No afiliados', 'Tasa usada', 'Podrían asistir', 'Lista nominal 2024', 'Votos Morena 2024'],
             $rows,
             [11, 15, 17, 14, 22, 16, 14, 18, 19, 20]

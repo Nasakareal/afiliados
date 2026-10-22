@@ -91,6 +91,11 @@ class ElectoralIntelligenceController extends Controller
 
         $dataset['operacion'] = $operation['resumen'];
         $operationalSections = collect($dataset['secciones']);
+        $dataset['operacion']['lista_nominal'] = (int) ($dataset['resumen_municipal']['2024']['lista_nominal'] ?? 0);
+        $dataset['operacion']['votos_emitidos'] = (int) ($dataset['resumen_municipal']['2024']['votos_totales'] ?? 0);
+        $dataset['operacion']['secciones_lista_nominal'] = $operationalSections
+            ->filter(fn (array $section): bool => ($section['historial']['2024']['lista_nominal'] ?? 0) > 0)
+            ->count();
         $dataset['operacion']['sin_base_si'] = $operationalSections
             ->filter(fn (array $section) => $section['operacion']['afiliados_si'] === 0)
             ->count();

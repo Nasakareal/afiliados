@@ -13,7 +13,7 @@ class ElectoralIntelligenceProjectionTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_projection_uses_only_yes_affiliates_as_mobilizable_base(): void
+    public function test_projection_uses_the_complete_nominal_roll_as_attendance_base(): void
     {
         $this->seed(PermissionsSeeder::class);
 
@@ -35,6 +35,9 @@ class ElectoralIntelligenceProjectionTest extends TestCase
             ->assertJsonPath('operacion.afiliados_no', 1)
             ->assertJsonPath('operacion.secciones_cubiertas', 2)
             ->assertJsonPath('operacion.registros_fuera_mapa', 1)
+            ->assertJsonPath('operacion.lista_nominal', 671572)
+            ->assertJsonPath('operacion.votos_emitidos', 377422)
+            ->assertJsonPath('operacion.secciones_lista_nominal', 387)
             ->assertJsonPath('operacion.sin_base_si', 400)
             ->assertJsonPath('operacion.estructura_minima', 2)
             ->assertJsonPath('indice_electoral.secciones_calculadas', 365)
@@ -59,7 +62,10 @@ class ElectoralIntelligenceProjectionTest extends TestCase
 
         $this->get(route('electoral.index'))
             ->assertOk()
-            ->assertSeeText('¿Cuántos afiliados podrían acudir?')
+            ->assertSeeText('¿Cuántas personas de la lista nominal podrían acudir?')
+            ->assertSeeText('De las 671,572 personas de la lista nominal')
+            ->assertSeeText('503,679 personas')
+            ->assertDontSeeText('¿Cuántos afiliados podrían acudir?')
             ->assertSeeText('Podrían acudir')
             ->assertSeeText('Bajo · 60%')
             ->assertSeeText('¿En qué secciones hace falta más trabajo?')
@@ -75,7 +81,7 @@ class ElectoralIntelligenceProjectionTest extends TestCase
             ->assertSeeText('Esa sección no aparece en el mapa vigente.')
             ->assertSeeText('Exportar todo a Excel')
             ->assertSeeText('Lista nominal')
-            ->assertDontSeeText('% de la lista nominal')
+            ->assertSeeText('Personas de la lista nominal que podrían asistir')
             ->assertSeeText('¿Cómo son las condiciones de cada sección?')
             ->assertSeeText('Condiciones de vida · Viviendas sin internet')
             ->assertSeeText('Aquí verás sus colonias, resultados, afiliados y condiciones de vida.')
@@ -117,6 +123,7 @@ class ElectoralIntelligenceProjectionTest extends TestCase
         $this->assertSame('Lista nominal', $priorities->getCell('H4')->getValue());
         $this->assertSame('Tasa usada', $workbook->getSheetByName('Movilizacion')->getCell('G4')->getValue());
         $this->assertSame(80, $workbook->getSheetByName('Movilizacion')->getCell('G5')->getValue());
+        $this->assertSame(1011, $workbook->getSheetByName('Movilizacion')->getCell('H5')->getValue());
 
         $workbook->disconnectWorksheets();
     }
