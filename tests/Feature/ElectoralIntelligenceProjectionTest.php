@@ -95,6 +95,9 @@ class ElectoralIntelligenceProjectionTest extends TestCase
             ->assertSeeText('Exportar todo a Excel')
             ->assertSeeText('Lista nominal')
             ->assertSeeText('Personas de la lista nominal que podrían asistir')
+            ->assertSeeText('Colonias prioritarias · referencia 1, 2 y 3')
+            ->assertSeeText('Polígonos oficiales DCAH de INEGI')
+            ->assertSee('morelia-colonias-prioritarias.geojson')
             ->assertSeeText('¿Cómo son las condiciones de cada sección?')
             ->assertSeeText('Condiciones de vida · Viviendas sin internet')
             ->assertSeeText('Aquí verás sus colonias, resultados, afiliados y condiciones de vida.')
@@ -104,6 +107,20 @@ class ElectoralIntelligenceProjectionTest extends TestCase
             ->assertSeeText('no describe a cada persona ni permite suponer sus preferencias')
             ->assertSeeText('Ver primero las más importantes')
             ->assertSee('Afiliados confirmados por sección');
+    }
+
+    public function test_priority_colony_map_uses_official_inegi_polygons(): void
+    {
+        $path = public_path('maps/electoral/morelia-colonias-prioritarias.geojson');
+        $geojson = json_decode(file_get_contents($path), true, 512, JSON_THROW_ON_ERROR);
+
+        $this->assertSame('FeatureCollection', $geojson['type']);
+        $this->assertSame('Instituto Municipal de Planeación de Morelia', $geojson['metadata']['institucion_origen']);
+        $this->assertSame('11/2021', $geojson['metadata']['fecha_actualizacion_municipal']);
+        $this->assertSame(46, $geojson['metadata']['poligonos_publicados']);
+        $this->assertSame(54, $geojson['metadata']['nombres_coincidentes']);
+        $this->assertCount(46, $geojson['features']);
+        $this->assertContains('Polygon', array_column(array_column($geojson['features'], 'geometry'), 'type'));
     }
 
     public function test_complete_electoral_intelligence_can_be_exported_to_excel(): void
