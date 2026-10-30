@@ -118,10 +118,16 @@ class ElectoralIntelligenceProjectionTest extends TestCase
         $this->assertSame('Instituto Municipal de Planeación de Morelia', $geojson['metadata']['institucion_origen']);
         $this->assertSame('11/2021', $geojson['metadata']['fecha_actualizacion_municipal']);
         $this->assertSame(926, $geojson['metadata']['poligonos_oficiales']);
-        $this->assertSame(46, $geojson['metadata']['poligonos_prioritarios']);
+        $this->assertSame(187, $geojson['metadata']['poligonos_prioritarios']);
+        $this->assertSame(174, $geojson['metadata']['poligonos_prioritarios_por_cruce_espacial']);
+        $this->assertSame(13, $geojson['metadata']['poligonos_prioritarios_por_nombre']);
         $this->assertSame(54, $geojson['metadata']['nombres_coincidentes']);
         $this->assertCount(926, $geojson['features']);
         $this->assertContains('Polygon', array_column(array_column($geojson['features'], 'geometry'), 'type'));
+
+        $spatiallyAssigned = collect($geojson['features'])->firstWhere('properties.prioridad_fuente', 'cruce_espacial_seccion');
+        $this->assertNotNull($spatiallyAssigned['properties']['seccion_prioridad']);
+        $this->assertGreaterThan(0, $spatiallyAssigned['properties']['porcentaje_colonia_en_seccion']);
     }
 
     public function test_complete_electoral_intelligence_can_be_exported_to_excel(): void

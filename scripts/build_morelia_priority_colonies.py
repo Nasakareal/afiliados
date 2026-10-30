@@ -3,10 +3,11 @@
 Usage:
     python scripts/build_morelia_priority_colonies.py \
         --shapefile path/to/00as.shp \
+        --sections public/maps/electoral/morelia-secciones.geojson \
         --reference database/data/electoral/morelia_priority_colonies_reference.json \
         --output public/maps/electoral/morelia-colonias-prioritarias.geojson
 
-Dependencies: pyshp and pyproj.
+Dependencies: pyshp, pyproj and shapely.
 """
 
 from __future__ import annotations
@@ -20,6 +21,7 @@ from pathlib import Path
 
 import shapefile
 from pyproj import CRS, Transformer
+from shapely.geometry import shape as shapely_shape
 
 
 MORELIA_ENTITY = "16"
@@ -59,9 +61,60 @@ def transform_coordinates(value, transformer: Transformer):
 def arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--shapefile", type=Path, required=True)
+    parser.add_argument("--sections", type=Path, required=True)
     parser.add_argument("--reference", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     return parser.parse_args()
+
+
+def assign_section_priorities(features: list[dict], reference: dict, sections_path: Path) -> dict:
+    priorities = {int(row["seccion"]): row for row in reference["filas"]}
+    sections_geojson = json.loads(sections_path.read_text(encoding="utf-8"))
+    priority_sections = []
+    for feature in sections_geojson["features"]:
+        section = int(feature["properties"]["SECCION"])
+        if section in priorities:
+            priority_sections.append((section, priorities[section], shapely_shape(feature["geometry"])))
+
+    spatial_count = 0
+    name_fallback_count = 0
+    for feature in features:
+        properties = feature["properties"]
+        colony = shapely_shape(feature["geometry"])
+        overlaps = []
+        for section, row, section_geometry in priority_sections:
+            overlap_area = colony.intersection(section_geometry).area
+            if overlap_area > 0:
+                overlaps.append((overlap_area, section, row))
+
+        if overlaps:
+            overlaps.sort(reverse=True, key=lambda item: item[0])
+            overlap_area, section, row = overlaps[0]
+            priority = int(row["prioridad"])
+            properties["prioridad"] = priority
+            properties["prioridad_etiqueta"] = reference["metadata"]["prioridades"][str(priority)]
+            properties["prioridad_fuente"] = "cruce_espacial_seccion"
+            properties["seccion_prioridad"] = section
+            properties["porcentaje_colonia_en_seccion"] = round((overlap_area / colony.area) * 100, 1)
+            properties["secciones_prioritarias_intersectadas"] = sorted(item[1] for item in overlaps)
+            spatial_count += 1
+        elif properties["prioridad"] is not None:
+            properties["prioridad_fuente"] = "coincidencia_nombre_referencia"
+            properties["seccion_prioridad"] = properties["secciones_referencia"][0]
+            properties["porcentaje_colonia_en_seccion"] = None
+            properties["secciones_prioritarias_intersectadas"] = []
+            name_fallback_count += 1
+        else:
+            properties["prioridad_fuente"] = None
+            properties["seccion_prioridad"] = None
+            properties["porcentaje_colonia_en_seccion"] = None
+            properties["secciones_prioritarias_intersectadas"] = []
+
+    return {
+        "cruce_espacial": spatial_count,
+        "respaldo_por_nombre": name_fallback_count,
+        "total": spatial_count + name_fallback_count,
+    }
 
 
 def main() -> None:
@@ -114,12 +167,9 @@ def main() -> None:
                 )
 
     features = []
-    priority_polygons = 0
     for index, (shape_record, properties) in enumerate(official_records):
         match_rows = matches.get(index, [])
         priority = max((row["prioridad"] for row in match_rows), default=None)
-        if priority is not None:
-            priority_polygons += 1
         sections = sorted({row["seccion"] for row in match_rows})
         reference_names = sorted({row["nombre_referencia"] for row in match_rows})
         geometry = shape_record.shape.__geo_interface__
@@ -143,6 +193,7 @@ def main() -> None:
             }
         )
 
+    priority_stats = assign_section_priorities(features, reference, args.sections)
     features.sort(key=lambda feature: (feature["properties"]["prioridad"] or 0, feature["properties"]["nombre"]))
     result = {
         "type": "FeatureCollection",
@@ -157,7 +208,10 @@ def main() -> None:
             "nombres_coincidentes": listed_names - len(unmatched),
             "nombres_sin_coincidencia": unmatched,
             "poligonos_oficiales": len(features),
-            "poligonos_prioritarios": priority_polygons,
+            "poligonos_prioritarios": priority_stats["total"],
+            "poligonos_prioritarios_por_cruce_espacial": priority_stats["cruce_espacial"],
+            "poligonos_prioritarios_por_nombre": priority_stats["respaldo_por_nombre"],
+            "regla_prioridad": "La colonia hereda la prioridad de la sección prioritaria con mayor superficie de intersección; si no existe intersección, se conserva una coincidencia nominal inequívoca.",
         },
         "features": features,
     }
@@ -167,7 +221,8 @@ def main() -> None:
         encoding="utf-8",
     )
     print(
-        f"{len(features)} official polygons ({priority_polygons} priority); "
+        f"{len(features)} official polygons ({priority_stats['total']} priority: "
+        f"{priority_stats['cruce_espacial']} spatial + {priority_stats['respaldo_por_nombre']} name fallback); "
         f"{listed_names - len(unmatched)}/{listed_names} listed names matched; "
         f"{len(unmatched)} unmatched"
     )
