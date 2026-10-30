@@ -25,6 +25,7 @@
   .ei .index-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.ei .index-box{border:1px solid var(--line);border-radius:15px;padding:15px;background:#fafbfc}.ei .index-box strong{display:block;font-size:1.5rem;line-height:1}.ei .index-box span{display:block;margin-top:6px;font-size:.7rem;color:var(--muted);font-weight:800;text-transform:uppercase}.ei .index-formula{border-left:3px solid #d91785;padding-left:12px;font-size:.77rem;color:var(--muted)}.ei .index-table td,.ei .index-table th{font-size:.74rem;vertical-align:middle}.ei .index-table th{text-transform:uppercase;letter-spacing:.04em;color:#788395;white-space:nowrap}.ei .index-score{font-weight:850;color:var(--wine)}
   .ei .iode-chart-shell{border:1px solid var(--line);border-radius:16px;overflow-x:auto;background:#fff}.ei .iode-chart{display:block;min-width:920px;width:100%;height:330px}.ei .zone-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.ei .zone-card{padding:12px 14px;border-radius:13px;border:1px solid rgba(0,0,0,.06)}.ei .zone-card strong{display:block;font-size:1.25rem}.ei .zone-card span{display:block;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em}.ei .zone-a{background:#fff2cc;color:#765b00}.ei .zone-b{background:#d9e8f5;color:#24577e}.ei .zone-c{background:#c9efdf;color:#116a53}.ei .iode-dot{cursor:pointer;transition:r .12s,opacity .12s}.ei .iode-dot:hover{r:7;opacity:1}.ei .iode-dot.is-selected{stroke:#111827;stroke-width:3;r:8;opacity:1}.ei .iode-chart-help{font-size:.72rem;color:var(--muted)}
   .ei .zone-matrix-shell{border:1px solid #cfd5dc;border-radius:15px;overflow:auto;background:#fff}.ei .zone-matrix-table{min-width:980px;margin:0}.ei .zone-matrix-table th{padding:9px 12px;background:#e4e6e9;border-color:#aeb5be;color:#202733;font-size:.7rem;text-transform:uppercase;letter-spacing:.04em;text-align:center}.ei .zone-matrix-table td{padding:13px 14px;border-color:#aeb5be;vertical-align:middle}.ei .zone-matrix-table .matrix-zone{width:125px;text-align:center}.ei .zone-matrix-table .matrix-threshold{width:170px;text-align:center;font-size:.9rem;font-weight:800}.ei .zone-matrix-table .matrix-reading{width:225px;text-align:center;font-size:.78rem;line-height:1.45}.ei .zone-matrix-table .matrix-a td{background:#fff8df}.ei .zone-matrix-table .matrix-b td{background:#e9f1f8}.ei .zone-matrix-table .matrix-c td{background:#e1f5ed}.ei .matrix-zone strong{display:block;font-size:1rem}.ei .matrix-zone span{display:block;margin-top:3px;font-size:.7rem;line-height:1.3}.ei .matrix-section-list{columns:4 145px;column-gap:20px;max-height:330px;overflow-y:auto}.ei .matrix-section-link{display:block;width:100%;border:0;background:transparent;color:#27364a;padding:2px 3px;text-align:left;font-size:.72rem;line-height:1.25;break-inside:avoid}.ei .matrix-section-link:hover,.ei .matrix-section-link:focus{background:rgba(255,255,255,.8);color:var(--wine);border-radius:5px;outline:none}.ei .matrix-section-link.is-selected{background:#fff;color:var(--wine);font-weight:850;border-radius:5px;box-shadow:0 0 0 2px #ffd43b}.ei .matrix-empty{font-size:.76rem;color:var(--muted)}
+  .ei .priority-colonies-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.ei .priority-colonies-stat{padding:11px 13px;border-radius:13px;border:1px solid rgba(0,0,0,.06)}.ei .priority-colonies-stat strong{display:block;font-size:1.25rem}.ei .priority-colonies-stat span{display:block;font-size:.67rem;font-weight:800;text-transform:uppercase}.ei .priority-all{background:#f4f6f9;color:#3e4a5d}.ei .priority-high{background:#f7d6dc;color:#8c142b}.ei .priority-medium{background:#fff0b8;color:#765900}.ei .priority-low{background:#dff0bd;color:#426b10}.ei .priority-colonies-shell{max-height:570px;overflow:auto;border:1px solid #cfd5dc;border-radius:15px}.ei .priority-colonies-table{min-width:1050px;margin:0}.ei .priority-colonies-table th{background:#e4e6e9;color:#202733;font-size:.68rem;text-align:center;text-transform:uppercase;letter-spacing:.04em;vertical-align:middle;white-space:nowrap}.ei .priority-colonies-table td{font-size:.76rem;vertical-align:middle}.ei .priority-colonies-table .colony-names{min-width:470px}.ei .priority-colonies-table tbody tr:hover{background:#fff8fb}.ei .priority-colonies-table tbody tr.is-selected{box-shadow:inset 4px 0 #d91785}.ei .priority-cell{min-width:105px;text-align:center;font-weight:850}.ei .priority-cell-3{background:#c00000!important;color:#fff}.ei .priority-cell-2{background:#ffc107!important;color:#3f3100}.ei .priority-cell-1{background:#92d050!important;color:#244800}.ei .priority-colonies-row[hidden]{display:none}.ei .priority-missing{color:#8a94a4;font-style:italic}
   .ei .fullscreen-btn{border:1px solid #dfe4ea;background:#fff;color:#374151;border-radius:10px;padding:7px 10px;font-size:.74rem;font-weight:800}.ei .fullscreen-btn:hover{background:#f4f6f9}.ei .map-card:fullscreen,.ei .map-card.is-map-fullscreen{background:#f4f7fb;padding:18px;border-radius:0}.ei .map-card:fullscreen #electoralMap,.ei .map-card.is-map-fullscreen #electoralMap{height:calc(100vh - 105px)}.ei .map-card.is-map-fullscreen{position:fixed;inset:0;z-index:2000;width:100vw;height:100vh}.ei .map-card:fullscreen .map-heading,.ei .map-card.is-map-fullscreen .map-heading{margin-bottom:10px!important}
   .ei .socio-panel{background:linear-gradient(135deg,#fff 0%,#f6fbfa 100%);border-color:#dcece7}.ei .socio-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.ei .socio-kpi{padding:13px;border-radius:13px;background:#fff;border:1px solid #e0ece8}.ei .socio-kpi strong{display:block;font-size:1.25rem}.ei .socio-kpi span{display:block;font-size:.66rem;color:var(--muted);font-weight:800;text-transform:uppercase}.ei .coverage-chip{display:inline-flex;padding:4px 7px;border-radius:999px;background:#e9f4f0;color:#176b58;font-size:.68rem;font-weight:800}
   .ei .context-card{border:1px solid #d9e3ef;background:linear-gradient(135deg,#fbfdff 0%,#f5f8fc 100%);border-radius:14px;padding:14px;margin-bottom:14px}.ei .context-heading{font-size:.74rem;font-weight:850;text-transform:uppercase;letter-spacing:.05em;color:#3f4d61;margin-bottom:8px}.ei .context-list{margin:0;padding-left:1.1rem;color:#344054}.ei .context-list li{font-size:.78rem;line-height:1.45;margin-bottom:6px}.ei .context-list li:last-child{margin-bottom:0}.ei .context-block{padding:11px 12px;border-radius:12px;background:#fff;border:1px solid #e6ebf1;margin-top:9px}.ei .context-note{font-size:.7rem;line-height:1.45;color:var(--muted);margin-top:9px}
@@ -32,7 +33,7 @@
   .ei .source-list a{color:var(--wine);text-decoration:none}.ei .source-list a:hover{text-decoration:underline}.ei .quality-row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}.ei .quality-row:last-child{border:0}.ei .quality-row span{color:var(--muted);font-size:.78rem}.ei .quality-row strong{font-size:.85rem}
   .ei .stable-table th{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:#7a8494;white-space:nowrap}.ei .stable-table td{font-size:.82rem;vertical-align:middle}.ei .section-link{border:0;background:none;color:var(--wine);font-weight:800;padding:0;text-decoration:underline;text-decoration-color:#e9bdca;text-underline-offset:3px}
   .leaflet-tooltip.ei-tooltip{border:0;border-radius:10px;box-shadow:0 8px 20px rgba(0,0,0,.16);padding:8px 10px;font:12px/1.35 system-ui,sans-serif}
-  @media(max-width:991.98px){.ei #electoralMap{height:520px}.ei .section-panel{min-height:0}.ei .map-toolbar{position:relative;left:auto;right:auto;top:auto;margin-bottom:10px}.ei .map-shell{display:flex;flex-direction:column}.ei .map-toolbar{order:-1}.ei .map-legend{bottom:12px}.ei .hero{padding:23px 20px}.ei .year-grid{grid-template-columns:1fr}.ei .projection-grid,.ei .action-kpis,.ei .index-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.ei .zone-summary{grid-template-columns:1fr}}
+  @media(max-width:991.98px){.ei #electoralMap{height:520px}.ei .section-panel{min-height:0}.ei .map-toolbar{position:relative;left:auto;right:auto;top:auto;margin-bottom:10px}.ei .map-shell{display:flex;flex-direction:column}.ei .map-toolbar{order:-1}.ei .map-legend{bottom:12px}.ei .hero{padding:23px 20px}.ei .year-grid{grid-template-columns:1fr}.ei .projection-grid,.ei .action-kpis,.ei .index-grid,.ei .priority-colonies-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.ei .zone-summary{grid-template-columns:1fr}}
 </style>
 @endpush
 
@@ -173,6 +174,44 @@
       </table>
     </div>
     <p class="iode-chart-help mt-2 mb-0">La matriz utiliza el IODE calculado en este tablero. La zona describe el equilibrio entre oferta y demanda del índice; no equivale a una preferencia electoral.</p>
+    <hr class="my-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+      <div><h3 class="panel-title">Colonias prioritarias por sección</h3><div class="panel-subtitle">Tabla semaforizada de la referencia compartida: prioridad 3 es alta, 2 es media y 1 es baja.</div></div>
+      <span class="soft-pill"><i class="fa-solid fa-location-dot me-1"></i>{{ number_format($priorityColonies['resumen']['total']) }} secciones de referencia</span>
+    </div>
+    <div class="priority-colonies-summary mb-3" aria-label="Resumen de colonias prioritarias">
+      <div class="priority-colonies-stat priority-all"><strong>{{ number_format($priorityColonies['resumen']['total']) }}</strong><span>Total de secciones</span></div>
+      <div class="priority-colonies-stat priority-high"><strong>{{ number_format($priorityColonies['resumen']['alta']) }}</strong><span>Prioridad 3 · Alta</span></div>
+      <div class="priority-colonies-stat priority-medium"><strong>{{ number_format($priorityColonies['resumen']['media']) }}</strong><span>Prioridad 2 · Media</span></div>
+      <div class="priority-colonies-stat priority-low"><strong>{{ number_format($priorityColonies['resumen']['baja']) }}</strong><span>Prioridad 1 · Baja</span></div>
+    </div>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+      <div class="action-filters" aria-label="Filtrar colonias por prioridad">
+        <button type="button" class="action-filter active" data-colony-priority="all">Todas</button>
+        <button type="button" class="action-filter" data-colony-priority="3">Prioridad alta</button>
+        <button type="button" class="action-filter" data-colony-priority="2">Prioridad media</button>
+        <button type="button" class="action-filter" data-colony-priority="1">Prioridad baja</button>
+      </div>
+      <div id="priorityColoniesCount" class="table-help">{{ number_format($priorityColonies['resumen']['total']) }} secciones mostradas</div>
+    </div>
+    <div class="priority-colonies-shell">
+      <table class="table table-bordered priority-colonies-table align-middle" aria-label="Colonias prioritarias por sección electoral">
+        <thead class="sticky-top"><tr><th>Distrito local</th><th>Sección</th><th>Colonias</th><th>Prioridad</th><th>Lista nominal 2021</th><th>Lista nominal 2024</th></tr></thead>
+        <tbody>
+          @foreach($priorityColonies['filas'] as $row)
+          <tr class="priority-colonies-row" data-priority="{{ $row['prioridad'] }}" data-priority-section="{{ $row['seccion'] }}">
+            <td class="text-center">{{ $row['distrito_local'] }}</td>
+            <td class="text-center"><button type="button" class="section-link" data-priority-open-section="{{ $row['seccion'] }}">{{ $row['seccion'] }}</button></td>
+            <td class="colony-names">@if($row['colonias'] !== ''){{ $row['colonias'] }}@else<span class="priority-missing">Sin colonia indicada en la referencia</span>@endif</td>
+            <td class="priority-cell priority-cell-{{ $row['prioridad'] }}">{{ $row['prioridad'] }} · {{ $row['prioridad_etiqueta'] }}</td>
+            <td class="text-end">{{ number_format($row['lista_nominal_2021']) }}</td>
+            <td class="text-end">{{ number_format($row['lista_nominal_2024']) }}</td>
+          </tr>
+          @endforeach
+        </tbody>
+      </table>
+    </div>
+    <p class="iode-chart-help mt-2 mb-0"><i class="fa-solid fa-circle-info me-1"></i><strong>Fuente:</strong> {{ $priorityColonies['metadata']['fuente'] }}. {{ $priorityColonies['metadata']['advertencia'] }} Haz clic en una sección para verla en el mapa.</p>
   </div>
 
   <div class="card-panel socio-panel mb-3" id="socioeconomicLayer">
@@ -394,6 +433,7 @@
     document.querySelectorAll('[data-action-section]').forEach(tableRow=>tableRow.classList.toggle('is-selected',Number(tableRow.dataset.actionSection)===selectedSection));
     document.querySelectorAll('[data-iode-section]').forEach(dot=>dot.classList.toggle('is-selected',Number(dot.dataset.iodeSection)===selectedSection));
     document.querySelectorAll('[data-zone-section]').forEach(button=>button.classList.toggle('is-selected',Number(button.dataset.zoneSection)===selectedSection));
+    document.querySelectorAll('[data-priority-section]').forEach(tableRow=>tableRow.classList.toggle('is-selected',Number(tableRow.dataset.prioritySection)===selectedSection));
     if(selectedSection===null||!geoLayer)return;
     const selectedLayer=layers.get(selectedSection);
     if(!selectedLayer)return;
@@ -690,6 +730,21 @@
     actionFilter=button.dataset.actionFilter;
     document.querySelectorAll('[data-action-filter]').forEach(candidate=>candidate.classList.toggle('active',candidate===button));
     renderActionTable();
+  }));
+  document.querySelectorAll('[data-colony-priority]').forEach(button=>button.addEventListener('click',()=>{
+    const selected=button.dataset.colonyPriority;
+    let visible=0;
+    document.querySelectorAll('[data-colony-priority]').forEach(candidate=>candidate.classList.toggle('active',candidate===button));
+    document.querySelectorAll('.priority-colonies-row').forEach(row=>{
+      const show=selected==='all'||row.dataset.priority===selected;
+      row.hidden=!show;
+      if(show)visible++;
+    });
+    document.getElementById('priorityColoniesCount').textContent=`${number.format(visible)} secciones mostradas`;
+  }));
+  document.querySelectorAll('[data-priority-open-section]').forEach(button=>button.addEventListener('click',()=>{
+    showSection(button.dataset.priorityOpenSection);
+    document.getElementById('mapCard').scrollIntoView({behavior:'smooth',block:'center'});
   }));
   document.getElementById('sectionSearch').addEventListener('change',event=>{const requested=Number(event.target.value);if(!rows.has(requested)){const previousLayer=selectedSection!==null?layers.get(selectedSection):null;if(previousLayer&&geoLayer)geoLayer.resetStyle(previousLayer);selectedSection=null;refreshSelectedLayer();document.getElementById('sectionDetail').classList.add('d-none');document.getElementById('emptySection').classList.remove('d-none');event.target.classList.add('is-invalid');document.getElementById('sectionSearchFeedback').textContent=`La sección ${event.target.value||'indicada'} no aparece en el mapa vigente; pudo cambiar de clave o de límites.`;return}showSection(requested)});
   const mapCard=document.getElementById('mapCard'),fullscreenButton=document.getElementById('mapFullscreen');

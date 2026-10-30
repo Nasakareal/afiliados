@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\ElectoralOfferDemandIndex;
+use App\Services\ElectoralPriorityColonies;
 use App\Services\ElectoralIntelligenceExcelExporter;
 use App\Services\ElectoralSectionColonies;
 use App\Services\SocioeconomicSectionLayer;
@@ -47,6 +48,7 @@ class ElectoralIntelligenceController extends Controller
             'electoralIndex' => $dataset['indice_electoral'],
             'topIode' => $indexedSections->take(12),
             'socioeconomic' => $dataset['socioeconomico'],
+            'priorityColonies' => $dataset['colonias_prioritarias'],
         ]);
     }
 
@@ -74,6 +76,7 @@ class ElectoralIntelligenceController extends Controller
         $dataset = app(ElectoralOfferDemandIndex::class)->enrich($this->dataset());
         $dataset = app(SocioeconomicSectionLayer::class)->enrich($dataset);
         $dataset = app(ElectoralSectionColonies::class)->enrich($dataset, $request->user());
+        $dataset = app(ElectoralPriorityColonies::class)->enrich($dataset);
         $validSections = collect($dataset['secciones'])
             ->pluck('seccion')
             ->map(fn ($section): string => (string) $section)

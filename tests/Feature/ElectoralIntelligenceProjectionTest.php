@@ -44,6 +44,10 @@ class ElectoralIntelligenceProjectionTest extends TestCase
             ->assertJsonPath('indice_electoral.secciones_sin_indice', 37)
             ->assertJsonPath('socioeconomico.secciones_con_datos', 373)
             ->assertJsonPath('socioeconomico.cobertura_alta', 317)
+            ->assertJsonPath('colonias_prioritarias.resumen.total', 28)
+            ->assertJsonPath('colonias_prioritarias.resumen.alta', 10)
+            ->assertJsonPath('colonias_prioritarias.resumen.media', 14)
+            ->assertJsonPath('colonias_prioritarias.resumen.baja', 4)
             ->assertHeader('Cache-Control', 'no-store, private');
 
         $section = collect($response->json('secciones'))->firstWhere('seccion', 1118);
@@ -59,6 +63,9 @@ class ElectoralIntelligenceProjectionTest extends TestCase
         $section1188 = collect($response->json('secciones'))->firstWhere('seccion', 1188);
         $this->assertSame(['Cinco de Diciembre'], $section1188['colonias']['nombres']);
         $this->assertSame('IEM, listado de ubicación de casillas 2025', $section1188['colonias']['fuente']);
+        $this->assertSame(3, $section1188['colonia_prioritaria']['prioridad']);
+        $this->assertSame('Alta', $section1188['colonia_prioritaria']['prioridad_etiqueta']);
+        $this->assertSame(940, $section1188['colonia_prioritaria']['lista_nominal_2024']);
 
         $this->get(route('electoral.index'))
             ->assertOk()
@@ -77,6 +84,12 @@ class ElectoralIntelligenceProjectionTest extends TestCase
             ->assertSeeText('Secciones de Morelia')
             ->assertSeeText('Lectura y seguimiento')
             ->assertSeeText('no equivale a una preferencia electoral')
+            ->assertSeeText('Colonias prioritarias por sección')
+            ->assertSeeText('Prioridad 3 · Alta')
+            ->assertSeeText('Prioridad 2 · Media')
+            ->assertSeeText('Prioridad 1 · Baja')
+            ->assertSeeText('Tabla de colonias prioritarias proporcionada por el usuario')
+            ->assertSeeText('Sin colonia indicada en la referencia')
             ->assertSeeText('Abrir mapa completo')
             ->assertSeeText('Esa sección no aparece en el mapa vigente.')
             ->assertSeeText('Exportar todo a Excel')

@@ -1,0 +1,42 @@
+{
+    "metadata": {
+        "fuente": "Tabla de colonias prioritarias proporcionada por el usuario",
+        "alcance": "Secciones de los distritos locales 10, 11, 16 y 17 incluidas en la referencia visual.",
+        "advertencia": "La prioridad y las listas nominales se transcriben de la tabla de referencia. Son datos del estudio y pueden diferir de la base electoral oficial normalizada del tablero.",
+        "prioridades": {
+            "3": "Alta",
+            "2": "Media",
+            "1": "Baja"
+        }
+    },
+    "filas": [
+        {"distrito_local": 10, "seccion": 1001, "colonias": "Las Margaritas", "prioridad": 2, "lista_nominal_2021": 1059, "lista_nominal_2024": 1477},
+        {"distrito_local": 10, "seccion": 1012, "colonias": "", "prioridad": 2, "lista_nominal_2021": 1309, "lista_nominal_2024": 1586},
+        {"distrito_local": 10, "seccion": 1020, "colonias": "Melchor Ocampo", "prioridad": 2, "lista_nominal_2021": 1134, "lista_nominal_2024": 2944},
+        {"distrito_local": 10, "seccion": 1203, "colonias": "Lomas del Tec., Santiaguito, Loma Bonita", "prioridad": 1, "lista_nominal_2021": 2024, "lista_nominal_2024": 2144},
+        {"distrito_local": 10, "seccion": 1219, "colonias": "Granjas del Maestro", "prioridad": 2, "lista_nominal_2021": 1809, "lista_nominal_2024": 646},
+        {"distrito_local": 11, "seccion": 1028, "colonias": "Centro", "prioridad": 3, "lista_nominal_2021": 372, "lista_nominal_2024": 1134},
+        {"distrito_local": 11, "seccion": 1031, "colonias": "Independencia, Satélite", "prioridad": 3, "lista_nominal_2021": 997, "lista_nominal_2024": 610},
+        {"distrito_local": 11, "seccion": 1046, "colonias": "Centro", "prioridad": 3, "lista_nominal_2021": 568, "lista_nominal_2024": 241},
+        {"distrito_local": 11, "seccion": 1076, "colonias": "Vasco de Quiroga, 5 de Mayo, Centro", "prioridad": 1, "lista_nominal_2021": 1188, "lista_nominal_2024": 3348},
+        {"distrito_local": 11, "seccion": 1083, "colonias": "Vasco de Quiroga", "prioridad": 3, "lista_nominal_2021": 628, "lista_nominal_2024": 774},
+        {"distrito_local": 11, "seccion": 1089, "colonias": "Fovissste Acueducto, Enrique Ramírez, U. Hab. Fovissste Acueducto, Acueducto", "prioridad": 3, "lista_nominal_2021": 901, "lista_nominal_2024": 1198},
+        {"distrito_local": 11, "seccion": 1105, "colonias": "Fray Antonio, Faldas del Punhuato, Mil Cumbres, Fray Antonio de Lisboa", "prioridad": 2, "lista_nominal_2021": 1604, "lista_nominal_2024": 933},
+        {"distrito_local": 11, "seccion": 1238, "colonias": "Zimpanio Norte, Priv. Fresnos de la Tierra, Quinceo, Atapaneo, Insurgentes de Valladolid", "prioridad": 3, "lista_nominal_2021": 1631, "lista_nominal_2024": 938},
+        {"distrito_local": 16, "seccion": 1054, "colonias": "Adolfo López Mateos, Inf. Santa Teresa, Polvorín, Vicente Guerrero, Villas del Sol, Agua Clara", "prioridad": 2, "lista_nominal_2021": 977, "lista_nominal_2024": 1331},
+        {"distrito_local": 16, "seccion": 1060, "colonias": "Agustín Arriaga Rivera, Ferrocarrilero", "prioridad": 1, "lista_nominal_2021": 2370, "lista_nominal_2024": 3570},
+        {"distrito_local": 16, "seccion": 1131, "colonias": "Felicitas del Río, Gustavo Díaz Ordaz, Juárez, Morelos", "prioridad": 2, "lista_nominal_2021": 1335, "lista_nominal_2024": 2082},
+        {"distrito_local": 16, "seccion": 1215, "colonias": "La Ortiga, Niño Artillero, Loma Colorada", "prioridad": 1, "lista_nominal_2021": 6025, "lista_nominal_2024": 6385},
+        {"distrito_local": 17, "seccion": 1110, "colonias": "Fracc. Ilustres Novohispanos", "prioridad": 3, "lista_nominal_2021": 1335, "lista_nominal_2024": 1334},
+        {"distrito_local": 17, "seccion": 1125, "colonias": "Ventura Puente, Lago de Yuriria", "prioridad": 2, "lista_nominal_2021": 1392, "lista_nominal_2024": 1680},
+        {"distrito_local": 17, "seccion": 1157, "colonias": "", "prioridad": 3, "lista_nominal_2021": 586, "lista_nominal_2024": 1320},
+        {"distrito_local": 17, "seccion": 1164, "colonias": "Rincón Quieto, Villas de la Loma", "prioridad": 2, "lista_nominal_2021": 1461, "lista_nominal_2024": 1416},
+        {"distrito_local": 17, "seccion": 1171, "colonias": "Félix Ireta, Arko San Mateo", "prioridad": 3, "lista_nominal_2021": 754, "lista_nominal_2024": 669},
+        {"distrito_local": 17, "seccion": 1179, "colonias": "Inf. Camelinas, La Loma, Camelinas, Electricistas, Fracc. Camelinas", "prioridad": 2, "lista_nominal_2021": 2166, "lista_nominal_2024": 274},
+        {"distrito_local": 17, "seccion": 1188, "colonias": "Cinco de Diciembre", "prioridad": 3, "lista_nominal_2021": 1291, "lista_nominal_2024": 940},
+        {"distrito_local": 17, "seccion": 1225, "colonias": "Vista Bella, Lomas de Vista Bella, Fracc. Vista Bella, Santa María de Guido, José Trinidad Guido, Col. Vista Bella", "prioridad": 2, "lista_nominal_2021": 2349, "lista_nominal_2024": 787},
+        {"distrito_local": 17, "seccion": 1251, "colonias": "Eréndira, San José Coapa, Tiripetío", "prioridad": 2, "lista_nominal_2021": 1908, "lista_nominal_2024": 7218},
+        {"distrito_local": 17, "seccion": 1269, "colonias": "El Durazno, Zimpanio Norte, Fracc. Hacienda la Trinidad, Valle del Durazno, 8 de Noviembre, 5 de Noviembre, Torrecillas, Lomas del Salto", "prioridad": 2, "lista_nominal_2021": 1681, "lista_nominal_2024": 1308},
+        {"distrito_local": 17, "seccion": 1276, "colonias": "Santiago Undameo, La Mintzita, Atecuaro, La Reunión, Tiripetío, Río Colorado, Loc. Isaac Arriaga", "prioridad": 2, "lista_nominal_2021": 1890, "lista_nominal_2024": 834}
+    ]
+}
