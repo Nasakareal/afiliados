@@ -114,9 +114,12 @@ def main() -> None:
                 )
 
     features = []
-    for index, match_rows in matches.items():
-        shape_record, properties = official_records[index]
-        priority = max(row["prioridad"] for row in match_rows)
+    priority_polygons = 0
+    for index, (shape_record, properties) in enumerate(official_records):
+        match_rows = matches.get(index, [])
+        priority = max((row["prioridad"] for row in match_rows), default=None)
+        if priority is not None:
+            priority_polygons += 1
         sections = sorted({row["seccion"] for row in match_rows})
         reference_names = sorted({row["nombre_referencia"] for row in match_rows})
         geometry = shape_record.shape.__geo_interface__
@@ -132,7 +135,7 @@ def main() -> None:
                     "fecha_actualizacion": properties["FECHA_ACT"],
                     "institucion": properties["INSTITUCIO"],
                     "prioridad": priority,
-                    "prioridad_etiqueta": reference["metadata"]["prioridades"][str(priority)],
+                    "prioridad_etiqueta": reference["metadata"]["prioridades"].get(str(priority)),
                     "secciones_referencia": sections,
                     "nombres_referencia": reference_names,
                 },
@@ -140,7 +143,7 @@ def main() -> None:
             }
         )
 
-    features.sort(key=lambda feature: (feature["properties"]["prioridad"] * -1, feature["properties"]["nombre"]))
+    features.sort(key=lambda feature: (feature["properties"]["prioridad"] or 0, feature["properties"]["nombre"]))
     result = {
         "type": "FeatureCollection",
         "metadata": {
@@ -153,7 +156,8 @@ def main() -> None:
             "nombres_listados": listed_names,
             "nombres_coincidentes": listed_names - len(unmatched),
             "nombres_sin_coincidencia": unmatched,
-            "poligonos_publicados": len(features),
+            "poligonos_oficiales": len(features),
+            "poligonos_prioritarios": priority_polygons,
         },
         "features": features,
     }
@@ -163,7 +167,8 @@ def main() -> None:
         encoding="utf-8",
     )
     print(
-        f"{len(features)} polygons; {listed_names - len(unmatched)}/{listed_names} listed names matched; "
+        f"{len(features)} official polygons ({priority_polygons} priority); "
+        f"{listed_names - len(unmatched)}/{listed_names} listed names matched; "
         f"{len(unmatched)} unmatched"
     )
 
