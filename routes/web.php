@@ -111,6 +111,7 @@ Route::middleware(['auth', 'system.access'])->group(function () {
     Route::post('/actividades', [ActividadController::class,'store'])->name('actividades.store')->middleware('permission:actividades.crear');
     Route::get('/actividades/{actividad}', [ActividadController::class,'show'])->name('actividades.show')->middleware('permission:actividades.ver');
     Route::get('/actividades/{actividad}/evidencia', [ActividadController::class,'evidence'])->name('actividades.evidencia')->middleware('permission:actividades.ver|actividades.reportar');
+    Route::get('/actividades/{actividad}/asistencias/{user}/evidencia', [ActividadController::class,'attendanceEvidence'])->name('actividades.asistencias.evidencia')->middleware('permission:actividades.ver|actividades.reportar');
     Route::post('/actividades/{actividad}/asistencia', [ActividadController::class,'attend'])->name('actividades.asistencia')->middleware('permission:actividades.reportar');
     Route::put('/actividades/{actividad}/revision', [ActividadController::class,'review'])->name('actividades.revision')->middleware('role:Admin|SuperAdmin');
     Route::get('/actividades/{actividad}/edit', [ActividadController::class,'edit'])->name('actividades.edit')->middleware('permission:actividades.editar');

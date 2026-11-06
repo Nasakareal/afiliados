@@ -16,6 +16,7 @@ class ActividadResource extends JsonResource
             'fin'         => optional($this->fin)->toIso8601String(),
             'all_day'     => (bool) $this->all_day,
             'lugar'       => $this->lugar,
+            'ubicacion_google' => $this->ubicacion_google,
             'estado'      => $this->estado,
             'creado_por'  => $this->creado_por,
             'distrito_local' => $this->distrito_local,

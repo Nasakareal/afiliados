@@ -55,6 +55,7 @@ class OperationalDashboardTest extends TestCase
             'titulo' => 'Gestión vecinal propia',
             'tipo' => 'Gestión',
             'colonia' => 'Centro',
+            'ubicacion_google' => 'maps.app.goo.gl/ejemplo123',
             'inicio' => now()->subDay()->format('Y-m-d H:i:s'),
             'asistentes' => 14,
             'yo_asisti' => 1,
@@ -67,11 +68,58 @@ class OperationalDashboardTest extends TestCase
         $this->assertSame('reporte_usuario', $activity->origen);
         $this->assertSame('pendiente', $activity->estado_revision);
         $this->assertSame(14, $activity->asistentes);
+        $this->assertSame('https://maps.app.goo.gl/ejemplo123', $activity->ubicacion_google);
         $this->assertDatabaseHas('actividad_participantes', [
             'actividad_id' => $activity->id,
             'user_id' => $capturer->id,
+            'evidencia_path' => $activity->evidencia_path,
         ]);
         Storage::disk('local')->assertExists($activity->evidencia_path);
+    }
+
+    public function test_attendance_requires_and_stores_photo_evidence(): void
+    {
+        Storage::fake('local');
+        $capturer = User::factory()->create(['must_change_password' => false]);
+        $capturer->assignRole('Capturista');
+        $activityId = DB::table('actividades')->insertGetId([
+            'titulo' => 'Asamblea informativa',
+            'tipo' => 'Reunión',
+            'origen' => 'oficial',
+            'inicio' => now()->subHour(),
+            'all_day' => false,
+            'creado_por' => $capturer->id,
+            'responsable_id' => $capturer->id,
+            'estado' => 'realizada',
+            'estado_revision' => 'aprobada',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $this->actingAs($capturer)->post(route('actividades.asistencia', $activityId), [])
+            ->assertSessionHasErrors('evidencia_asistencia');
+        $this->assertDatabaseMissing('actividad_participantes', [
+            'actividad_id' => $activityId,
+            'user_id' => $capturer->id,
+        ]);
+
+        $response = $this->actingAs($capturer)->post(route('actividades.asistencia', $activityId), [
+            'evidencia_asistencia' => UploadedFile::fake()->image('asistencia.jpg'),
+        ]);
+
+        $response->assertRedirect();
+        $participant = DB::table('actividad_participantes')
+            ->where('actividad_id', $activityId)->where('user_id', $capturer->id)->first();
+        $this->assertNotNull($participant);
+        $this->assertNotNull($participant->evidencia_path);
+        Storage::disk('local')->assertExists($participant->evidencia_path);
+        $this->actingAs($capturer)->get(route('actividades.asistencias.evidencia', [$activityId, $capturer]))
+            ->assertOk();
+
+        $otherCapturer = User::factory()->create(['must_change_password' => false]);
+        $otherCapturer->assignRole('Capturista');
+        $this->actingAs($otherCapturer)->get(route('actividades.asistencias.evidencia', [$activityId, $capturer]))
+            ->assertForbidden();
     }
 
     public function test_demo_commands_only_create_and_remove_marked_records(): void

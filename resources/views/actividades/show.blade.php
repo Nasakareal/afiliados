@@ -6,7 +6,7 @@
 @section('content')
 <div class="container-xl">
   <div class="card card-outline card-primary shadow-sm">
-    <div class="card-header d-flex justify-content-between align-items-center">
+    <div class="card-header d-flex flex-wrap gap-2 justify-content-between align-items-center">
       <h3 class="card-title mb-0">
         <i class="fa fa-calendar-day me-1"></i> {{ $actividad->titulo }}
       </h3>
@@ -17,7 +17,7 @@
         @endif
         @can('actividades.reportar')
         @unless($yoAsisti)
-        <form action="{{ route('actividades.asistencia',$actividad) }}" method="POST">@csrf<button class="btn btn-granate btn-sm"><i class="fa-solid fa-user-check"></i> Yo asistí</button></form>
+        <button type="button" class="btn btn-granate btn-sm" data-bs-toggle="modal" data-bs-target="#modalAsistencia"><i class="fa-solid fa-user-check"></i> Yo asistí</button>
         @endunless
         @endcan
         @can('actividades.editar')
@@ -46,6 +46,15 @@
         <dt class="col-sm-3">Lugar</dt>
         <dd class="col-sm-9">{{ $actividad->lugar ?: '—' }}</dd>
 
+        <dt class="col-sm-3">Ubicación</dt>
+        <dd class="col-sm-9">
+          @if($actividad->ubicacion_google)
+            <a href="{{ $actividad->ubicacion_google }}" target="_blank" rel="noopener" class="btn btn-outline-danger btn-sm"><i class="fa-solid fa-map-location-dot me-1"></i> Abrir en Google Maps</a>
+          @else
+            <span class="text-muted">Sin enlace de ubicación</span>
+          @endif
+        </dd>
+
         <dt class="col-sm-3">Tipo / colonia</dt>
         <dd class="col-sm-9">{{ $actividad->tipo ?: '—' }} / {{ $actividad->colonia ?: '—' }}</dd>
 
@@ -57,6 +66,19 @@
 
         <dt class="col-sm-3">Asistencia / registros</dt>
         <dd class="col-sm-9">{{ number_format($actividad->asistentes ?? 0) }} asistentes reportados · {{ number_format($actividad->participantes->count()) }} integrantes confirmaron asistencia · {{ number_format($actividad->afiliados()->count()) }} registros vinculados</dd>
+
+        @if($actividad->participantes->isNotEmpty())
+        <dt class="col-sm-3">Evidencias de asistencia</dt>
+        <dd class="col-sm-9">
+          <div class="d-flex flex-wrap gap-2">
+            @foreach($actividad->participantes as $participante)
+              @if($participante->pivot->evidencia_path && (auth()->id() === $participante->id || auth()->user()->hasAnyRole(['Admin','SuperAdmin','Coordinador'])))
+                <a class="btn btn-outline-secondary btn-sm" target="_blank" href="{{ route('actividades.asistencias.evidencia', [$actividad, $participante]) }}"><i class="fa-solid fa-camera me-1"></i> {{ auth()->id() === $participante->id ? 'Mi evidencia' : $participante->name }}</a>
+              @endif
+            @endforeach
+          </div>
+        </dd>
+        @endif
 
         <dt class="col-sm-3">Evidencia</dt>
         <dd class="col-sm-9">
@@ -100,6 +122,27 @@
     </div>
   </div>
 </div>
+
+@can('actividades.reportar')
+@unless($yoAsisti)
+<div class="modal fade" id="modalAsistencia" tabindex="-1" aria-labelledby="modalAsistenciaLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+    <form action="{{ route('actividades.asistencia',$actividad) }}" method="POST" enctype="multipart/form-data">
+      @csrf
+      <div class="modal-header"><h5 class="modal-title" id="modalAsistenciaLabel"><i class="fa-solid fa-user-check text-success me-2"></i>Confirmar que asistí</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div>
+      <div class="modal-body">
+        <p>Para registrar tu asistencia a <strong>{{ $actividad->titulo }}</strong>, sube una foto tomada durante la actividad.</p>
+        <label for="evidencia_asistencia" class="form-label fw-bold">Foto de evidencia <span class="text-danger">*</span></label>
+        <input type="file" name="evidencia_asistencia" id="evidencia_asistencia" accept="image/jpeg,image/png,image/webp" capture="environment" class="form-control @error('evidencia_asistencia') is-invalid @enderror" required>
+        <div class="form-text">Puedes tomarla ahora o elegirla de tu galería. Máximo 10 MB.</div>
+        @error('evidencia_asistencia')<div class="invalid-feedback">{{ $message }}</div>@enderror
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button><button class="btn btn-granate"><i class="fa-solid fa-camera me-2"></i>Subir foto y confirmar</button></div>
+    </form>
+  </div></div>
+</div>
+@endunless
+@endcan
 @endsection
 
 @push('scripts')

@@ -14,7 +14,7 @@ class Actividad extends Model
     protected $fillable = [
         'titulo','tipo','origen','descripcion',
         'inicio','fin','all_day',
-        'lugar','colonia',
+        'lugar','ubicacion_google','colonia',
         'creado_por','responsable_id','capturista_id','distrito_local',
         'asistentes','evidencia_url','evidencia_path','evidencia_nombre','capturada_en','demo_batch',
         'estado','estado_revision','revisado_por','revisado_en',
@@ -53,7 +53,7 @@ class Actividad extends Model
     public function participantes()
     {
         return $this->belongsToMany(User::class, 'actividad_participantes')
-            ->withPivot('asistio_en')->withTimestamps();
+            ->withPivot('asistio_en', 'evidencia_path', 'evidencia_nombre')->withTimestamps();
     }
 
     public function scopeEstado($q, $estado)

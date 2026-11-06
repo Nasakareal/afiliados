@@ -9,7 +9,7 @@
       <h3 class="card-title mb-0"><i class="fa fa-plus-circle me-1"></i> Crear actividad oficial</h3>
     </div>
     <div class="card-body">
-      <form action="{{ route('actividades.store') }}" method="POST" autocomplete="off">
+      <form action="{{ route('actividades.store') }}" method="POST" enctype="multipart/form-data" autocomplete="off">
         @csrf
 
         <div class="row g-3">
@@ -25,6 +25,17 @@
             <input type="text" name="lugar" value="{{ old('lugar') }}" 
                    class="form-control @error('lugar') is-invalid @enderror">
             @error('lugar')<div class="invalid-feedback">{{ $message }}</div>@enderror
+          </div>
+
+          <div class="col-12">
+            <div class="border rounded-3 p-3 bg-light">
+              <label class="form-label fw-bold" for="ubicacion_google"><i class="fa-solid fa-location-dot text-danger me-1"></i> Ubicación en Google Maps</label>
+              <input type="text" inputmode="url" name="ubicacion_google" id="ubicacion_google" value="{{ old('ubicacion_google') }}"
+                     class="form-control @error('ubicacion_google') is-invalid @enderror" maxlength="2000"
+                     placeholder="Pega aquí el enlace que copiaste de Google Maps">
+              <div class="form-text">En Google Maps toca <strong>Compartir</strong>, luego <strong>Copiar enlace</strong> y pégalo aquí.</div>
+              @error('ubicacion_google')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            </div>
           </div>
 
           <div class="col-md-4">
@@ -87,9 +98,10 @@
           </div>
 
           <div class="col-md-8">
-            <label class="form-label">Evidencia (URL)</label>
-            <input type="url" name="evidencia_url" value="{{ old('evidencia_url') }}" class="form-control @error('evidencia_url') is-invalid @enderror" placeholder="https://…">
-            @error('evidencia_url')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            <label class="form-label fw-bold" for="foto_actividad"><i class="fa-solid fa-camera me-1"></i> Foto de la actividad</label>
+            <input type="file" name="foto_actividad" id="foto_actividad" accept="image/jpeg,image/png,image/webp" capture="environment" class="form-control @error('foto_actividad') is-invalid @enderror">
+            <div class="form-text">Puedes tomarla con la cámara o elegirla de tu galería. Máximo 10 MB.</div>
+            @error('foto_actividad')<div class="invalid-feedback">{{ $message }}</div>@enderror
           </div>
 
           <div class="col-md-4">

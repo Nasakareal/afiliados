@@ -31,7 +31,8 @@ Route::prefix('v1')->group(function () {
         Route::delete('/afiliados/{afiliado}', [AfiliadoApiController::class, 'destroy'])->middleware('permission:afiliados.borrar');
         Route::post('/registro', [AfiliadoApiController::class, 'store'])->name('api.registro.store')->middleware('permission:afiliados.crear');
 
-        Route::get('/secciones', [SeccionApiController::class, 'index'])->middleware('permission:secciones.ver');
+        Route::get('/secciones', [SeccionApiController::class, 'index'])
+            ->middleware('permission:secciones.ver|lonas.crear|lonas.editar');
         Route::post('/secciones', [SeccionApiController::class, 'store'])->middleware('permission:secciones.crear');
         Route::get('/secciones/{seccion}', [SeccionApiController::class, 'show'])->middleware('permission:secciones.ver');
         Route::match(['put', 'patch'], '/secciones/{seccion}', [SeccionApiController::class, 'update'])->middleware('permission:secciones.editar');

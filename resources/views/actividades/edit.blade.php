@@ -15,7 +15,7 @@
     </div>
 
     <div class="card-body">
-      <form action="{{ route('actividades.update', $actividad->id) }}" method="POST" autocomplete="off">
+      <form action="{{ route('actividades.update', $actividad->id) }}" method="POST" enctype="multipart/form-data" autocomplete="off">
         @csrf
         @method('PUT')
 
@@ -35,6 +35,16 @@
                    value="{{ old('lugar', $actividad->lugar) }}"
                    class="form-control @error('lugar') is-invalid @enderror">
             @error('lugar')<div class="invalid-feedback">{{ $message }}</div>@enderror
+          </div>
+
+          <div class="col-12">
+            <div class="border rounded-3 p-3 bg-light">
+              <label class="form-label fw-bold" for="ubicacion_google"><i class="fa-solid fa-location-dot text-danger me-1"></i> Ubicación en Google Maps</label>
+              <input type="text" inputmode="url" name="ubicacion_google" id="ubicacion_google" value="{{ old('ubicacion_google', $actividad->ubicacion_google) }}"
+                     class="form-control @error('ubicacion_google') is-invalid @enderror" maxlength="2000" placeholder="Pega aquí el enlace que copiaste de Google Maps">
+              <div class="form-text">En Google Maps toca <strong>Compartir</strong>, luego <strong>Copiar enlace</strong> y pégalo aquí.</div>
+              @error('ubicacion_google')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            </div>
           </div>
 
           <div class="col-md-4">
@@ -105,9 +115,10 @@
           </div>
 
           <div class="col-md-8">
-            <label class="form-label">Evidencia (URL)</label>
-            <input type="url" name="evidencia_url" value="{{ old('evidencia_url', $actividad->evidencia_url) }}" class="form-control @error('evidencia_url') is-invalid @enderror">
-            @error('evidencia_url')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            <label class="form-label fw-bold" for="foto_actividad"><i class="fa-solid fa-camera me-1"></i> {{ $actividad->evidencia_path ? 'Reemplazar foto de la actividad' : 'Foto de la actividad' }}</label>
+            <input type="file" name="foto_actividad" id="foto_actividad" accept="image/jpeg,image/png,image/webp" capture="environment" class="form-control @error('foto_actividad') is-invalid @enderror">
+            <div class="form-text">{{ $actividad->evidencia_path ? 'Si no eliges otra foto, se conservará la actual.' : 'Puedes tomarla con la cámara o elegirla de tu galería.' }} Máximo 10 MB.</div>
+            @error('foto_actividad')<div class="invalid-feedback">{{ $message }}</div>@enderror
           </div>
 
           <div class="col-md-4">
