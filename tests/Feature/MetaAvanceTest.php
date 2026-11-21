@@ -660,7 +660,8 @@ class MetaAvanceTest extends TestCase
         $page = $this->actingAs($admin)->get(route('avance.index', $query));
         $page->assertOk()
             ->assertSeeText('Ver personas y distritos')
-            ->assertSeeText('Descargar Excel');
+            ->assertSeeText('Descargar Excel')
+            ->assertSeeText('Excel por sección');
 
         $detail = $this->actingAs($admin)->get(route('avance.convencidos', $query));
         $detail->assertOk()
@@ -686,6 +687,93 @@ class MetaAvanceTest extends TestCase
         $this->assertSame('DL 01 / DFn 03', $people->getCell('M6')->getValue());
         $this->assertNull($people->getCell('B7')->getValue());
         $this->assertStringContainsString('Referente: Moises Navarro', $people->getCell('A2')->getValue());
+
+        $workbook->disconnectWorksheets();
+    }
+
+    public function test_section_summary_excel_includes_colonies_lonas_and_convinced_counts(): void
+    {
+        $admin = User::factory()->create(['must_change_password' => false]);
+        $admin->assignRole('Admin');
+        $capturer = User::factory()->create(['must_change_password' => false]);
+
+        DB::table('afiliados')->insert([
+            [
+                'capturista_id' => $capturer->id,
+                'nombre' => 'Persona uno',
+                'municipio' => 'Municipio de prueba',
+                'cve_mun' => '001',
+                'colonia' => 'Centro',
+                'seccion' => '0001',
+                'distrito_local' => 1,
+                'distrito_federal' => 3,
+                'estatus' => 'validado',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'capturista_id' => $capturer->id,
+                'nombre' => 'Persona dos',
+                'municipio' => 'Municipio de prueba',
+                'cve_mun' => '001',
+                'colonia' => 'Las Flores',
+                'seccion' => '0001',
+                'distrito_local' => 1,
+                'distrito_federal' => 3,
+                'estatus' => 'validado',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
+
+        DB::table('lonas')->insert([
+            [
+                'seccion' => '0001',
+                'direccion' => 'Calle uno',
+                'lat' => 19.7,
+                'lng' => -101.2,
+                'foto_path' => 'lonas/uno.jpg',
+                'responsable' => 'Responsable uno',
+                'capturado_por' => $capturer->id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'seccion' => '0001',
+                'direccion' => 'Calle dos',
+                'lat' => 19.71,
+                'lng' => -101.21,
+                'foto_path' => 'lonas/dos.jpg',
+                'responsable' => 'Responsable dos',
+                'capturado_por' => $capturer->id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
+
+        $response = $this->actingAs($admin)->get(
+            route('avance.secciones.export.xlsx', ['distrito_local' => 1])
+        );
+
+        $response->assertOk()->assertHeader(
+            'content-type',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        );
+
+        $workbook = IOFactory::load($response->baseResponse->getFile()->getPathname());
+        $sheet = $workbook->getSheetByName('Avance por sección');
+
+        $this->assertNotNull($sheet);
+        $this->assertSame('DISTRITO', $sheet->getCell('A4')->getValue());
+        $this->assertSame('SECCIÓN', $sheet->getCell('B4')->getValue());
+        $this->assertSame('COLONIAS', $sheet->getCell('C4')->getValue());
+        $this->assertSame('# LONAS', $sheet->getCell('D4')->getValue());
+        $this->assertSame('# CONVENCIDOS', $sheet->getCell('E4')->getValue());
+        $this->assertSame(1, $sheet->getCell('A5')->getValue());
+        $this->assertSame('0001', $sheet->getCell('B5')->getValue());
+        $this->assertSame('Centro, Las Flores', $sheet->getCell('C5')->getValue());
+        $this->assertSame(2, $sheet->getCell('D5')->getValue());
+        $this->assertSame(2, $sheet->getCell('E5')->getValue());
 
         $workbook->disconnectWorksheets();
     }

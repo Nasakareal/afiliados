@@ -197,6 +197,9 @@
       <a href="{{ route('avance.export.xlsx', request()->query()) }}" class="btn btn-sm btn-success">
         <i class="fa-solid fa-file-excel me-1"></i> Descargar Excel
       </a>
+      <a href="{{ route('avance.secciones.export.xlsx', request()->query()) }}" class="btn btn-sm btn-outline-success">
+        <i class="fa-solid fa-table-list me-1"></i> Excel por sección
+      </a>
       @can('avance.metas')
         <button class="btn btn-sm btn-granate btn-nueva-meta" data-bs-toggle="modal" data-bs-target="#modalMeta">
           <i class="fa-solid fa-bullseye me-1"></i> Asignar meta

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\MetaAvance;
 use App\Models\User;
 use App\Services\AvanceExcelExporter;
+use App\Services\AvanceSeccionesExcelExporter;
 use App\Support\LocalDistrictAccess;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
@@ -930,6 +931,28 @@ class MetaAvanceController extends Controller
             ->deleteFileAfterSend(true);
     }
 
+    public function exportSecciones(
+        Request $request,
+        AvanceSeccionesExcelExporter $exporter
+    ) {
+        $filters = $this->resolveFilters($request);
+        $path = $exporter->create(
+            $this->resumenSecciones($filters),
+            $this->filterSummary($filters)
+        );
+
+        return response()
+            ->download(
+                $path,
+                'avance_por_seccion_'.now()->format('Ymd_His').'.xlsx',
+                [
+                    'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+                ]
+            )
+            ->deleteFileAfterSend(true);
+    }
+
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -1258,6 +1281,167 @@ class MetaAvanceController extends Controller
         );
 
         return $query;
+    }
+
+    private function resumenSecciones(array $filters)
+    {
+        $secciones = DB::table('secciones as s')
+            ->select(
+                's.seccion',
+                's.cve_mun',
+                's.municipio',
+                's.distrito_local',
+                's.distrito_federal'
+            )
+            ->when(
+                $filters['cveMun'] !== '',
+                fn($query) => $query->where('s.cve_mun', $filters['cveMun'])
+            )
+            ->when(
+                $filters['distritoLocal'] !== '',
+                fn($query) => $query->where('s.distrito_local', $filters['distritoLocal'])
+            )
+            ->when(
+                $filters['distritoFederal'] !== '',
+                fn($query) => $query->where('s.distrito_federal', $filters['distritoFederal'])
+            )
+            ->get();
+
+        $convencidosQuery = DB::table('afiliados as a')
+            ->select(
+                'a.cve_mun',
+                'a.distrito_local',
+                'a.seccion',
+                'a.colonia',
+                DB::raw('COUNT(*) AS total')
+            )
+            ->whereNull('a.deleted_at')
+            ->when(
+                $filters['cveMun'] !== '',
+                fn($query) => $query->where('a.cve_mun', $filters['cveMun'])
+            )
+            ->when(
+                $filters['distritoLocal'] !== '',
+                fn($query) => $query->where('a.distrito_local', $filters['distritoLocal'])
+            )
+            ->when(
+                $filters['distritoFederal'] !== '',
+                fn($query) => $query->where('a.distrito_federal', $filters['distritoFederal'])
+            )
+            ->when(
+                $filters['referente'] !== '',
+                fn($query) => $query->whereRaw('TRIM(a.perfil) = ?', [$filters['referente']])
+            )
+            ->when(
+                $filters['capturistaId'],
+                fn($query) => $query->where('a.capturista_id', $filters['capturistaId'])
+            );
+
+        $this->applyTipoCargaFilter(
+            $convencidosQuery,
+            $filters['tipoCarga'],
+            $filters['referentesOficiales'],
+            'a.perfil',
+            'a.capturista_id'
+        );
+
+        $convencidos = $convencidosQuery
+            ->groupBy(
+                'a.cve_mun',
+                'a.distrito_local',
+                'a.seccion',
+                'a.colonia'
+            )
+            ->get()
+            ->groupBy(fn($row) => $this->sectionSummaryKey(
+                $row->cve_mun,
+                $row->distrito_local,
+                $row->seccion
+            ));
+
+        $lonasQuery = DB::table('lonas as l')
+            ->join('secciones as s', 's.seccion', '=', 'l.seccion')
+            ->select(
+                's.cve_mun',
+                's.distrito_local',
+                's.seccion',
+                DB::raw('COUNT(DISTINCT l.id) AS total')
+            )
+            ->whereNull('l.deleted_at')
+            ->when(
+                $filters['cveMun'] !== '',
+                fn($query) => $query->where('s.cve_mun', $filters['cveMun'])
+            )
+            ->when(
+                $filters['distritoLocal'] !== '',
+                fn($query) => $query->where('s.distrito_local', $filters['distritoLocal'])
+            )
+            ->when(
+                $filters['distritoFederal'] !== '',
+                fn($query) => $query->where('s.distrito_federal', $filters['distritoFederal'])
+            )
+            ->when(
+                $filters['referente'] !== '',
+                fn($query) => $query->whereRaw('TRIM(l.responsable) = ?', [$filters['referente']])
+            )
+            ->when(
+                $filters['capturistaId'],
+                fn($query) => $query->where('l.capturado_por', $filters['capturistaId'])
+            );
+
+        $this->applyTipoCargaFilter(
+            $lonasQuery,
+            $filters['tipoCarga'],
+            $filters['referentesOficiales'],
+            'l.responsable',
+            'l.capturado_por'
+        );
+
+        $lonas = $lonasQuery
+            ->groupBy('s.cve_mun', 's.distrito_local', 's.seccion')
+            ->get()
+            ->keyBy(fn($row) => $this->sectionSummaryKey(
+                $row->cve_mun,
+                $row->distrito_local,
+                $row->seccion
+            ));
+
+        return $secciones
+            ->map(function ($seccion) use ($convencidos, $lonas) {
+                $key = $this->sectionSummaryKey(
+                    $seccion->cve_mun,
+                    $seccion->distrito_local,
+                    $seccion->seccion
+                );
+                $personas = $convencidos->get($key, collect());
+                $colonias = $personas
+                    ->pluck('colonia')
+                    ->map(fn($colonia) => trim((string) $colonia))
+                    ->filter()
+                    ->unique(fn($colonia) => Str::lower($colonia))
+                    ->sort(SORT_NATURAL | SORT_FLAG_CASE)
+                    ->values();
+
+                return [
+                    'distrito' => (int) $seccion->distrito_local,
+                    'seccion' => str_pad((string) $seccion->seccion, 4, '0', STR_PAD_LEFT),
+                    'colonias' => $colonias->implode(', '),
+                    'lonas' => (int) optional($lonas->get($key))->total,
+                    'convencidos' => (int) $personas->sum('total'),
+                ];
+            })
+            ->sortBy([
+                ['distrito', 'asc'],
+                ['seccion', 'asc'],
+            ])
+            ->values();
+    }
+
+    private function sectionSummaryKey($cveMun, $distritoLocal, $seccion): string
+    {
+        return (string) $cveMun
+            .'|'.(string) (int) $distritoLocal
+            .'|'.(string) (int) $seccion;
     }
 
     private function applyTipoCargaFilter(
