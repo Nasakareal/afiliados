@@ -282,8 +282,8 @@
                             class="dropdown-item {{ is_active('avance.*') }}"
                             href="{{ route('avance.index') }}"
                         >
-                            <i class="fa-solid fa-user-check me-2"></i>
-                            Convencidos
+                            <i class="fa-solid fa-chart-line me-2"></i>
+                            Avance distrital
                         </a>
                     </li>
                     @endcan
