@@ -172,6 +172,9 @@ Route::middleware(['auth', 'system.access'])->group(function () {
     Route::get('/avance/convencidos', [MetaAvanceController::class,'convencidos'])->name('avance.convencidos')->middleware('permission:avance.ver');
     Route::get('/avance/export.xlsx', [MetaAvanceController::class,'export'])->name('avance.export.xlsx')->middleware('permission:avance.ver');
     Route::get('/avance/secciones-export.xlsx', [MetaAvanceController::class,'exportSecciones'])->name('avance.secciones.export.xlsx')->middleware('permission:avance.ver');
+    Route::get('/avance/secciones-prioritarias-export.xlsx', [MetaAvanceController::class,'exportSeccionesPrioritarias'])->name('avance.prioritarias.export.xlsx')->middleware('permission:avance.ver');
+    Route::post('/avance/secciones-prioritarias', [MetaAvanceController::class,'storeSeccionPrioritaria'])->name('avance.prioritarias.store')->middleware('permission:avance.metas');
+    Route::delete('/avance/secciones-prioritarias/{seccionPrioritaria}', [MetaAvanceController::class,'destroySeccionPrioritaria'])->name('avance.prioritarias.destroy')->middleware('permission:avance.metas');
     Route::post('/avance/metas', [MetaAvanceController::class,'store'])->name('avance.metas.store')->middleware('permission:avance.metas');
     Route::put('/avance/metas/{metaAvance}', [MetaAvanceController::class,'update'])->name('avance.metas.update')->middleware('permission:avance.metas');
     Route::delete('/avance/metas/{metaAvance}', [MetaAvanceController::class,'destroy'])->name('avance.metas.destroy')->middleware('permission:avance.metas');
@@ -221,3 +224,5 @@ Route::middleware(['auth', 'system.access'])->group(function () {
         });
     });
 });
+
+require __DIR__.'/brigadas.php';

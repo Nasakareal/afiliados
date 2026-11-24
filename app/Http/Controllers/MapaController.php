@@ -25,7 +25,6 @@ class MapaController extends Controller
         $allowed = ['validado','pendiente','descartado','todos'];
         if (!in_array($estatus, $allowed, true)) $estatus = 'validado';
 
-        // === Conteos por municipio SIN filtrar (todos): total, por estatus y derivados
         $rows = DB::table('afiliados')
             ->selectRaw("
                 cve_mun,
@@ -35,13 +34,13 @@ class MapaController extends Controller
                 SUM(CASE WHEN estatus='descartado' THEN 1 ELSE 0 END) as no_afiliados,
                 SUM(CASE WHEN estatus='pendiente'  THEN 1 ELSE 0 END) as pendientes
             ")
-            ->whereNull('deleted_at');
+            ->whereNull('deleted_at')
+            ->whereIn('cve_mun', ['053', '53']);
         LocalDistrictAccess::scope($rows);
         $rows = $rows
             ->groupBy('cve_mun','municipio')
             ->get();
 
-        // Mapa para color (todos), y mapas de stats por CVEGEO y por nombre normalizado
         $conteo = [];
         $conteoPorNombre = [];
         $statsCVE = [];
@@ -76,20 +75,41 @@ class MapaController extends Controller
             $municipiosCVE[$cvegeo] = $r->municipio;
         }
 
-        // === Capas adicionales
+        $sectionRows = DB::table('afiliados')
+            ->selectRaw("seccion, COUNT(*) AS total,
+                SUM(CASE WHEN estatus='validado' THEN 1 ELSE 0 END) AS afiliados,
+                SUM(CASE WHEN estatus='descartado' THEN 1 ELSE 0 END) AS no_afiliados,
+                SUM(CASE WHEN estatus='pendiente' THEN 1 ELSE 0 END) AS pendientes")
+            ->whereNull('deleted_at')
+            ->whereIn('cve_mun', ['053', '53'])
+            ->whereNotNull('seccion');
+        LocalDistrictAccess::scope($sectionRows);
+        $sectionStats = $sectionRows
+            ->groupBy('seccion')
+            ->get()
+            ->mapWithKeys(fn ($row) => [(string) ((int) $row->seccion) => [
+                'total' => (int) $row->total,
+                'afiliados' => (int) $row->afiliados,
+                'no_afiliados' => (int) $row->no_afiliados,
+                'pendientes' => (int) $row->pendientes,
+            ]])
+            ->all();
+
         $layers = [];
         $dir = public_path('maps/out');
         if (is_dir($dir)) {
             $files = glob($dir.'/*.geojson');
             sort($files);
             foreach ($files as $path) {
-                $file   = basename($path);
-                $base   = pathinfo($file, PATHINFO_FILENAME);
-                $pretty = str_replace('_',' ', ucwords(strtolower($base), '_'));
+                $file = basename($path);
+                $base = pathinfo($file, PATHINFO_FILENAME);
+                $pretty = str_replace('_', ' ', ucwords(strtolower($base), '_'));
                 $layers[] = [
-                    'id'   => $base,
-                    'name' => $pretty,
-                    'url'  => asset('maps/out/'.$file),
+                    'id' => $base,
+                    'name' => $base === 'SECCION' ? 'Secciones de Morelia' : $pretty,
+                    'url' => $base === 'SECCION'
+                        ? asset('maps/electoral/morelia-secciones.geojson')
+                        : asset('maps/out/'.$file),
                 ];
             }
         }
@@ -102,6 +122,7 @@ class MapaController extends Controller
             'statsCVE'        => $statsCVE,
             'statsNombre'     => $statsNombre,
             'municipiosCVE'   => $municipiosCVE,
+            'sectionStats'    => $sectionStats,
             'distritoLocalAsignado' => $distritoLocalAsignado,
             'distritosLocalesAsignados' => $distritosLocalesAsignados,
         ]);
@@ -109,14 +130,14 @@ class MapaController extends Controller
 
     public function data(Request $request)
     {
-        // Aquí sí respetamos el filtro
         $estatus = $request->query('estatus', 'validado');
         $allowed = ['validado','pendiente','descartado','todos'];
         if (!in_array($estatus, $allowed, true)) $estatus = 'validado';
 
         $rows = DB::table('afiliados')
             ->select('id','nombre','apellido_paterno','apellido_materno','municipio','lat','lng')
-            ->whereNull('deleted_at');
+            ->whereNull('deleted_at')
+            ->whereIn('cve_mun', ['053', '53']);
         LocalDistrictAccess::scope($rows);
         $rows = $rows
             ->when($estatus !== 'todos', fn($q)=>$q->where('estatus', $estatus))

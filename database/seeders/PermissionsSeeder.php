@@ -36,6 +36,10 @@ class PermissionsSeeder extends Seeder
             // Captura y mapa de lonas
             'lonas.ver', 'lonas.crear', 'lonas.editar', 'lonas.borrar',
 
+            // Brigadas y comprobación de asistencia
+            'brigadas.ver', 'brigadas.crear', 'brigadas.editar', 'brigadas.borrar',
+            'brigadas.participar', 'brigadas.participantes.ver',
+
             // Mapa y reportes
             'mapa.ver', 'reportes.ver',
 
@@ -85,6 +89,8 @@ class PermissionsSeeder extends Seeder
             'secciones.ver','mapa.ver','reportes.ver',
             'avance.ver',
             'lonas.ver','lonas.crear','lonas.editar','lonas.borrar',
+            'brigadas.ver','brigadas.crear','brigadas.editar',
+            'brigadas.participar','brigadas.participantes.ver',
         ]);
 
         // Capturista: crear/ver afiliados + ver mapa (aditivo)
@@ -92,17 +98,20 @@ class PermissionsSeeder extends Seeder
             'afiliados.ver','afiliados.crear','mapa.ver',
             'actividades.ver','actividades.reportar',
             'lonas.ver','lonas.crear',
+            'brigadas.ver','brigadas.participar',
         ]);
 
         // Consulta: solo lectura general (aditivo)
         $roleView->givePermissionTo([
             'afiliados.ver','secciones.ver','actividades.ver','mapa.ver','reportes.ver',
             'lonas.ver','avance.ver',
+            'brigadas.ver','brigadas.participar',
         ]);
 
         // Usuarios genéricos de lonas: únicamente este módulo (captura, listado y mapa).
         $roleLonas->syncPermissions([
             'lonas.ver','lonas.crear',
+            'brigadas.ver','brigadas.participar',
         ]);
 
         // Recalcula/limpia de nuevo la caché

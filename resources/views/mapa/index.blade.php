@@ -57,8 +57,17 @@
   const statsCVE        = @json($statsCVE) || {};
   const statsNombre     = @json($statsNombre) || {};
   const municipalityNames = @json($municipiosCVE) || {};
+  const sectionStats    = @json($sectionStats) || {};
   const assignedLocalDistrict = @json($distritoLocalAsignado);
   const assignedLocalDistricts = @json($distritosLocalesAsignados);
+  const MORELIA_CVEGEO = '16053';
+
+  function moreliaMunicipalityFeature(feature){
+    const props = feature && feature.properties || {};
+    const cvegeo = municipalityCve(props);
+    const name = normalize(props.NOMGEO || props.NOM_MUN || '');
+    return cvegeo === MORELIA_CVEGEO || name === 'MORELIA';
+  }
 
   function localDistrictFeature(feature){
     if (assignedLocalDistricts.length === 0) return true;
@@ -157,10 +166,19 @@
   function fitMunicipios(){ munLabels.forEach(fitMunicipio); }
   map.on('zoomend viewreset', fitMunicipios);
 
-  fetch(assignedLocalDistrict === null
-    ? @json(asset('geo/michoacan.json'))
-    : @json(asset('maps/out/SECCION.geojson')))
+  const moreliaBoundaryPromise = fetch(@json(asset('geo/michoacan.json')))
     .then(r => r.json())
+    .then(geo => {
+      const feature = (geo.features || []).find(moreliaMunicipalityFeature);
+      if (!feature) throw new Error('No se encontró el límite municipal de Morelia.');
+      return { feature, bbox: turf.bbox(feature) };
+    });
+
+  const primaryGeoPromise = assignedLocalDistrict === null
+    ? moreliaBoundaryPromise.then(boundary => ({type:'FeatureCollection', features:[boundary.feature]}))
+    : fetch(@json(asset('maps/electoral/morelia-secciones.geojson'))).then(r => r.json());
+
+  primaryGeoPromise
     .then(function(geo){
       if (assignedLocalDistrict !== null) {
         geo = Object.assign({}, geo, {features:(geo.features || []).filter(localDistrictFeature)});
@@ -216,10 +234,14 @@
         }
       }).addTo(map);
 
-      layersControl.addOverlay(capaMunicipios, 'Municipios (total)');
+      layersControl.addOverlay(capaMunicipios, 'Morelia (total)');
 
       const bounds = capaMunicipios.getBounds();
-      map.fitBounds(bounds); map.setMaxBounds(bounds.pad(0.05));
+      if (bounds.isValid()) {
+        map.fitBounds(bounds);
+        map.setMaxBounds(bounds.pad(0.05));
+        map.setMinZoom(map.getBoundsZoom(bounds));
+      }
       setTimeout(fitMunicipios, 0);
     })
     .catch(err => console.error('Error cargando GeoJSON:', err));
@@ -230,7 +252,7 @@
   }
   function getLabelInfo(props){
     const sec = pickProp(props, ['SECCION','Seccion','seccion','SEC']);
-    if (sec) return { text: `Sección ${sec}`, className: 'label-sec' };
+    if (sec) return { text: `Sección ${sec}`, className: 'label-sec', isSection:true };
     const df  = pickProp(props, ['DISTRITO_F','Distrito_F','DISTRITO_FEDERAL','DF']);
     if (df)  return { text: `DF ${df}`,  className: 'label-df'  };
     const dl  = pickProp(props, ['DISTRITO_L','Distrito_L','DISTRITO_LOCAL','DL']);
@@ -246,11 +268,46 @@
     return null;
   }
 
+  function bboxIntersects(a, b){
+    return a[0] <= b[2] && a[2] >= b[0] && a[1] <= b[3] && a[3] >= b[1];
+  }
+
+  function restrictFeatureToMorelia(feature, boundary){
+    if (!feature || !feature.geometry) return null;
+    try {
+      if (!bboxIntersects(turf.bbox(feature), boundary.bbox)) return null;
+      if (!turf.booleanIntersects(feature, boundary.feature)) return null;
+
+      const type = feature.geometry.type || '';
+      if (type === 'Polygon' || type === 'MultiPolygon') {
+        const clipped = turf.intersect(feature, boundary.feature);
+        if (clipped) {
+          clipped.properties = feature.properties || {};
+          return clipped;
+        }
+      }
+      return feature;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function restrictGeoToMorelia(geo, boundary){
+    return Object.assign({}, geo, {
+      features: (geo.features || [])
+        .map(feature => restrictFeatureToMorelia(feature, boundary))
+        .filter(Boolean)
+    });
+  }
+
   const overlayLabelItems = [];
   const MIN_LABEL_SCALE_OVER = 0.2;
   function fitOverlayOne(item){
     const root = item.marker.getElement();
     if (!root) return;
+    const show = !item.isSection || map.getZoom() >= 12;
+    root.style.display = show ? '' : 'none';
+    if (!show) return;
     const span = root.querySelector('.map-label-text');
     if (!span) return;
     const b  = item.layer.getBounds();
@@ -271,6 +328,11 @@
 
   function baseOverlayStyle(feature){
     const t = feature && feature.geometry && feature.geometry.type || '';
+    const sec = pickProp(feature && feature.properties, ['SECCION','Seccion','seccion','SEC']);
+    if (sec) {
+      const stats = sectionStats[String(parseInt(sec, 10))] || {total:0};
+      return { weight:1, color:'#333', fill:true, fillColor:getColor(stats.total), fillOpacity:0.72 };
+    }
     if (/LineString/i.test(t)) return { weight: 2, color:'#333' };
     if (/Polygon/i.test(t))    return { weight: 1, color:'#333', fill:false };
     return {};
@@ -286,6 +348,14 @@
     if (dl)  rows.push(`<div><strong>Distrito Local:</strong> ${dl}</div>`);
     if (df)  rows.push(`<div><strong>Distrito Federal:</strong> ${df}</div>`);
     if (ent) rows.push(`<div><small>Entidad: ${ent}</small></div>`);
+    if (sec) {
+      const stats = sectionStats[String(parseInt(sec, 10))] || {total:0, afiliados:0, no_afiliados:0, pendientes:0};
+      rows.push('<hr style="margin:6px 0">');
+      rows.push(`<div><strong>Total de registros:</strong> ${stats.total}</div>`);
+      rows.push(`<div><strong>Afiliados (sí):</strong> ${stats.afiliados}</div>`);
+      rows.push(`<div><strong>No afiliados (no):</strong> ${stats.no_afiliados}</div>`);
+      rows.push(`<div><strong>Pendientes:</strong> ${stats.pendientes}</div>`);
+    }
     return `<div style="min-width:220px">
       <h5 style="margin:0 0 6px 0">${title}</h5>
       ${rows.join('')}
@@ -293,54 +363,87 @@
   }
 
   @foreach ($layers as $l)
-    fetch("{{ $l['url'] }}")
-      .then(r => r.json())
-      .then(geo => {
-        if (assignedLocalDistrict !== null) {
-          geo = Object.assign({}, geo, {features:(geo.features || []).filter(localDistrictFeature)});
-          if (!geo.features.length) return;
-        }
-        const group = L.layerGroup();
+    (() => {
+      const layerId = @json($l['id']);
+      const layerName = @json($l['name']);
+      const layerUrl = @json($l['url']);
+      const group = L.layerGroup();
+      let loadPromise = null;
 
-        const geoLayer = L.geoJSON(geo, {
-          pane: 'overlaysPane',
-          style: baseOverlayStyle,
-          onEachFeature: function(feature, layer){
-            layer.on('click', function(e){
-              const html = overlayPopupHTML(feature.properties || {});
-              L.popup({ closeButton:true }).setLatLng(e.latlng).setContent(html).openOn(map);
-              this.setStyle({ weight:3, color:'#000' }); this.bringToFront();
-            });
-            layer.on('mouseover', function(){ this.setStyle({ weight:2 }); this.bringToFront(); });
-            layer.on('mouseout',  function(){ this.setStyle(baseOverlayStyle(feature)); });
-          }
-        }).addTo(group);
+      layersControl.addOverlay(group, layerName);
 
-        L.geoJSON(geo, {
-          onEachFeature: function(feature, lyr){
-            const info = getLabelInfo(feature.properties || {});
-            const latlng = centerLatLng(feature, lyr);
-            if (!latlng) return;
-            const marker = L.marker(latlng, {
-              pane: 'labelsPane',
-              icon: L.divIcon({
-                className: 'map-label',
-                html: `<span class="map-label-text ${info.className}">${info.text}</span>`,
-                iconSize: null
-              }),
-              interactive: false
+      function loadLayer(){
+        if (loadPromise) return loadPromise;
+
+        const geoPromise = fetch(layerUrl).then(r => r.json());
+        const dataPromise = layerId === 'SECCION'
+          ? geoPromise.then(geo => [geo, null])
+          : Promise.all([geoPromise, moreliaBoundaryPromise]);
+
+        loadPromise = dataPromise
+          .then(([sourceGeo, boundary]) => {
+            let geo = layerId === 'SECCION'
+              ? sourceGeo
+              : restrictGeoToMorelia(sourceGeo, boundary);
+
+            if (assignedLocalDistrict !== null) {
+              geo = Object.assign({}, geo, {features:(geo.features || []).filter(localDistrictFeature)});
+            }
+
+            L.geoJSON(geo, {
+              pane: 'overlaysPane',
+              style: baseOverlayStyle,
+              onEachFeature: function(feature, layer){
+                layer.on('click', function(e){
+                  const html = overlayPopupHTML(feature.properties || {});
+                  L.popup({ closeButton:true }).setLatLng(e.latlng).setContent(html).openOn(map);
+                  this.setStyle({ weight:3, color:'#000' }); this.bringToFront();
+                });
+                layer.on('mouseover', function(){ this.setStyle({ weight:2 }); this.bringToFront(); });
+                layer.on('mouseout',  function(){ this.setStyle(baseOverlayStyle(feature)); });
+              }
             }).addTo(group);
 
-            const item = { layer: lyr, marker };
-            marker.on('add', () => fitOverlayOne(item));
-            overlayLabelItems.push(item);
-          }
-        });
+            L.geoJSON(geo, {
+              onEachFeature: function(feature, lyr){
+                const info = getLabelInfo(feature.properties || {});
+                const latlng = centerLatLng(feature, lyr);
+                if (!latlng) return;
+                const marker = L.marker(latlng, {
+                  pane: 'labelsPane',
+                  icon: L.divIcon({
+                    className: 'map-label',
+                    html: `<span class="map-label-text ${info.className}">${info.text}</span>`,
+                    iconSize: null
+                  }),
+                  interactive: false
+                }).addTo(group);
 
-        layersControl.addOverlay(group, "{{ $l['name'] }}");
-        map.on('overlayadd', e => { if (e.layer === group) setTimeout(fitOverlayAll, 0); });
-      })
-      .catch(err => console.error('Error capa {{ $l['name'] }}:', err));
+                const item = { layer: lyr, marker, isSection:info.isSection === true };
+                marker.on('add', () => fitOverlayOne(item));
+                overlayLabelItems.push(item);
+              }
+            });
+
+            setTimeout(fitOverlayAll, 0);
+          })
+          .catch(err => {
+            loadPromise = null;
+            console.error('Error capa ' + layerName + ':', err);
+          });
+
+        return loadPromise;
+      }
+
+      map.on('overlayadd', e => {
+        if (e.layer === group) loadLayer();
+      });
+
+      if (layerId === 'SECCION') {
+        group.addTo(map);
+        loadLayer();
+      }
+    })();
   @endforeach
 </script>
 @endpush

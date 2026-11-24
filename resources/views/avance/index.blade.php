@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Avance distrital')
+@section('title', 'Avance Morelia')
 
 @push('css')
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -10,6 +10,15 @@
   .district-quick-filter { align-items:center; display:flex; gap:.45rem; }
   .district-quick-filter .form-select { min-width:175px; }
   .avance-periodo { color:#667085; font-size:.82rem; }
+  .morelia-hero { background:linear-gradient(135deg,#1d3376 0%,#314e9b 100%); border-radius:1rem; color:#fff; margin-bottom:1rem; padding:1.1rem 1.25rem; }
+  .morelia-hero h1 { font-size:1.25rem; }
+  .morelia-hero p { color:rgba(255,255,255,.82); font-size:.86rem; margin:0; }
+  .priority-overview { display:grid; gap:.65rem; grid-template-columns:repeat(4,minmax(110px,1fr)); margin-top:.9rem; }
+  .priority-stat { background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.18); border-radius:.7rem; padding:.65rem .8rem; }
+  .priority-stat strong { display:block; font-size:1.25rem; line-height:1; }
+  .priority-stat span { color:rgba(255,255,255,.78); font-size:.7rem; }
+  .simple-filter { align-items:end; background:#fff; border:1px solid #dfe4ee; border-radius:.8rem; display:flex; flex-wrap:wrap; gap:.65rem; margin-bottom:1rem; padding:.8rem; }
+  .simple-filter label { color:#475467; display:block; font-size:.7rem; font-weight:700; margin-bottom:.2rem; }
 
   .avance-summary {
     display:grid;
@@ -96,6 +105,7 @@
     .district-quick-filter { width:100%; }
     .district-quick-filter .form-select { min-width:0; }
     .ranking-grid { grid-template-columns:1fr; }
+    .priority-overview { grid-template-columns:repeat(2,1fr); }
   }
   @media print {
     .report-actions,.navbar,.app-footer { display:none !important; }
@@ -115,12 +125,9 @@
       if ($porcentaje >= 30) return 'pct-warning';
       return 'pct-danger';
     };
-    $dfTexto = $distritoFederal !== '' ? str_pad($distritoFederal, 2, '0', STR_PAD_LEFT) : 'Todos';
     $dlTexto = $distritoLocal !== '' ? str_pad($distritoLocal, 2, '0', STR_PAD_LEFT) : 'Todos';
-    $tituloDistrito = $distritoFederal !== ''
-      ? 'Distrito '.$dfTexto.($nombreDistritoFederal ? ' '.$nombreDistritoFederal : '')
-      : 'Michoacán';
-    if ($distritoLocal !== '') $tituloDistrito .= ' · Distrito local '.$dlTexto;
+    $tituloDistrito = $distritoLocal !== '' ? 'Morelia · Distrito local '.$dlTexto : 'Morelia · Todos los distritos locales';
+    $reportQuery = request()->except(['cve_mun', 'distrito_federal']);
 
     $tipoCargaTexto = match($tipoCarga) {
       'distritales' => 'Distrito local',
@@ -129,82 +136,56 @@
     };
   @endphp
 
-  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-    <div>
-      <h1 class="h5 fw-bold mb-1 text-uppercase">Avance distrital</h1>
-      <div class="avance-periodo">{{ $tituloDistrito }} · {{ $tipoCargaTexto }} · Histórico completo</div>
+  <section class="morelia-hero">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+      <div>
+        <h1 class="fw-bold mb-1">Campaña municipal de Morelia</h1>
+        <p>Avance de convencidos y lonas para la Presidencia Municipal. Aquí solamente aparecen secciones de Morelia.</p>
+      </div>
+      <a href="{{ route('avance.prioritarias.export.xlsx', $reportQuery) }}" class="btn btn-light fw-bold">
+        <i class="fa-solid fa-file-excel text-success me-1"></i> Descargar reporte de prioritarias
+      </a>
     </div>
-    <div class="report-actions d-flex gap-2">
-      <form method="GET" action="{{ route('avance.index') }}" id="districtQuickFilter" class="district-quick-filter">
-        @if($cveMun !== '')<input type="hidden" name="cve_mun" value="{{ $cveMun }}">@endif
+    <div class="priority-overview">
+      <div class="priority-stat"><strong>{{ $prioridadConteos['total'] }}</strong><span>Prioritarias · {{ $prioridadConteos['con_meta'] }} con meta</span></div>
+      <div class="priority-stat"><strong>{{ $prioridadConteos['alta'] }}</strong><span>Prioridad alta</span></div>
+      <div class="priority-stat"><strong>{{ $prioridadConteos['media'] }}</strong><span>Prioridad media</span></div>
+      <div class="priority-stat"><strong>{{ $prioridadConteos['baja'] }}</strong><span>Prioridad baja</span></div>
+    </div>
+  </section>
 
-        <label for="quickTipoCarga" class="visually-hidden">Tipo de carga</label>
-        <select name="tipo_carga" id="quickTipoCarga" class="form-select form-select-sm" title="Tipo de carga" onchange="this.form.submit()">
-          <option value="todos" {{ $tipoCarga === 'todos' ? 'selected' : '' }}>Todos</option>
-          <option value="distritales" {{ $tipoCarga === 'distritales' ? 'selected' : '' }}>Distrito local</option>
-          <option value="politicos" {{ $tipoCarga === 'politicos' ? 'selected' : '' }}>Políticos</option>
-        </select>
-
-        <label for="quickReferente" class="visually-hidden">Referente</label>
-        <select name="referente" id="quickReferente" class="form-select form-select-sm" title="Cambiar referente" onchange="this.form.submit()">
-            <option value="">Todos los referentes</option>
-
-            @foreach($referentes as $nombreReferente)
-                <option
-                    value="{{ $nombreReferente }}"
-                    {{ $referente === $nombreReferente ? 'selected' : '' }}
-                >
-                    {{ $nombreReferente }}
-                </option>
-            @endforeach
-        </select>
-        @if($capturistaId)<input type="hidden" name="capturista_id" value="{{ $capturistaId }}">@endif
-        <label for="quickDistritoFederal" class="visually-hidden">Distrito federal</label>
-        <select name="distrito_federal" id="quickDistritoFederal" class="form-select form-select-sm" title="Cambiar distrito federal" onchange="this.form.submit()">
-          <option value="">Todos los distritos</option>
-          @foreach($distritosFederales as $distrito)
-            <option value="{{ $distrito }}" {{ (string)$distritoFederal === (string)$distrito ? 'selected' : '' }}>
-              DFn {{ str_pad($distrito, 2, '0', STR_PAD_LEFT) }}
-            </option>
-          @endforeach
-        </select>
+  <div class="simple-filter report-actions">
+    <form method="GET" action="{{ route('avance.index') }}" id="districtQuickFilter" class="district-quick-filter flex-grow-1">
+      @if($tipoCarga !== 'todos')<input type="hidden" name="tipo_carga" value="{{ $tipoCarga }}">@endif
+      @if($referente !== '')<input type="hidden" name="referente" value="{{ $referente }}">@endif
+      @if($capturistaId)<input type="hidden" name="capturista_id" value="{{ $capturistaId }}">@endif
+      <div>
+        <label for="quickDistritoLocal">¿Qué distrito quieres ver?</label>
         @if($distritoLocalRestringido && count($distritosLocalesAsignados) === 1)
           <input type="hidden" name="distrito_local" value="{{ $distritoLocal }}">
-          <span class="form-control form-control-sm bg-light text-nowrap" title="Distrito local asignado">
-            DL {{ str_pad($distritoLocal, 2, '0', STR_PAD_LEFT) }}
-          </span>
+          <span class="form-control form-control-sm bg-light text-nowrap">Distrito local {{ str_pad($distritoLocal, 2, '0', STR_PAD_LEFT) }}</span>
         @else
-          <label for="quickDistritoLocal" class="visually-hidden">Distrito local</label>
-          <select name="distrito_local" id="quickDistritoLocal" class="form-select form-select-sm" title="Cambiar distrito local" onchange="this.form.submit()">
-            @unless($distritoLocalRestringido)<option value="">Todos los locales</option>@endunless
+          <select name="distrito_local" id="quickDistritoLocal" class="form-select form-select-sm" onchange="this.form.submit()">
+            @unless($distritoLocalRestringido)<option value="">Todos los distritos de Morelia</option>@endunless
             @foreach($distritosLocales as $distrito)
-              <option value="{{ $distrito }}" {{ (string)$distritoLocal === (string)$distrito ? 'selected' : '' }}>
-                DL {{ str_pad($distrito, 2, '0', STR_PAD_LEFT) }}
-              </option>
+              <option value="{{ $distrito }}" {{ (string)$distritoLocal === (string)$distrito ? 'selected' : '' }}>Distrito local {{ str_pad($distrito, 2, '0', STR_PAD_LEFT) }}</option>
             @endforeach
           </select>
         @endif
-        <button type="submit" class="btn btn-sm btn-outline-primary" title="Aplicar filtros">
-          <i class="fa-solid fa-check"></i><span class="d-none d-xl-inline ms-1">Aplicar</span>
-        </button>
-      </form>
-      <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalFiltros">
-        <i class="fa-solid fa-filter me-1"></i> Filtros
-      </button>
-      <a href="{{ route('avance.convencidos', request()->query()) }}" class="btn btn-sm btn-outline-primary">
-        <i class="fa-solid fa-users me-1"></i> Ver personas y distritos
-      </a>
-      <a href="{{ route('avance.export.xlsx', request()->query()) }}" class="btn btn-sm btn-success">
-        <i class="fa-solid fa-file-excel me-1"></i> Descargar Excel
-      </a>
-      <a href="{{ route('avance.secciones.export.xlsx', request()->query()) }}" class="btn btn-sm btn-outline-success">
-        <i class="fa-solid fa-table-list me-1"></i> Excel por sección
-      </a>
-      @can('avance.metas')
-        <button class="btn btn-sm btn-granate btn-nueva-meta" data-bs-toggle="modal" data-bs-target="#modalMeta">
-          <i class="fa-solid fa-bullseye me-1"></i> Asignar meta
-        </button>
-      @endcan
+      </div>
+    </form>
+    <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalFiltros"><i class="fa-solid fa-filter me-1"></i> Más filtros</button>
+    <a href="{{ route('avance.convencidos', $reportQuery) }}" class="btn btn-sm btn-outline-primary"><i class="fa-solid fa-users me-1"></i> Ver personas</a>
+    @can('avance.metas')
+      <button class="btn btn-sm btn-outline-dark" data-bs-toggle="modal" data-bs-target="#modalSeccionesPrioritarias"><i class="fa-solid fa-bullseye me-1"></i> Metas por sección</button>
+      <button class="btn btn-sm btn-granate btn-nueva-meta" data-bs-toggle="modal" data-bs-target="#modalMeta"><i class="fa-solid fa-bullseye me-1"></i> Cambiar metas</button>
+    @endcan
+    <div class="dropdown">
+      <button class="btn btn-sm btn-outline-success dropdown-toggle" data-bs-toggle="dropdown"><i class="fa-solid fa-file-excel me-1"></i> Otras descargas</button>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li><a class="dropdown-item" href="{{ route('avance.export.xlsx', $reportQuery) }}">Reporte completo de Morelia</a></li>
+        <li><a class="dropdown-item" href="{{ route('avance.secciones.export.xlsx', $reportQuery) }}">Todas las secciones de Morelia</a></li>
+      </ul>
     </div>
   </div>
 
@@ -220,10 +201,10 @@
 
   <div class="avance-summary-wrap">
     <div class="avance-summary">
-      @foreach(['DFn / DL','Secciones','Secciones cubiertas','Meta convencidos','Total convencidos','% convencidos','Meta lonas','Total lonas','% lonas'] as $encabezado)
+      @foreach(['Distrito local','Secciones','Secciones con avance','Meta convencidos','Convencidos','Avance de meta','Meta lonas','Lonas colocadas','Avance de lonas'] as $encabezado)
         <div class="avance-summary-head">{{ $encabezado }}</div>
       @endforeach
-      <div class="avance-summary-value">{{ $dfTexto }} / {{ $dlTexto }}</div>
+      <div class="avance-summary-value">{{ $dlTexto }}</div>
       <div class="avance-summary-value">{{ number_format($totales['secciones']) }}</div>
       <div class="avance-summary-value">
         {{ number_format($totales['secciones_cubiertas']) }}
@@ -248,10 +229,6 @@
       @if($avance->isNotEmpty())
         <div class="district-map-body">
           <div id="avanceDistrictMap" aria-label="Mapa de {{ $tituloDistrito }}"></div>
-          <label class="avance-map-label-toggle" for="toggleAvanceMunicipalityLabels">
-            <input type="checkbox" id="toggleAvanceMunicipalityLabels">
-            Nombres de municipios
-          </label>
           <div class="avance-map-legend" aria-label="Escala de convencidos">
             <strong>Convencidos:</strong>
             <span><i style="background:#f8cbd7"></i>0–4</span>
@@ -271,8 +248,7 @@
         <table class="table district-table">
           <thead>
             <tr>
-              <th>DL / DFn</th>
-              <th>Municipio</th>
+              <th>Distrito local</th>
               <th>Secciones</th>
               <th>Meta<br>convencidos</th>
               <th>Total<br>convencidos</th>
@@ -286,16 +262,12 @@
             @forelse($avance as $fila)
               <tr>
                 <td>
-                  {{ str_pad($fila['distrito_local'], 2, '0', STR_PAD_LEFT) }} /
-                  {{ $fila['distritos_federales'] ?: '—' }}
-                </td>
-                <td class="municipio-cell">
-                  <div class="municipio-cell-wrap">
-                    <span>{{ $fila['municipio'] }}</span>
+                  <strong>DL {{ str_pad($fila['distrito_local'], 2, '0', STR_PAD_LEFT) }}</strong>
+                  <div class="mt-1">
                     <button
                       type="button"
                       class="btn btn-success btn-secciones-municipio"
-                      title="Ver votos por sección de {{ $fila['municipio'] }}"
+                      title="Ver convencidos por sección"
                       data-bs-toggle="modal"
                       data-bs-target="#modalSeccionesMunicipio"
                       data-scope="{{ $fila['cve_mun'] }}|{{ $fila['distrito_local'] }}"
@@ -339,7 +311,7 @@
               </tr>
             @empty
               <tr>
-                <td colspan="9" class="py-5 text-muted">Sin información para mostrar.</td>
+                <td colspan="8" class="py-5 text-muted">No hay información de Morelia para este filtro.</td>
               </tr>
             @endforelse
           </tbody>
@@ -402,7 +374,7 @@
     <div class="modal-content">
       <div class="modal-header bg-success text-white">
         <div>
-          <h5 class="modal-title" id="tituloSeccionesMunicipio">Votos por sección</h5>
+          <h5 class="modal-title" id="tituloSeccionesMunicipio">Convencidos por sección</h5>
           <div class="small opacity-75" id="subtituloSeccionesMunicipio"></div>
         </div>
         <button class="btn-close btn-close-white" type="button" data-bs-dismiss="modal" aria-label="Cerrar"></button>
@@ -412,14 +384,13 @@
           <thead class="table-light position-sticky top-0">
             <tr>
               <th class="ps-4">Sección</th>
-              <th>DFn</th>
-              <th class="text-end pe-4">Votos / convencidos</th>
+              <th class="text-end pe-4">Personas convencidas</th>
             </tr>
           </thead>
           <tbody id="tablaSeccionesMunicipio"></tbody>
           <tfoot>
             <tr class="table-success fw-bold">
-              <td class="ps-4" colspan="2">Total del municipio</td>
+              <td class="ps-4">Total del distrito</td>
               <td class="text-end pe-4" id="totalSeccionesMunicipio">0</td>
             </tr>
           </tfoot>
@@ -434,9 +405,7 @@
     <div class="modal-content">
       <form method="GET" action="{{ route('avance.index') }}">
         <div class="modal-header">
-          <h5 class="modal-title">
-            <i class="fa-solid fa-filter me-1"></i> Filtros del reporte
-          </h5>
+          <h5 class="modal-title"><i class="fa-solid fa-filter me-1"></i> Filtrar información de Morelia</h5>
           <button class="btn-close" type="button" data-bs-dismiss="modal"></button>
         </div>
 
@@ -448,18 +417,6 @@
                 <option value="todos" {{ $tipoCarga === 'todos' ? 'selected' : '' }}>Todos</option>
                 <option value="distritales" {{ $tipoCarga === 'distritales' ? 'selected' : '' }}>Distrito local</option>
                 <option value="politicos" {{ $tipoCarga === 'politicos' ? 'selected' : '' }}>Políticos</option>
-              </select>
-            </div>
-
-            <div class="col-md-6">
-              <label class="form-label">Distrito federal</label>
-              <select name="distrito_federal" class="form-select">
-                <option value="">Todos</option>
-                @foreach($distritosFederales as $distrito)
-                  <option value="{{ $distrito }}" {{ (string)$distritoFederal === (string)$distrito ? 'selected' : '' }}>
-                    Distrito {{ str_pad($distrito, 2, '0', STR_PAD_LEFT) }}
-                  </option>
-                @endforeach
               </select>
             </div>
 
@@ -478,18 +435,6 @@
                   @endforeach
                 </select>
               @endif
-            </div>
-
-            <div class="col-md-6">
-              <label class="form-label">Municipio</label>
-              <select name="cve_mun" class="form-select">
-                <option value="">Todos</option>
-                @foreach($avance->unique('cve_mun') as $fila)
-                  <option value="{{ $fila['cve_mun'] }}" {{ (string)$cveMun === (string)$fila['cve_mun'] ? 'selected' : '' }}>
-                    {{ $fila['municipio'] }}
-                  </option>
-                @endforeach
-              </select>
             </div>
 
             <div class="col-md-6">
@@ -519,7 +464,7 @@
         </div>
 
         <div class="modal-footer">
-          <a href="{{ route('avance.index') }}" class="btn btn-outline-secondary">Mostrar todo</a>
+          <a href="{{ route('avance.index') }}" class="btn btn-outline-secondary">Quitar filtros</a>
           <button class="btn btn-granate">
             <i class="fa-solid fa-check me-1"></i> Aplicar
           </button>
@@ -530,6 +475,87 @@
 </div>
 
 @can('avance.metas')
+<div class="modal fade" id="modalSeccionesPrioritarias" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fa-solid fa-bullseye me-1"></i> Metas por sección de Morelia</h5>
+        <button class="btn-close" type="button" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-light border small mb-3">
+          <strong>Para asignar una meta:</strong> 1. Elige la sección. 2. Indica la prioridad. 3. Escribe la meta de convencidos (y de lonas, si aplica). 4. Presiona Guardar. Si la sección ya estaba configurada, sus datos se actualizan.
+        </div>
+        <form method="POST" action="{{ route('avance.prioritarias.store') }}" class="row g-2 align-items-end mb-4">
+          @csrf
+          <div class="col-lg-4 col-md-6">
+            <label for="prioritaria_seccion" class="form-label">Sección de Morelia</label>
+            <select name="seccion" id="prioritaria_seccion" class="form-select" required>
+              <option value="">Selecciona una sección</option>
+              @foreach($seccionesMoreliaDisponibles as $seccionMorelia)
+                <option value="{{ str_pad($seccionMorelia->seccion, 4, '0', STR_PAD_LEFT) }}">DL {{ str_pad($seccionMorelia->distrito_local, 2, '0', STR_PAD_LEFT) }} · Sección {{ str_pad($seccionMorelia->seccion, 4, '0', STR_PAD_LEFT) }}</option>
+              @endforeach
+            </select>
+          </div>
+          <div class="col-lg-2 col-md-3">
+            <label for="prioritaria_prioridad" class="form-label">Prioridad</label>
+            <select name="prioridad" id="prioritaria_prioridad" class="form-select" required>
+              <option value="3">Alta</option>
+              <option value="2" selected>Media</option>
+              <option value="1">Baja</option>
+            </select>
+          </div>
+          <div class="col-lg-2 col-md-3">
+            <label for="prioritaria_meta_convencidos" class="form-label">Meta convencidos</label>
+            <input type="number" name="meta_convencidos" id="prioritaria_meta_convencidos" class="form-control" min="0" step="1" value="0" required>
+          </div>
+          <div class="col-lg-2 col-md-3">
+            <label for="prioritaria_meta_lonas" class="form-label">Meta lonas</label>
+            <input type="number" name="meta_lonas" id="prioritaria_meta_lonas" class="form-control" min="0" step="1" value="0" required>
+          </div>
+          <div class="col-lg-2 col-md-3 d-grid">
+            <button class="btn btn-granate"><i class="fa-solid fa-floppy-disk me-1"></i> Guardar</button>
+          </div>
+        </form>
+
+        <div class="table-responsive">
+          <table class="table table-sm table-hover align-middle mb-0">
+            <thead><tr><th>Distrito</th><th>Sección</th><th>Prioridad</th><th>Meta convencidos</th><th>Meta lonas</th><th class="text-end">Acción</th></tr></thead>
+            <tbody>
+              @forelse($seccionesPrioritarias as $prioritaria)
+                <tr>
+                  <td>DL {{ str_pad(optional($seccionesMoreliaPorNumero->get((string)(int)$prioritaria->seccion))->distrito_local, 2, '0', STR_PAD_LEFT) }}</td>
+                  <td class="fw-bold">{{ str_pad($prioritaria->seccion, 4, '0', STR_PAD_LEFT) }}</td>
+                  <td>
+                    <span class="badge {{ $prioritaria->prioridad === 3 ? 'text-bg-danger' : ($prioritaria->prioridad === 2 ? 'text-bg-warning' : 'text-bg-success') }}">
+                      {{ [3 => 'Alta', 2 => 'Media', 1 => 'Baja'][$prioritaria->prioridad] }}
+                    </span>
+                  </td>
+                  <td>{{ $prioritaria->meta_convencidos > 0 ? number_format($prioritaria->meta_convencidos) : 'Sin meta' }}</td>
+                  <td>{{ $prioritaria->meta_lonas > 0 ? number_format($prioritaria->meta_lonas) : 'Sin meta' }}</td>
+                  <td class="text-end">
+                    <button type="button" class="btn btn-sm btn-outline-primary btn-editar-prioritaria me-1" data-seccion="{{ $prioritaria->seccion }}" data-prioridad="{{ $prioritaria->prioridad }}" data-meta-convencidos="{{ $prioritaria->meta_convencidos }}" data-meta-lonas="{{ $prioritaria->meta_lonas }}"><i class="fa-solid fa-pen"></i> Cambiar</button>
+                    <form method="POST" action="{{ route('avance.prioritarias.destroy', $prioritaria) }}" onsubmit="return confirm('¿Retirar esta sección de las prioritarias?')">
+                      @csrf @method('DELETE')
+                      <button class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-trash"></i> Retirar</button>
+                    </form>
+                  </td>
+                </tr>
+              @empty
+                <tr><td colspan="6" class="text-center text-muted py-4">No hay secciones prioritarias configuradas.</td></tr>
+              @endforelse
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <span class="me-auto text-muted small">{{ $seccionesPrioritarias->count() }} secciones configuradas</span>
+        <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal fade" id="modalMeta" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -546,9 +572,9 @@
         <div class="modal-body">
           <div class="row g-3">
             <div class="col-12">
-              <label for="meta_cve_mun" class="form-label">Municipio y distrito local</label>
+              <label for="meta_cve_mun" class="form-label">Distrito local de Morelia</label>
               <select name="meta_scope" id="meta_cve_mun" class="form-select" required>
-                <option value="">Selecciona un municipio y distrito</option>
+                <option value="">Selecciona un distrito</option>
                 @foreach($avance as $fila)
                   <option
                     value="{{ $fila['cve_mun'] }}|{{ $fila['distrito_local'] }}"
@@ -557,7 +583,7 @@
                     data-secciones="{{ $fila['secciones'] }}"
                     {{ old('cve_mun').'|'.old('distrito_local') === $fila['cve_mun'].'|'.$fila['distrito_local'] ? 'selected' : '' }}
                   >
-                    {{ $fila['municipio'] }} · DL {{ str_pad($fila['distrito_local'], 2, '0', STR_PAD_LEFT) }}
+                    Distrito local {{ str_pad($fila['distrito_local'], 2, '0', STR_PAD_LEFT) }}
                   </option>
                 @endforeach
               </select>
@@ -612,7 +638,7 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-  ['quickDistritoFederal', 'quickDistritoLocal'].forEach(function (id) {
+  ['quickDistritoLocal'].forEach(function (id) {
     document.getElementById(id)?.addEventListener('change', function () {
       this.form.submit();
     });
@@ -624,14 +650,13 @@ document.addEventListener('DOMContentLoaded', function () {
   modalSecciones?.addEventListener('show.bs.modal', function (event) {
     const boton = event.relatedTarget;
     const scope = boton?.dataset.scope || '';
-    const municipio = boton?.dataset.municipio || '';
     const distritoLocal = boton?.dataset.distritoLocal || '';
     const secciones = seccionesPorMunicipio[scope] || [];
     const cuerpo = document.getElementById('tablaSeccionesMunicipio');
     const total = secciones.reduce((suma, fila) => suma + Number(fila.total || 0), 0);
 
     document.getElementById('subtituloSeccionesMunicipio').textContent =
-      municipio+' · Distrito local '+String(distritoLocal).padStart(2, '0');
+      'Morelia · Distrito local '+String(distritoLocal).padStart(2, '0');
     document.getElementById('totalSeccionesMunicipio').textContent =
       total.toLocaleString('es-MX');
     cuerpo.replaceChildren();
@@ -639,25 +664,32 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!secciones.length) {
       const fila = cuerpo.insertRow();
       const celda = fila.insertCell();
-      celda.colSpan = 3;
+      celda.colSpan = 2;
       celda.className = 'py-4 text-center text-muted';
-      celda.textContent = 'No hay secciones para este municipio con los filtros actuales.';
+      celda.textContent = 'No hay información para este distrito con los filtros actuales.';
       return;
     }
 
     secciones.forEach(function (detalle) {
       const fila = cuerpo.insertRow();
       const seccion = fila.insertCell();
-      const distrito = fila.insertCell();
       const votos = fila.insertCell();
 
       seccion.className = 'ps-4 fw-bold';
       seccion.textContent = detalle.seccion;
-      distrito.textContent = detalle.distrito_federal
-        ? String(detalle.distrito_federal).padStart(2, '0')
-        : '—';
       votos.className = 'text-end pe-4 fw-bold';
       votos.textContent = Number(detalle.total || 0).toLocaleString('es-MX');
+    });
+  });
+
+  document.querySelectorAll('.btn-editar-prioritaria').forEach(function (button) {
+    button.addEventListener('click', function () {
+      document.getElementById('prioritaria_seccion').value = button.dataset.seccion;
+      document.getElementById('prioritaria_prioridad').value = button.dataset.prioridad;
+      document.getElementById('prioritaria_meta_convencidos').value = button.dataset.metaConvencidos || 0;
+      document.getElementById('prioritaria_meta_lonas').value = button.dataset.metaLonas || 0;
+      document.getElementById('prioritaria_seccion').focus();
+      document.querySelector('#modalSeccionesPrioritarias .modal-body')?.scrollTo({top:0, behavior:'smooth'});
     });
   });
 });
@@ -667,7 +699,6 @@ document.addEventListener('DOMContentLoaded', function () {
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-  const selectedDistrict = @json((string)$distritoFederal);
   const selectedLocalDistrict = @json((string)$distritoLocal);
   const sectionMunicipalities = @json($municipioPorSeccion);
   const sectionCounts = @json($convencidosPorSeccion);
@@ -690,21 +721,14 @@ document.addEventListener('DOMContentLoaded', function () {
     keyboard:false,
     tap:false
   });
-  const municipalityLabels = L.layerGroup();
-
-  document.getElementById('toggleAvanceMunicipalityLabels')?.addEventListener('change', function () {
-    this.checked ? municipalityLabels.addTo(map) : map.removeLayer(municipalityLabels);
-  });
-
   fetch(@json(asset('maps/out/SECCION.geojson')))
     .then(response => response.json())
     .then(geojson => {
-      const features = geojson.features.filter(
-        feature => (!selectedDistrict || String(feature.properties?.DISTRITO_F ?? '') === selectedDistrict)
-          && (!selectedLocalDistrict || String(feature.properties?.DISTRITO_L ?? '') === selectedLocalDistrict)
-      );
-
-      const municipalityLayers = {};
+      const features = geojson.features.filter(feature => {
+        const section = String(Number(feature.properties?.SECCION ?? 0));
+        return Boolean(sectionMunicipalities[section])
+          && (!selectedLocalDistrict || String(feature.properties?.DISTRITO_L ?? '') === selectedLocalDistrict);
+      });
 
       const layer = L.geoJSON(
         {
@@ -740,14 +764,6 @@ document.addEventListener('DOMContentLoaded', function () {
               layer.resetStyle(this);
             });
 
-            if (municipality) {
-              (
-                municipalityLayers[municipality.cve_mun] ||= {
-                  name:municipality.municipio,
-                  layers:[]
-                }
-              ).layers.push(sectionLayer);
-            }
           }
         }
       ).addTo(map);
@@ -756,23 +772,6 @@ document.addEventListener('DOMContentLoaded', function () {
         map.fitBounds(layer.getBounds(), {padding:[18,18]});
       }
 
-      Object.values(municipalityLayers).forEach(municipality => {
-        const bounds = L.featureGroup(municipality.layers).getBounds();
-
-        if (!bounds.isValid()) return;
-
-        L.marker(
-          bounds.getCenter(),
-          {
-            interactive:false,
-            icon:L.divIcon({
-              className:'avance-map-label',
-              html:'<span>'+municipality.name+'</span>',
-              iconSize:null
-            })
-          }
-        ).addTo(municipalityLabels);
-      });
     })
     .catch(() => {
       document.getElementById('avanceDistrictMap').innerHTML =

@@ -18,6 +18,10 @@ class MetaAvanceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        config([
+            'avance.municipio_cve' => '001',
+            'avance.distritos_locales' => [1, 2],
+        ]);
         $this->seed(PermissionsSeeder::class);
 
         DB::table('secciones')->insert([
@@ -37,28 +41,27 @@ class MetaAvanceTest extends TestCase
         $this->actingAs($admin)
             ->get(route('avance.index'))
             ->assertOk()
-            ->assertSeeText('Michoacán')
-            ->assertSeeText('Todos los distritos')
-            ->assertSeeText('Todos los locales')
+            ->assertSeeText('Campaña municipal de Morelia')
+            ->assertSeeText('Todos los distritos de Morelia')
             ->assertSee('id="quickDistritoLocal"', false)
             ->assertSee('onchange="this.form.submit()"', false)
-            ->assertSeeText('Histórico completo')
             ->assertDontSee('name="fecha_inicio"', false)
             ->assertDontSee('name="fecha_fin"', false)
             ->assertSee('avanceDistrictMap')
-            ->assertSee('toggleAvanceMunicipalityLabels')
-            ->assertSeeText('Nombres de municipios')
-            ->assertSeeText('Secciones cubiertas')
+            ->assertDontSee('name="distrito_federal"', false)
+            ->assertSeeText('Secciones con avance')
             ->assertSeeInOrder(['Meta<br>convencidos', 'Total<br>convencidos'], false)
             ->assertSeeInOrder(['Meta<br>lonas', 'Total<br>lonas'], false)
             ->assertSeeText('Top capturistas por convencidos')
             ->assertSeeText('Referentes por convencidos')
-            ->assertSee('Asignar meta');
+            ->assertSeeText('Cambiar metas')
+            ->assertSeeText('Metas por sección')
+            ->assertSeeText('Descargar reporte de prioritarias');
 
         $this->actingAs($admin)
             ->get(route('avance.index', ['distrito_federal' => '3']))
             ->assertOk()
-            ->assertSeeText('Distrito 03 Zitácuaro');
+            ->assertDontSeeText('Zitácuaro');
     }
 
     public function test_progress_matches_sections_by_municipality_and_section(): void
@@ -98,7 +101,7 @@ class MetaAvanceTest extends TestCase
         );
 
         $this->assertSame(1, $rows['001|1']['total_convencidos']);
-        $this->assertSame(0, $rows['002|2']['total_convencidos']);
+        $this->assertFalse($rows->has('002|2'));
         $this->assertSame(['Gladyz Butanda'], $response->viewData('referentes')->all());
     }
 
@@ -539,7 +542,7 @@ class MetaAvanceTest extends TestCase
             'distrito_local' => 2,
             'meta_convencidos' => 10,
             'meta_lonas' => 1,
-        ])->assertForbidden();
+        ])->assertSessionHasErrors(['cve_mun']);
 
         $this->assertDatabaseMissing('meta_avances', [
             'cve_mun' => '002',
@@ -547,7 +550,7 @@ class MetaAvanceTest extends TestCase
         ]);
     }
 
-    public function test_each_municipality_has_a_green_section_vote_breakdown(): void
+    public function test_each_local_district_has_a_section_convinced_breakdown(): void
     {
         DB::table('secciones')->insert([
             'seccion' => '0002',
@@ -596,7 +599,7 @@ class MetaAvanceTest extends TestCase
             ->assertSee('btn btn-success btn-secciones-municipio', false)
             ->assertSee('data-scope="001|1"', false)
             ->assertSee('id="modalSeccionesMunicipio"', false)
-            ->assertSeeText('Votos / convencidos');
+            ->assertSeeText('Personas convencidas');
 
         $detalle = $response->viewData('seccionesPorMunicipio')->get('001|1');
 
@@ -659,9 +662,9 @@ class MetaAvanceTest extends TestCase
 
         $page = $this->actingAs($admin)->get(route('avance.index', $query));
         $page->assertOk()
-            ->assertSeeText('Ver personas y distritos')
-            ->assertSeeText('Descargar Excel')
-            ->assertSeeText('Excel por sección');
+            ->assertSeeText('Ver personas')
+            ->assertSeeText('Descargar reporte de prioritarias')
+            ->assertSeeText('Otras descargas');
 
         $detail = $this->actingAs($admin)->get(route('avance.convencidos', $query));
         $detail->assertOk()
@@ -834,6 +837,85 @@ class MetaAvanceTest extends TestCase
         $this->assertStringContainsString('Distrito local: 01', $people->getCell('A2')->getValue());
 
         $workbook->disconnectWorksheets();
+    }
+
+    public function test_admin_can_change_priority_sections_and_export_requested_workbook(): void
+    {
+        config([
+            'avance.municipio_cve' => '053',
+            'avance.distritos_locales' => [10, 11, 16, 17],
+        ]);
+        DB::table('secciones')->insert([
+            'seccion' => '1001',
+            'cve_mun' => '053',
+            'municipio' => 'Morelia',
+            'distrito_local' => 10,
+            'distrito_federal' => 8,
+            'lista_nominal' => 1477,
+        ]);
+
+        $admin = User::factory()->create(['must_change_password' => false]);
+        $admin->assignRole('Admin');
+
+        $this->actingAs($admin)
+            ->post(route('avance.prioritarias.store'), [
+                'seccion' => '1001',
+                'prioridad' => 3,
+                'meta_convencidos' => 250,
+                'meta_lonas' => 12,
+            ])
+            ->assertRedirect();
+
+        $priority = DB::table('secciones_prioritarias')
+            ->where('cve_mun', '053')
+            ->where('seccion', '1001')
+            ->first();
+        $this->assertSame(3, (int) $priority->prioridad);
+        $this->assertSame(250, (int) $priority->meta_convencidos);
+        $this->assertSame(12, (int) $priority->meta_lonas);
+
+        DB::table('afiliados')->insert([
+            'capturista_id' => $admin->id,
+            'nombre' => 'Persona prioritaria',
+            'municipio' => 'Morelia',
+            'cve_mun' => '053',
+            'seccion' => '1001',
+            'distrito_local' => 10,
+            'distrito_federal' => 8,
+            'perfil' => 'Referente prioritario',
+            'estatus' => 'validado',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $response = $this->actingAs($admin)->get(route('avance.prioritarias.export.xlsx'));
+        $response->assertOk();
+
+        $workbook = IOFactory::load($response->baseResponse->getFile()->getPathname());
+        $this->assertSame(['Resumen Ejecutivo', 'Detalle Secciones', 'Liderazgos y Captura'], $workbook->getSheetNames());
+        $detail = $workbook->getSheetByName('Detalle Secciones');
+        $this->assertSame('1001', $detail->getCell('B5')->getValue());
+        $this->assertSame('Alta', $detail->getCell('C5')->getValue());
+        $this->assertSame(250, $detail->getCell('F5')->getValue());
+        $this->assertSame(1, $detail->getCell('G5')->getValue());
+        $this->assertSame('=IF(F5=0,0,G5/F5)', $detail->getCell('H5')->getValue());
+        $this->assertSame(12, $detail->getCell('I5')->getValue());
+        $workbook->disconnectWorksheets();
+
+        $this->actingAs($admin)
+            ->delete(route('avance.prioritarias.destroy', $priority->id))
+            ->assertRedirect();
+        $this->assertDatabaseMissing('secciones_prioritarias', ['id' => $priority->id]);
+    }
+
+    public function test_coordinator_cannot_change_priority_sections(): void
+    {
+        $coordinator = User::factory()->create(['must_change_password' => false]);
+        $coordinator->assignRole('Coordinador');
+
+        $this->actingAs($coordinator)
+            ->post(route('avance.prioritarias.store'), ['seccion' => '1001', 'prioridad' => 3])
+            ->assertForbidden();
     }
 
     public function test_official_goals_match_the_delivered_workbook_totals(): void

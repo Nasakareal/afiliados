@@ -240,6 +240,38 @@
                       </li>
                       @endcan
 
+                        @can('brigadas.ver')
+                        <li class="nav-item dropdown keep-open">
+                            <a class="nav-link dropdown-toggle {{ is_active(['brigadas.*']) }}" href="#" data-bs-toggle="dropdown" role="button">
+                                <i class="fa-solid fa-people-group me-1"></i> Brigadas
+                            </a>
+
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a class="dropdown-item {{ is_active('brigadas.index') }}" href="{{ route('brigadas.index') }}">
+                                        <i class="fa-solid fa-list me-1"></i> Listado
+                                    </a>
+                                </li>
+
+                                @if(Route::has('brigadas.map'))
+                                <li>
+                                    <a class="dropdown-item {{ is_active('brigadas.map') }}" href="{{ route('brigadas.map') }}">
+                                        <i class="fa-solid fa-map-location-dot me-1"></i> Mapa
+                                    </a>
+                                </li>
+                                @endif
+
+                                @can('brigadas.crear')
+                                <li>
+                                    <a class="dropdown-item {{ is_active('brigadas.create') }}" href="{{ route('brigadas.create') }}">
+                                        <i class="fa-solid fa-plus me-1"></i> Registrar
+                                    </a>
+                                </li>
+                                @endcan
+                            </ul>
+                        </li>
+                        @endcan
+
                       @can('mapa.ver')
                       <li class="nav-item">
                         <a class="nav-link {{ is_active('mapa.index') }}" href="{{ route('mapa.index') }}">

@@ -1,0 +1,223 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+
+use App\Http\Controllers\AfiliadoController;
+use App\Http\Controllers\SeccionController;
+use App\Http\Controllers\ActividadController;
+use App\Http\Controllers\MapaController;
+use App\Http\Controllers\ReporteController;
+use App\Http\Controllers\Settings\SettingsController;
+use App\Http\Controllers\Settings\UserController;
+use App\Http\Controllers\Settings\RoleController;
+use App\Http\Controllers\Settings\RolePermissionController;
+use App\Http\Controllers\Settings\AppSettingController;
+use App\Http\Controllers\Settings\ComunicadoController;
+use App\Http\Controllers\Settings\SqlBackupController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\LonaController;
+use App\Http\Controllers\MetaAvanceController;
+use App\Http\Controllers\ElectoralIntelligenceController;
+
+use App\Http\Controllers\ReferenteMunicipalController;
+use App\Http\Controllers\ReferenteSeccionalController;
+use App\Http\Controllers\AvanceMunicipalController;
+use App\Http\Controllers\AvanceSeccionalController;
+
+/*
+|--------------------------------------------------------------------------
+| Público
+|--------------------------------------------------------------------------
+*/
+Route::view('/', 'welcome')->name('welcome');
+Route::view('/politica-de-privacidad', 'legal.privacy')->name('privacy');
+Route::redirect('/politica-privacidad', '/politica-de-privacidad', 301);
+Route::redirect('/privacy-policy', '/politica-de-privacidad', 301);
+Route::view('/soporte', 'soporte')->name('soporte');
+
+// Breeze/Fortify (login, register, etc.)
+if (file_exists(base_path('routes/auth.php'))) {
+    require __DIR__.'/auth.php';
+}
+
+Route::middleware(['auth', 'system.access'])->group(function () {
+
+    Route::get('/dashboard', [DashboardController::class,'index'])->name('dashboard');
+
+    //Rutas para capturar los Referentes Municipales
+    Route::get('/referentes-municipales', [ReferenteMunicipalController::class, 'index'])->name('referentes_municipales.index')->middleware('permission:referentes_municipales.ver');
+    Route::get('/referentes-municipales/create', [ReferenteMunicipalController::class, 'create'])->name('referentes_municipales.create')->middleware('permission:referentes_municipales.crear');
+    Route::post('/referentes-municipales', [ReferenteMunicipalController::class, 'store'])->name('referentes_municipales.store')->middleware('permission:referentes_municipales.crear');
+    Route::get('/referentes-municipales/{referenteMunicipal}', [ReferenteMunicipalController::class, 'show'])->name('referentes_municipales.show')->middleware('permission:referentes_municipales.ver');
+    Route::get('/referentes-municipales/{referenteMunicipal}/edit', [ReferenteMunicipalController::class, 'edit'])->name('referentes_municipales.edit')->middleware('permission:referentes_municipales.editar');
+    Route::put('/referentes-municipales/{referenteMunicipal}', [ReferenteMunicipalController::class, 'update'])->name('referentes_municipales.update')->middleware('permission:referentes_municipales.editar');
+    Route::delete('/referentes-municipales/{referenteMunicipal}', [ReferenteMunicipalController::class, 'destroy'])->name('referentes_municipales.destroy')->middleware('permission:referentes_municipales.borrar');
+
+    // Avance municipal
+    Route::get('/avance-municipal', [AvanceMunicipalController::class, 'index'])->name('avance_municipal.index')->middleware('permission:avance_municipal.ver');
+
+    //Rutas para capturar los Referentes Seccionales
+    Route::get('/referentes-seccionales', [ReferenteSeccionalController::class, 'index'])->name('referentes_seccionales.index')->middleware('permission:referentes_seccionales.ver');
+    Route::get('/referentes-seccionales/create', [ReferenteSeccionalController::class, 'create'])->name('referentes_seccionales.create')->middleware('permission:referentes_seccionales.crear');
+    Route::post('/referentes-seccionales', [ReferenteSeccionalController::class, 'store'])->name('referentes_seccionales.store')->middleware('permission:referentes_seccionales.crear');
+    Route::get('/referentes-seccionales/{referenteSeccional}', [ReferenteSeccionalController::class, 'show'])->name('referentes_seccionales.show')->middleware('permission:referentes_seccionales.ver');
+    Route::get('/referentes-seccionales/{referenteSeccional}/edit', [ReferenteSeccionalController::class, 'edit'])->name('referentes_seccionales.edit')->middleware('permission:referentes_seccionales.editar');
+    Route::put('/referentes-seccionales/{referenteSeccional}', [ReferenteSeccionalController::class, 'update'])->name('referentes_seccionales.update')->middleware('permission:referentes_seccionales.editar');
+    Route::delete('/referentes-seccionales/{referenteSeccional}', [ReferenteSeccionalController::class, 'destroy'])->name('referentes_seccionales.destroy')->middleware('permission:referentes_seccionales.borrar');
+
+    // Avance seccional
+    Route::get('/avance-seccional', [AvanceSeccionalController::class, 'index'])->name('avance_seccional.index')->middleware('permission:avance_seccional.ver');
+
+    // Avance general
+    Route::get('/avance', [MetaAvanceController::class, 'index'])->name('avance.index')->middleware('permission:avance.ver');
+    Route::get('/avance/convencidos', [MetaAvanceController::class, 'convencidos'])->name('avance.convencidos')->middleware('permission:avance.ver');
+    Route::get('/avance/export.xlsx', [MetaAvanceController::class, 'export'])->name('avance.export.xlsx')->middleware('permission:avance.ver');
+    Route::post('/avance/metas', [MetaAvanceController::class, 'store'])->name('avance.metas.store')->middleware('permission:avance.metas');
+    Route::put('/avance/metas/{metaAvance}', [MetaAvanceController::class, 'update'])->name('avance.metas.update')->middleware('permission:avance.metas');
+    Route::delete('/avance/metas/{metaAvance}', [MetaAvanceController::class, 'destroy'])->name('avance.metas.destroy')->middleware('permission:avance.metas');
+
+    // Afiliados
+    Route::get('/afiliados', [AfiliadoController::class,'index'])->name('afiliados.index')->middleware('permission:afiliados.ver');
+    Route::get('/afiliados/exportar-pagina', [AfiliadoController::class,'exportarPagina'])->name('afiliados.exportar_pagina')->middleware('permission:afiliados.ver');
+    Route::get('/afiliados/exportar-excel', [AfiliadoController::class,'exportarExcel'])->name('afiliados.exportar_excel')->middleware('permission:afiliados.ver');
+    Route::get('/afiliados/create', [AfiliadoController::class,'create'])->name('afiliados.create')->middleware('permission:afiliados.crear');
+    Route::post('/afiliados', [AfiliadoController::class,'store'])->name('afiliados.store')->middleware('permission:afiliados.crear');
+    Route::get('/afiliados/{afiliado}', [AfiliadoController::class,'show'])->name('afiliados.show')->middleware('permission:afiliados.ver');
+    Route::get('/afiliados/{afiliado}/edit', [AfiliadoController::class,'edit'])->name('afiliados.edit')->middleware('permission:afiliados.editar');
+    Route::put('/afiliados/{afiliado}', [AfiliadoController::class,'update'])->name('afiliados.update')->middleware('permission:afiliados.editar');
+    Route::delete('/afiliados/{afiliado}', [AfiliadoController::class,'destroy'])->name('afiliados.destroy')->middleware('permission:afiliados.borrar');
+
+    Route::get('/registro', [AfiliadoController::class,'create'])->name('registro')->middleware('permission:afiliados.crear');
+
+    // Secciones
+    Route::get('/secciones',               [SeccionController::class,'index'])->name('secciones.index')->middleware('permission:secciones.ver');
+    Route::get('/secciones/create',        [SeccionController::class,'create'])->name('secciones.create')->middleware('permission:secciones.crear');
+    Route::post('/secciones',              [SeccionController::class,'store'])->name('secciones.store')->middleware('permission:secciones.crear');
+    Route::post('/secciones/import',       [SeccionController::class,'importExcel'])->name('secciones.import')->middleware('permission:secciones.crear');
+    Route::get('/secciones/lookup',        [SeccionController::class,'lookup'])->name('secciones.lookup')->middleware('permission:secciones.ver|afiliados.crear|afiliados.editar');
+    Route::get   ('/secciones/{seccion}',        [SeccionController::class,'show'])->whereNumber('seccion')->name('secciones.show')->middleware('permission:secciones.ver');
+    Route::get   ('/secciones/{seccion}/edit',   [SeccionController::class,'edit'])->whereNumber('seccion')->name('secciones.edit')->middleware('permission:secciones.editar');
+    Route::put   ('/secciones/{seccion}',        [SeccionController::class,'update'])->whereNumber('seccion')->name('secciones.update')->middleware('permission:secciones.editar');
+    Route::delete('/secciones/{seccion}',        [SeccionController::class,'destroy'])->whereNumber('seccion')->name('secciones.destroy')->middleware('permission:secciones.borrar');
+
+    
+    // Actividades / Calendario
+    Route::get('/calendario', [ActividadController::class,'index'])->name('calendario.index')->middleware('permission:actividades.ver');
+    Route::get('/actividades/feed', [ActividadController::class,'feed'])->name('actividades.feed')->middleware('permission:actividades.ver');
+    Route::get('/actividades', [ActividadController::class,'list'])->name('actividades.index')->middleware('permission:actividades.ver');
+    Route::get('/mis-actividades/reportar', [ActividadController::class,'reportForm'])->name('actividades.reportar')->middleware('permission:actividades.reportar');
+    Route::post('/mis-actividades/reportar', [ActividadController::class,'storeReport'])->name('actividades.reportes.store')->middleware('permission:actividades.reportar');
+    Route::get('/actividades/create', [ActividadController::class,'create'])->name('actividades.create')->middleware('permission:actividades.crear');
+    Route::post('/actividades', [ActividadController::class,'store'])->name('actividades.store')->middleware('permission:actividades.crear');
+    Route::get('/actividades/{actividad}', [ActividadController::class,'show'])->name('actividades.show')->middleware('permission:actividades.ver');
+    Route::get('/actividades/{actividad}/evidencia', [ActividadController::class,'evidence'])->name('actividades.evidencia')->middleware('permission:actividades.ver|actividades.reportar');
+    Route::get('/actividades/{actividad}/asistencias/{user}/evidencia', [ActividadController::class,'attendanceEvidence'])->name('actividades.asistencias.evidencia')->middleware('permission:actividades.ver|actividades.reportar');
+    Route::post('/actividades/{actividad}/asistencia', [ActividadController::class,'attend'])->name('actividades.asistencia')->middleware('permission:actividades.reportar');
+    Route::put('/actividades/{actividad}/revision', [ActividadController::class,'review'])->name('actividades.revision')->middleware('role:Admin|SuperAdmin');
+    Route::get('/actividades/{actividad}/edit', [ActividadController::class,'edit'])->name('actividades.edit')->middleware('permission:actividades.editar');
+    Route::put('/actividades/{actividad}', [ActividadController::class,'update'])->name('actividades.update')->middleware('permission:actividades.editar');
+    Route::delete('/actividades/{actividad}', [ActividadController::class,'destroy'])->name('actividades.destroy')->middleware('permission:actividades.borrar');
+
+    // Reportes (con nombres compatibles)
+    Route::prefix('reportes')->name('reportes.')->middleware('permission:reportes.ver')->group(function () {
+        Route::get('/', [ReporteController::class,'index'])->name('index');
+
+        // Afiliados (el index se llama EXACTO 'reportes.afiliados')
+        Route::prefix('afiliados')->group(function () {
+            Route::get('/', [ReporteController::class,'afiliados'])->name('afiliados');                 // /reportes/afiliados
+            Route::get('/data', [ReporteController::class,'afiliadosData'])->name('afiliados.data');    // /reportes/afiliados/data
+            Route::get('/export.xlsx', [ReporteController::class,'afiliadosExportXlsx'])->name('afiliados.export.xlsx');
+            Route::get('/facets', [ReporteController::class,'facets'])->name('afiliados.facets');
+        });
+
+        // Secciones (index = 'reportes.secciones')
+        Route::prefix('secciones')->group(function () {
+            Route::get('/', [ReporteController::class,'secciones'])->name('secciones');                 // /reportes/secciones
+            Route::get('/data', [ReporteController::class,'seccionesData'])->name('secciones.data');
+            Route::get('/export.xlsx', [ReporteController::class,'seccionesExportXlsx'])->name('secciones.export.xlsx');
+        });
+
+        // Capturistas (index = 'reportes.capturistas')
+        Route::prefix('capturistas')->group(function () {
+            Route::get('/', [ReporteController::class,'capturistas'])->name('capturistas');             // /reportes/capturistas
+            Route::get('/data', [ReporteController::class,'capturistasData'])->name('capturistas.data');
+            Route::get('/export.xlsx', [ReporteController::class,'capturistasExportXlsx'])->name('capturistas.export.xlsx');
+        });
+    });
+
+    // Mapa
+    Route::get('/mapa', [MapaController::class,'index'])->name('mapa.index')->middleware('permission:mapa.ver');
+    Route::get('/mapa/data', [MapaController::class,'data'])->name('mapa.data')->middleware('permission:mapa.ver');
+
+    // Inteligencia electoral agregada por sección
+    Route::get('/inteligencia-electoral', [ElectoralIntelligenceController::class, 'index'])->name('electoral.index')->middleware('permission:mapa.ver');
+    Route::get('/inteligencia-electoral/data', [ElectoralIntelligenceController::class, 'data'])->name('electoral.data')->middleware('permission:mapa.ver');
+    Route::get('/inteligencia-electoral/export.xlsx', [ElectoralIntelligenceController::class, 'export'])->name('electoral.export.xlsx')->middleware('permission:mapa.ver');
+
+    // Lonas
+    Route::get('/lonas', [LonaController::class, 'index'])->name('lonas.index')->middleware('permission:lonas.ver');
+    Route::get('/lonas/export.xlsx', [LonaController::class, 'export'])->name('lonas.export.xlsx')->middleware('permission:lonas.ver');
+    Route::get('/lonas/mapa', [LonaController::class, 'map'])->name('lonas.map')->middleware('permission:lonas.ver');
+    Route::get('/lonas/mapa/data', [LonaController::class, 'mapData'])->name('lonas.map.data')->middleware('permission:lonas.ver');
+    Route::get('/lonas/create', [LonaController::class, 'create'])->name('lonas.create')->middleware('permission:lonas.crear');
+    Route::post('/lonas', [LonaController::class, 'store'])->name('lonas.store')->middleware('permission:lonas.crear');
+    Route::get('/lonas/{lona}', [LonaController::class, 'show'])->name('lonas.show')->middleware('permission:lonas.ver');
+    Route::get('/lonas/{lona}/foto', [LonaController::class, 'photo'])->name('lonas.foto')->middleware('permission:lonas.ver');
+    Route::get('/lonas/{lona}/edit', [LonaController::class, 'edit'])->name('lonas.edit')->middleware('permission:lonas.editar');
+    Route::put('/lonas/{lona}', [LonaController::class, 'update'])->name('lonas.update')->middleware('permission:lonas.editar');
+    Route::delete('/lonas/{lona}', [LonaController::class, 'destroy'])->name('lonas.destroy')->middleware('permission:lonas.borrar');
+
+    // Avance y metas
+    Route::get('/avance', [MetaAvanceController::class,'index'])->name('avance.index')->middleware('permission:avance.ver');
+    Route::get('/avance/convencidos', [MetaAvanceController::class,'convencidos'])->name('avance.convencidos')->middleware('permission:avance.ver');
+    Route::get('/avance/export.xlsx', [MetaAvanceController::class,'export'])->name('avance.export.xlsx')->middleware('permission:avance.ver');
+    Route::get('/avance/secciones-export.xlsx', [MetaAvanceController::class,'exportSecciones'])->name('avance.secciones.export.xlsx')->middleware('permission:avance.ver');
+    Route::post('/avance/metas', [MetaAvanceController::class,'store'])->name('avance.metas.store')->middleware('permission:avance.metas');
+    Route::put('/avance/metas/{metaAvance}', [MetaAvanceController::class,'update'])->name('avance.metas.update')->middleware('permission:avance.metas');
+    Route::delete('/avance/metas/{metaAvance}', [MetaAvanceController::class,'destroy'])->name('avance.metas.destroy')->middleware('permission:avance.metas');
+
+    // Settings
+    Route::prefix('settings')->name('settings.')->group(function () {
+        Route::get('/', [SettingsController::class,'index'])->name('index')->middleware('permission:settings.ver');
+
+        Route::get('/usuarios', [UserController::class,'index'])->name('usuarios.index')->middleware('permission:usuarios.ver');
+        Route::get('/usuarios/create', [UserController::class,'create'])->name('usuarios.create')->middleware('permission:usuarios.crear');
+        Route::post('/usuarios', [UserController::class,'store'])->name('usuarios.store')->middleware('permission:usuarios.crear');
+        Route::get('/usuarios/{user}', [UserController::class,'show'])->name('usuarios.show')->middleware('permission:usuarios.ver');
+        Route::get('/usuarios/{user}/edit', [UserController::class,'edit'])->name('usuarios.edit')->middleware('permission:usuarios.editar');
+        Route::put('/usuarios/{user}', [UserController::class,'update'])->name('usuarios.update')->middleware('permission:usuarios.editar');
+        Route::delete('/usuarios/{user}', [UserController::class,'destroy'])->name('usuarios.destroy')->middleware('permission:usuarios.borrar');
+
+        Route::get('/roles', [RoleController::class,'index'])->name('roles.index')->middleware('permission:roles.ver');
+        Route::get('/roles/create', [RoleController::class,'create'])->name('roles.create')->middleware('permission:roles.crear');
+        Route::post('/roles', [RoleController::class,'store'])->name('roles.store')->middleware('permission:roles.crear');
+        Route::get('/roles/{role}', [RoleController::class,'show'])->name('roles.show')->middleware('permission:roles.ver');
+        Route::get('/roles/{role}/edit', [RoleController::class,'edit'])->name('roles.edit')->middleware('permission:roles.editar');
+        Route::put('/roles/{role}', [RoleController::class,'update'])->name('roles.update')->middleware('permission:roles.editar');
+        Route::delete('/roles/{role}', [RoleController::class,'destroy'])->name('roles.destroy')->middleware('permission:roles.borrar');
+
+        Route::prefix('roles')->name('roles.')->group(function () {
+            Route::get('/{role}/permisos', [RolePermissionController::class,'show'])->name('permisos.show')->middleware('permission:permisos.ver');
+            Route::get('/{role}/permisos/edit', [RolePermissionController::class,'edit'])->name('permisos.edit')->middleware('permission:permisos.editar');
+            Route::put('/{role}/permisos', [RolePermissionController::class,'update'])->name('permisos.update')->middleware('permission:permisos.editar');
+        });
+
+        Route::get('/comunicados', [ComunicadoController::class,'index'])->name('comunicados.index')->middleware('permission:comunicados.ver');
+        Route::get('/comunicados/create', [ComunicadoController::class,'create'])->name('comunicados.create')->middleware('permission:comunicados.crear');
+        Route::post('/comunicados', [ComunicadoController::class,'store'])->name('comunicados.store')->middleware('permission:comunicados.crear');
+        Route::get('/comunicados/{comunicado}', [ComunicadoController::class,'show'])->name('comunicados.show')->middleware('permission:comunicados.ver');
+        Route::get('/comunicados/{comunicado}/edit', [ComunicadoController::class,'edit'])->name('comunicados.edit')->middleware('permission:comunicados.editar');
+        Route::put('/comunicados/{comunicado}', [ComunicadoController::class,'update'])->name('comunicados.update')->middleware('permission:comunicados.editar');
+        Route::delete('/comunicados/{comunicado}', [ComunicadoController::class,'destroy'])->name('comunicados.destroy')->middleware('permission:comunicados.borrar');
+        Route::post('/comunicados/{comunicado}/leido', [ComunicadoController::class,'marcarLeido'])->name('comunicados.leido')->middleware('permission:comunicados.ver');
+
+        Route::get('/app', [AppSettingController::class,'edit'])->name('app.edit')->middleware('permission:settings.editar');
+        Route::put('/app', [AppSettingController::class,'update'])->name('app.update')->middleware('permission:settings.editar');
+
+        Route::prefix('backups-sql')->name('backups_sql.')->group(function () {
+            Route::get('/', [SqlBackupController::class, 'index'])->name('index');
+            Route::post('/subir', [SqlBackupController::class, 'upload'])->name('upload');
+            Route::get('/{file}', [SqlBackupController::class, 'download'])->name('download');
+        });
+    });
+});

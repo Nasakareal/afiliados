@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\MetaAvance;
+use App\Models\SeccionPrioritaria;
 use App\Models\User;
 use App\Services\AvanceExcelExporter;
+use App\Services\AvancePrioritariasExcelExporter;
 use App\Services\AvanceSeccionesExcelExporter;
 use App\Support\LocalDistrictAccess;
 use Illuminate\Database\Query\Builder;
@@ -15,6 +17,8 @@ use Illuminate\Validation\Rule;
 
 class MetaAvanceController extends Controller
 {
+    private const MORELIA_CVE_MUN = '053';
+    private const MORELIA_LOCAL_DISTRICTS = [10, 11, 16, 17];
     private const META_FECHA_INICIO = '2000-01-01';
     private const META_FECHA_FIN = '2099-12-31';
 
@@ -686,6 +690,8 @@ class MetaAvanceController extends Controller
             ->values();
 
         $distritosLocales = DB::table('secciones')
+            ->where('cve_mun', $this->campaignCveMun())
+            ->whereIn('distrito_local', $this->campaignDistricts())
             ->whereNotNull('distrito_local')
             ->when(
                 $distritoLocalRestringido,
@@ -699,6 +705,8 @@ class MetaAvanceController extends Controller
             ->pluck('distrito_local');
 
         $distritosFederales = DB::table('secciones')
+            ->where('cve_mun', $this->campaignCveMun())
+            ->whereIn('distrito_local', $this->campaignDistricts())
             ->whereNotNull('distrito_federal')
             ->when(
                 $distritoLocalRestringido,
@@ -731,7 +739,7 @@ class MetaAvanceController extends Controller
                     (string) $distritoFederal
                 ] ?? ''
             )
-            : 'Michoacán';
+            : 'Morelia';
 
         $municipioPorSeccion = DB::table('secciones')
             ->select(
@@ -848,6 +856,34 @@ class MetaAvanceController extends Controller
                 }
             );
 
+        $campaignCveMun = $this->campaignCveMun();
+        $campaignDistricts = $this->campaignDistricts();
+
+        $seccionesPrioritarias = SeccionPrioritaria::query()
+            ->where('cve_mun', $campaignCveMun)
+            ->orderByDesc('prioridad')
+            ->orderByRaw('CAST(seccion AS UNSIGNED)')
+            ->get();
+
+        $seccionesMoreliaDisponibles = DB::table('secciones')
+            ->where('cve_mun', $campaignCveMun)
+            ->whereIn('distrito_local', $campaignDistricts)
+            ->select('seccion', 'distrito_local')
+            ->orderBy('distrito_local')
+            ->orderByRaw('CAST(seccion AS UNSIGNED)')
+            ->get();
+
+        $seccionesMoreliaPorNumero = $seccionesMoreliaDisponibles
+            ->keyBy(fn($row) => (string) (int) $row->seccion);
+
+        $prioridadConteos = [
+            'total' => $seccionesPrioritarias->count(),
+            'alta' => $seccionesPrioritarias->where('prioridad', 3)->count(),
+            'media' => $seccionesPrioritarias->where('prioridad', 2)->count(),
+            'baja' => $seccionesPrioritarias->where('prioridad', 1)->count(),
+            'con_meta' => $seccionesPrioritarias->where('meta_convencidos', '>', 0)->count(),
+        ];
+
         $data = compact(
             'avance',
             'totales',
@@ -869,7 +905,11 @@ class MetaAvanceController extends Controller
             'municipioPorSeccion',
             'seccionesPorMunicipio',
             'puedeVerTodo',
-            'tipoCarga'
+            'tipoCarga',
+            'seccionesPrioritarias',
+            'seccionesMoreliaDisponibles',
+            'seccionesMoreliaPorNumero',
+            'prioridadConteos'
         );
 
         if ($request->expectsJson()) {
@@ -953,14 +993,116 @@ class MetaAvanceController extends Controller
             ->deleteFileAfterSend(true);
     }
 
+    public function exportSeccionesPrioritarias(
+        Request $request,
+        AvancePrioritariasExcelExporter $exporter
+    ) {
+        $filters = $this->resolveFilters($request);
+        $filters['cveMun'] = $this->campaignCveMun();
+
+        $prioridades = SeccionPrioritaria::query()
+            ->where('cve_mun', $this->campaignCveMun())
+            ->get()
+            ->keyBy(fn(SeccionPrioritaria $row) => (string) (int) $row->seccion);
+
+        $reference = $this->priorityReference();
+        $rows = $this->resumenSecciones($filters)
+            ->filter(fn(array $row) => $prioridades->has((string) (int) $row['seccion']))
+            ->map(function (array $row) use ($prioridades, $reference) {
+                $key = (string) (int) $row['seccion'];
+                $configured = $prioridades->get($key);
+                $source = $reference[$key] ?? [];
+
+                return array_merge($row, [
+                    'prioridad' => (int) $configured->prioridad,
+                    'prioridad_etiqueta' => [3 => 'Alta', 2 => 'Media', 1 => 'Baja'][(int) $configured->prioridad],
+                    'meta_convencidos' => (int) $configured->meta_convencidos,
+                    'meta_lonas' => (int) $configured->meta_lonas,
+                    'colonias' => $row['colonias'] !== '' ? $row['colonias'] : (string) ($source['colonias'] ?? ''),
+                    'lista_nominal_2024' => (int) ($source['lista_nominal_2024'] ?? $row['lista_nominal'] ?? 0),
+                ]);
+            })
+            ->sortBy([['distrito', 'asc'], ['seccion', 'asc']])
+            ->values();
+
+        $sectionNumbers = $rows->pluck('seccion')->map(fn($value) => (string) (int) $value)->all();
+        $people = $this->convencidosQuery($filters)
+            ->whereIn(DB::raw('CAST(a.seccion AS UNSIGNED)'), array_map('intval', $sectionNumbers))
+            ->get();
+
+        $path = $exporter->create(
+            $rows,
+            $people,
+            $this->filterSummary($filters)
+        );
+
+        return response()->download(
+            $path,
+            'avance_secciones_prioritarias_'.now()->format('Ymd_His').'.xlsx',
+            [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+            ]
+        )->deleteFileAfterSend(true);
+    }
+
+    public function storeSeccionPrioritaria(Request $request)
+    {
+        $campaignCveMun = $this->campaignCveMun();
+        $campaignDistricts = $this->campaignDistricts();
+        $data = $request->validate([
+            'seccion' => [
+                'required',
+                'string',
+                'regex:/^\d{1,6}$/',
+                function ($attribute, $value, $fail) use ($campaignCveMun, $campaignDistricts) {
+                    $exists = DB::table('secciones')
+                        ->where('cve_mun', $campaignCveMun)
+                        ->whereIn('distrito_local', $campaignDistricts)
+                        ->whereRaw('CAST(seccion AS UNSIGNED) = ?', [(int) $value])
+                        ->exists();
+
+                    if (!$exists) {
+                        $fail('La sección seleccionada no pertenece a Morelia.');
+                    }
+                },
+            ],
+            'prioridad' => ['required', 'integer', Rule::in([1, 2, 3])],
+            'meta_convencidos' => ['required', 'integer', 'min:0'],
+            'meta_lonas' => ['nullable', 'integer', 'min:0'],
+        ]);
+
+        SeccionPrioritaria::query()->updateOrCreate(
+            ['cve_mun' => $campaignCveMun, 'seccion' => str_pad((string) $data['seccion'], 4, '0', STR_PAD_LEFT)],
+            [
+                'prioridad' => (int) $data['prioridad'],
+                'meta_convencidos' => (int) $data['meta_convencidos'],
+                'meta_lonas' => (int) ($data['meta_lonas'] ?? 0),
+                'asignado_por' => $request->user()->id,
+            ]
+        );
+
+        return back()->with('status', 'Sección prioritaria guardada correctamente.');
+    }
+
+    public function destroySeccionPrioritaria(SeccionPrioritaria $seccionPrioritaria)
+    {
+        abort_unless($seccionPrioritaria->cve_mun === $this->campaignCveMun(), 404);
+        $seccionPrioritaria->delete();
+
+        return back()->with('status', 'Sección retirada de la lista prioritaria.');
+    }
+
     public function store(Request $request)
     {
+        $campaignCveMun = $this->campaignCveMun();
+        $campaignDistricts = $this->campaignDistricts();
         $data = $request->validate([
             'cve_mun' => [
                 'required',
                 'string',
                 'size:3',
-                Rule::exists('secciones', 'cve_mun'),
+                Rule::in([$campaignCveMun]),
             ],
             'meta_convencidos' => ['required', 'integer', 'min:1'],
             'meta_lonas' => ['nullable', 'integer', 'min:0'],
@@ -968,7 +1110,8 @@ class MetaAvanceController extends Controller
                 'required',
                 'integer',
                 Rule::exists('secciones', 'distrito_local')
-                    ->where(fn($query) => $query->where('cve_mun', $request->input('cve_mun'))),
+                    ->where(fn($query) => $query->where('cve_mun', $campaignCveMun)),
+                Rule::in($campaignDistricts),
             ],
         ]);
 
@@ -1024,6 +1167,9 @@ class MetaAvanceController extends Controller
     {
         $this->authorizeDistrict($request, (int)$metaAvance->distrito_local);
 
+        $campaignCveMun = $this->campaignCveMun();
+        $campaignDistricts = $this->campaignDistricts();
+
         $data = $request->validate([
             'tipo' => [
                 'required',
@@ -1036,14 +1182,15 @@ class MetaAvanceController extends Controller
                 'required',
                 'string',
                 'size:3',
-                Rule::exists('secciones', 'cve_mun'),
+                Rule::in([$campaignCveMun]),
             ],
             'meta' => ['required', 'integer', 'min:0'],
             'distrito_local' => [
                 'required',
                 'integer',
                 Rule::exists('secciones', 'distrito_local')
-                    ->where(fn($query) => $query->where('cve_mun', $request->input('cve_mun'))),
+                    ->where(fn($query) => $query->where('cve_mun', $campaignCveMun)),
+                Rule::in($campaignDistricts),
             ],
         ]);
 
@@ -1116,16 +1263,19 @@ class MetaAvanceController extends Controller
             'SuperAdmin',
         ]);
 
-        $cveMun = trim(
-            (string) $request->query('cve_mun')
-        );
+        $cveMun = $this->campaignCveMun();
 
-        $distritosLocalesAsignados = LocalDistrictAccess::districts(
+        $distritosLocalesOriginales = LocalDistrictAccess::districts(
             $usuario
         );
 
+        $distritosLocalesAsignados = array_values(array_intersect(
+            $distritosLocalesOriginales,
+            $this->campaignDistricts()
+        ));
+
         $distritoLocalRestringido = (
-            $distritosLocalesAsignados !== []
+            $distritosLocalesOriginales !== []
         );
 
         $distritoSolicitado = trim(
@@ -1134,8 +1284,15 @@ class MetaAvanceController extends Controller
             )
         );
 
+        $distritoSolicitado = in_array((int) $distritoSolicitado, $this->campaignDistricts(), true)
+            ? (string) (int) $distritoSolicitado
+            : '';
+
         $distritoLocal = $distritoLocalRestringido
             ? (
+                $distritosLocalesAsignados === []
+                    ? '-1'
+                    : (
                 in_array(
                     (int) $distritoSolicitado,
                     $distritosLocalesAsignados,
@@ -1143,14 +1300,11 @@ class MetaAvanceController extends Controller
                 )
                     ? (string) (int) $distritoSolicitado
                     : (string) $distritosLocalesAsignados[0]
+                    )
             )
             : $distritoSolicitado;
 
-        $distritoFederal = trim(
-            (string) $request->query(
-                'distrito_federal'
-            )
-        );
+        $distritoFederal = '';
 
         $referente = trim(
             (string) $request->query(
@@ -1291,7 +1445,8 @@ class MetaAvanceController extends Controller
                 's.cve_mun',
                 's.municipio',
                 's.distrito_local',
-                's.distrito_federal'
+                's.distrito_federal',
+                's.lista_nominal'
             )
             ->when(
                 $filters['cveMun'] !== '',
@@ -1426,6 +1581,7 @@ class MetaAvanceController extends Controller
                     'distrito' => (int) $seccion->distrito_local,
                     'seccion' => str_pad((string) $seccion->seccion, 4, '0', STR_PAD_LEFT),
                     'colonias' => $colonias->implode(', '),
+                    'lista_nominal' => (int) $seccion->lista_nominal,
                     'lonas' => (int) optional($lonas->get($key))->total,
                     'convencidos' => (int) $personas->sum('total'),
                 ];
@@ -1442,6 +1598,30 @@ class MetaAvanceController extends Controller
         return (string) $cveMun
             .'|'.(string) (int) $distritoLocal
             .'|'.(string) (int) $seccion;
+    }
+
+    private function priorityReference(): array
+    {
+        $path = database_path('data/electoral/morelia_priority_colonies_reference.json');
+        if (!is_file($path)) {
+            return [];
+        }
+
+        $reference = json_decode(file_get_contents($path), true);
+
+        return collect($reference['filas'] ?? [])->mapWithKeys(
+            fn(array $row) => [(string) (int) $row['seccion'] => $row]
+        )->all();
+    }
+
+    private function campaignCveMun(): string
+    {
+        return (string) config('avance.municipio_cve', self::MORELIA_CVE_MUN);
+    }
+
+    private function campaignDistricts(): array
+    {
+        return array_map('intval', config('avance.distritos_locales', self::MORELIA_LOCAL_DISTRICTS));
     }
 
     private function applyTipoCargaFilter(
@@ -1562,11 +1742,7 @@ class MetaAvanceController extends Controller
 
     private function filterSummary(array $filters): array
     {
-        $municipio = $filters['cveMun'] !== ''
-            ? DB::table('secciones')
-                ->where('cve_mun', $filters['cveMun'])
-                ->value('municipio')
-            : null;
+        $municipio = 'Morelia';
 
         $capturista = $filters['capturistaId']
             ? DB::table('users')
@@ -1590,15 +1766,7 @@ class MetaAvanceController extends Controller
                     STR_PAD_LEFT
                 )
                 : 'Todos',
-            'Distrito federal' => $filters['distritoFederal'] !== ''
-                ? str_pad(
-                    $filters['distritoFederal'],
-                    2,
-                    '0',
-                    STR_PAD_LEFT
-                )
-                : 'Todos',
-            'Municipio' => $municipio ?: 'Todos',
+            'Municipio' => $municipio,
             'Referente' => $filters['referente'] ?: 'Todos',
             'Capturista' => $capturista ?: 'Todos',
         ];

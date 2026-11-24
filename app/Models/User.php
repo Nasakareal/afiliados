@@ -29,7 +29,10 @@ class User extends Authenticatable
     public function canAccessSystem(): bool
     {
         return ! config('auth.restrict_system_access', true)
-            || $this->hasAnyRole(self::SYSTEM_ACCESS_ROLES);
+            || $this->hasAnyRole(self::SYSTEM_ACCESS_ROLES)
+            // Durante la campaña, los usuarios operativos pueden entrar al sistema
+            // únicamente a los módulos que sus permisos les permitan (por ejemplo, Brigadas).
+            || $this->can('brigadas.ver');
     }
 
     // === Relaciones de conveniencia ===

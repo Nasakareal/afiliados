@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\DeviceApiController;
 use App\Http\Controllers\Api\AdminApiController;
 use App\Http\Controllers\Api\FeedApiController;
 use App\Http\Controllers\MetaAvanceController;
+use App\Http\Controllers\Api\BrigadaApiController;
 
 Route::prefix('v1')->group(function () {
     Route::post('/auth/login', [AuthApiController::class, 'login'])->name('api.auth.login');
@@ -77,6 +78,23 @@ Route::prefix('v1')->group(function () {
             ->name('api.lonas.update')->middleware('permission:lonas.editar');
         Route::delete('/lonas/{lona}', [\App\Http\Controllers\Api\LonaApiController::class, 'destroy'])
             ->name('api.lonas.destroy')->middleware('permission:lonas.borrar');
+
+        Route::get('/brigadas/secciones', [BrigadaApiController::class, 'sections'])
+            ->name('api.brigadas.secciones')->middleware('permission:brigadas.ver|brigadas.crear');
+        Route::get('/brigadas', [BrigadaApiController::class, 'index'])
+            ->name('api.brigadas.index')->middleware('permission:brigadas.ver');
+        Route::post('/brigadas', [BrigadaApiController::class, 'store'])
+            ->name('api.brigadas.store')->middleware('permission:brigadas.crear');
+        Route::get('/brigadas/{brigada}', [BrigadaApiController::class, 'show'])
+            ->name('api.brigadas.show')->middleware('permission:brigadas.ver');
+        Route::match(['put', 'patch'], '/brigadas/{brigada}', [BrigadaApiController::class, 'update'])
+            ->name('api.brigadas.update')->middleware('permission:brigadas.editar');
+        Route::delete('/brigadas/{brigada}', [BrigadaApiController::class, 'destroy'])
+            ->name('api.brigadas.destroy')->middleware('permission:brigadas.borrar');
+        Route::post('/brigadas/{brigada}/participar', [BrigadaApiController::class, 'participate'])
+            ->name('api.brigadas.participar')->middleware('permission:brigadas.participar');
+        Route::get('/brigadas/{brigada}/participantes/{participante}/evidencia', [BrigadaApiController::class, 'evidence'])
+            ->name('api.brigadas.evidencia')->middleware('permission:brigadas.ver');
 
         Route::get('/comunicados', [\App\Http\Controllers\Api\ComunicadoApiController::class, 'index'])->name('api.comunicados.index')->middleware('permission:comunicados.ver');
 

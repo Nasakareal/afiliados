@@ -3,8 +3,9 @@
     "",
     "\\app",
     "\\app\\Http",
-    "\\app\\Http\\Controllers"
+    "\\app\\Http\\Controllers",
+    "\\routes"
   ],
-  "SelectedNode": "\\app\\Http\\Controllers\\AfiliadoController.php",
+  "SelectedNode": "\\routes\\brigadas.php",
   "PreviewInSolutionExplorer": false
 }
