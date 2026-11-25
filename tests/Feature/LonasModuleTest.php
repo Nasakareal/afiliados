@@ -33,7 +33,10 @@ class LonasModuleTest extends TestCase
 
         $this->actingAs($user)->get(route('lonas.index'))->assertOk();
         $this->actingAs($user)->get(route('lonas.create'))->assertOk();
-        $this->actingAs($user)->get(route('lonas.map'))->assertOk();
+        $this->actingAs($user)->get(route('lonas.map'))
+            ->assertOk()
+            ->assertSeeText('Las secciones resaltadas tienen lonas registradas')
+            ->assertSee('morelia-secciones.geojson');
         $this->actingAs($user)->get(route('afiliados.index'))->assertForbidden();
         $this->actingAs($user)->get(route('mapa.index'))->assertForbidden();
         $this->actingAs($user)->get(route('dashboard'))

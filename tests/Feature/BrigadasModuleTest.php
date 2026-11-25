@@ -84,6 +84,37 @@ class BrigadasModuleTest extends TestCase
             ->assertOk()->assertSeeText('Brigada visible');
     }
 
+    public function test_brigade_map_is_available_from_navigation_and_returns_points(): void
+    {
+        $admin = User::factory()->create();
+        $admin->assignRole('Admin');
+        $section = Seccion::where('cve_mun', '053')->firstOrFail();
+        $brigade = Brigada::create([
+            'seccion_id' => $section->id,
+            'responsable' => 'Brigada del mapa',
+            'direccion' => 'Plaza principal',
+            'lat' => 19.7026,
+            'lng' => -101.1922,
+            'activo' => true,
+            'capturado_por' => $admin->id,
+        ]);
+
+        $this->actingAs($admin)->get(route('brigadas.map'))
+            ->assertOk()
+            ->assertSeeText('Mapa de brigadas')
+            ->assertSeeText('Las secciones resaltadas tienen brigadas registradas')
+            ->assertSee('morelia-secciones.geojson')
+            ->assertSeeText('Mapa de lonas');
+
+        $this->actingAs($admin)->getJson(route('brigadas.map.data'))
+            ->assertOk()
+            ->assertJsonCount(1)
+            ->assertJsonPath('0.id', $brigade->id)
+            ->assertJsonPath('0.seccion', '1234')
+            ->assertJsonPath('0.responsable', 'Brigada del mapa')
+            ->assertJsonPath('0.activo', true);
+    }
+
     public function test_flutter_api_lists_morelia_and_registers_attendance(): void
     {
         $admin = User::factory()->create();

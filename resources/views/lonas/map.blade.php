@@ -7,7 +7,7 @@
   <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 px-3 mb-3">
     <div>
       <h1 class="h3 mb-1">Mapa de lonas</h1>
-      <p class="text-muted mb-0">Selecciona un punto para ver la foto y los datos.</p>
+      <p class="text-muted mb-0">Las secciones resaltadas tienen lonas registradas. Selecciona un punto para ver sus datos.</p>
     </div>
     <div class="d-flex gap-2">
       <a href="{{ route('lonas.index') }}" class="btn btn-outline-secondary">
@@ -31,6 +31,8 @@
 <style>
   .lona-popup img{width:260px;max-width:100%;height:175px;object-fit:cover;border-radius:8px;margin-bottom:8px}
   .lona-popup{min-width:270px}
+  .section-map-legend{background:rgba(255,255,255,.94);padding:8px 10px;border-radius:8px;box-shadow:0 1px 5px rgba(0,0,0,.3);font-size:.82rem;font-weight:600}
+  .section-map-legend i{display:inline-block;width:18px;height:12px;margin-right:6px;border:2px solid #b00055;background:rgba(217,23,133,.3);vertical-align:-2px}
 </style>
 @endpush
 
@@ -51,14 +53,57 @@ document.addEventListener('DOMContentLoaded', function () {
     return node.innerHTML;
   };
 
-  fetch(@json(route('lonas.map.data')), {
-    headers: {'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest'}
-  })
-    .then(response => {
-      if (!response.ok) throw new Error('No se pudo cargar la información.');
+  Promise.all([
+    fetch(@json(route('lonas.map.data')), {
+      headers: {'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest'}
+    }).then(response => {
+      if (!response.ok) throw new Error('No se pudo cargar la información de las lonas.');
+      return response.json();
+    }),
+    fetch(@json(asset('maps/electoral/morelia-secciones.geojson'))).then(response => {
+      if (!response.ok) throw new Error('No se pudo cargar la cartografía de secciones.');
       return response.json();
     })
-    .then(lonas => {
+  ])
+    .then(([lonas, seccionesGeoJson]) => {
+      const lonasPorSeccion = lonas.reduce((totales, lona) => {
+        const seccion = String(Number(lona.seccion));
+        totales[seccion] = (totales[seccion] || 0) + 1;
+        return totales;
+      }, {});
+      const seccionesConLonas = seccionesGeoJson.features.filter(feature =>
+        Boolean(lonasPorSeccion[String(Number(feature.properties?.SECCION || 0))])
+      );
+      let sectionsLayer;
+      sectionsLayer = L.geoJSON({type: 'FeatureCollection', features: seccionesConLonas}, {
+        style: {
+          color: '#b00055',
+          weight: 3,
+          opacity: .95,
+          fillColor: '#d91785',
+          fillOpacity: .28
+        },
+        onEachFeature(feature, layer) {
+          const seccion = String(Number(feature.properties.SECCION));
+          const total = lonasPorSeccion[seccion] || 0;
+          layer.bindTooltip(`<strong>Sección ${escapeHtml(seccion)}</strong><br>${total} ${total === 1 ? 'lona registrada' : 'lonas registradas'}`, {sticky: true});
+          layer.on('mouseover', function () {
+            this.setStyle({weight: 5, fillOpacity: .42});
+          });
+          layer.on('mouseout', function () {
+            sectionsLayer.resetStyle(this);
+          });
+        }
+      }).addTo(map);
+
+      const legend = L.control({position: 'bottomright'});
+      legend.onAdd = function () {
+        const box = L.DomUtil.create('div', 'section-map-legend');
+        box.innerHTML = '<i></i> Sección con lonas';
+        return box;
+      };
+      legend.addTo(map);
+
       lonas.forEach(lona => {
         const popup = `
           <div class="lona-popup">

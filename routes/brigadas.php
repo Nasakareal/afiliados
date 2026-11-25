@@ -5,6 +5,8 @@ use App\Http\Controllers\BrigadaParticipanteController;
 Route::middleware(['auth','system.access'])->group(function () {
     Route::get('/brigadas',[BrigadaController::class,'index'])->name('brigadas.index')->middleware('permission:brigadas.ver');
     Route::get('/brigadas/export.xlsx',[BrigadaController::class,'export'])->name('brigadas.export')->middleware('permission:brigadas.ver');
+    Route::get('/brigadas/mapa',[BrigadaController::class,'map'])->name('brigadas.map')->middleware('permission:brigadas.ver');
+    Route::get('/brigadas/mapa/data',[BrigadaController::class,'mapData'])->name('brigadas.map.data')->middleware('permission:brigadas.ver');
     Route::get('/brigadas/create',[BrigadaController::class,'create'])->name('brigadas.create')->middleware('permission:brigadas.crear');
     Route::post('/brigadas',[BrigadaController::class,'store'])->name('brigadas.store')->middleware('permission:brigadas.crear');
     Route::get('/brigadas/{brigada}',[BrigadaController::class,'show'])->whereNumber('brigada')->name('brigadas.show')->middleware('permission:brigadas.ver');

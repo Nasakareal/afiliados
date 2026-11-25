@@ -27,6 +27,41 @@ class BrigadaController extends Controller
         return view('brigadas.index', compact('brigadas'));
     }
 
+    public function map()
+    {
+        return view('brigadas.map');
+    }
+
+    public function mapData()
+    {
+        $brigadas = Brigada::query()
+            ->with('seccion:id,seccion,distrito_local')
+            ->withCount('participantes')
+            ->whereHas('seccion', fn ($query) => $query
+                ->where('cve_mun', self::MORELIA_CVE_MUN)
+                ->whereIn('distrito_local', self::MORELIA_DISTRICTS))
+            ->latest()
+            ->get()
+            ->map(function (Brigada $brigada) {
+                return [
+                    'id' => $brigada->id,
+                    'seccion' => $brigada->seccion->seccion,
+                    'distrito_local' => (int) $brigada->seccion->distrito_local,
+                    'responsable' => $brigada->responsable,
+                    'direccion' => $brigada->direccion,
+                    'telefono' => $brigada->telefono,
+                    'lat' => (float) $brigada->lat,
+                    'lng' => (float) $brigada->lng,
+                    'activo' => (bool) $brigada->activo,
+                    'participantes_count' => (int) $brigada->participantes_count,
+                    'detalle_url' => route('brigadas.show', $brigada),
+                    'google_url' => $brigada->google_maps_url,
+                ];
+            });
+
+        return response()->json($brigadas);
+    }
+
     public function create()
     {
         return view('brigadas.form', ['brigada' => new Brigada(['activo' => true]), 'secciones' => $this->sections()]);

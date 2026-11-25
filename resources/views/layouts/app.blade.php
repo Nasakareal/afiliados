@@ -227,12 +227,11 @@
 
             @can('lonas.ver')
                       <li class="nav-item dropdown keep-open">
-                        <a class="nav-link dropdown-toggle {{ is_active(['lonas.*']) }}" href="#" data-bs-toggle="dropdown" role="button">
+                        <a class="nav-link dropdown-toggle {{ request()->routeIs('lonas.*') && !request()->routeIs('lonas.map*') ? 'active' : '' }}" href="#" data-bs-toggle="dropdown" role="button">
                           <i class="fa-solid fa-panorama me-1"></i> Lonas
                         </a>
                         <ul class="dropdown-menu">
                           <li><a class="dropdown-item {{ is_active('lonas.index') }}" href="{{ route('lonas.index') }}"><i class="fa-solid fa-list me-1"></i> Listado</a></li>
-                          <li><a class="dropdown-item {{ is_active('lonas.map') }}" href="{{ route('lonas.map') }}"><i class="fa-solid fa-map-location-dot me-1"></i> Mapa</a></li>
                           @can('lonas.crear')
                           <li><a class="dropdown-item {{ is_active('lonas.create') }}" href="{{ route('lonas.create') }}"><i class="fa-solid fa-camera me-1"></i> Capturar</a></li>
                           @endcan
@@ -242,7 +241,7 @@
 
                         @can('brigadas.ver')
                         <li class="nav-item dropdown keep-open">
-                            <a class="nav-link dropdown-toggle {{ is_active(['brigadas.*']) }}" href="#" data-bs-toggle="dropdown" role="button">
+                            <a class="nav-link dropdown-toggle {{ request()->routeIs('brigadas.*') && !request()->routeIs('brigadas.map*') ? 'active' : '' }}" href="#" data-bs-toggle="dropdown" role="button">
                                 <i class="fa-solid fa-people-group me-1"></i> Brigadas
                             </a>
 
@@ -252,14 +251,6 @@
                                         <i class="fa-solid fa-list me-1"></i> Listado
                                     </a>
                                 </li>
-
-                                @if(Route::has('brigadas.map'))
-                                <li>
-                                    <a class="dropdown-item {{ is_active('brigadas.map') }}" href="{{ route('brigadas.map') }}">
-                                        <i class="fa-solid fa-map-location-dot me-1"></i> Mapa
-                                    </a>
-                                </li>
-                                @endif
 
                                 @can('brigadas.crear')
                                 <li>
@@ -272,12 +263,29 @@
                         </li>
                         @endcan
 
-                      @can('mapa.ver')
-                      <li class="nav-item">
-                        <a class="nav-link {{ is_active('mapa.index') }}" href="{{ route('mapa.index') }}">
+                      @if(
+                        auth()->user()->can('mapa.ver') ||
+                        auth()->user()->can('brigadas.ver') ||
+                        auth()->user()->can('lonas.ver')
+                      )
+                      <li class="nav-item dropdown keep-open">
+                        <a class="nav-link dropdown-toggle {{ is_active(['mapa.*', 'brigadas.map*', 'lonas.map*']) }}" href="#" data-bs-toggle="dropdown" role="button">
                           <i class="fa-solid fa-map-location-dot me-1"></i> Mapa
                         </a>
+                        <ul class="dropdown-menu">
+                          @can('mapa.ver')
+                          <li><a class="dropdown-item {{ is_active('mapa.*') }}" href="{{ route('mapa.index') }}"><i class="fa-solid fa-map me-2"></i> Mapa general</a></li>
+                          @endcan
+                          @can('brigadas.ver')
+                          <li><a class="dropdown-item {{ is_active('brigadas.map*') }}" href="{{ route('brigadas.map') }}"><i class="fa-solid fa-people-group me-2"></i> Mapa de brigadas</a></li>
+                          @endcan
+                          @can('lonas.ver')
+                          <li><a class="dropdown-item {{ is_active('lonas.map*') }}" href="{{ route('lonas.map') }}"><i class="fa-solid fa-panorama me-2"></i> Mapa de lonas</a></li>
+                          @endcan
+                        </ul>
                       </li>
+                      @endif
+                      @can('mapa.ver')
                       <li class="nav-item">
                         <a class="nav-link {{ is_active('electoral.*') }}" href="{{ route('electoral.index') }}">
                           <i class="fa-solid fa-chart-area me-1"></i> Elecciones
